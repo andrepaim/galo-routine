@@ -4,6 +4,7 @@ import { Text, Icon } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 import * as Haptics from 'expo-haptics';
+import Animated, { FadeInLeft, FadeInUp } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
 import { useAuthStore, usePeriodStore, useCompletionStore } from '../../lib/stores';
 import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
@@ -41,25 +42,27 @@ export default function ChildTodayScreen() {
         keyExtractor={(item) => item.id}
         ListHeaderComponent={
           <View style={styles.header}>
-            <View style={styles.greeting}>
+            <Animated.View entering={FadeInLeft.duration(400)} style={styles.greeting}>
               <Icon source="hand-wave" size={32} color={Colors.primary} />
               <Text variant="headlineMedium" style={styles.name}>
                 Hi, {childName || 'Star'}!
               </Text>
-            </View>
-            <Text variant="titleMedium" style={styles.date}>
-              {format(today, 'EEEE, MMMM d')}
-            </Text>
+            </Animated.View>
+            <Animated.View entering={FadeInLeft.delay(100).duration(400)}>
+              <Text variant="titleMedium" style={styles.date}>
+                {format(today, 'EEEE, MMMM d')}
+              </Text>
+            </Animated.View>
 
             {starProgress && (
-              <View style={styles.starSummary}>
+              <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.starSummary}>
                 <StarCounter
                   earned={starProgress.earned}
                   budget={starProgress.budget}
                   pending={starProgress.pending}
                   size="large"
                 />
-              </View>
+              </Animated.View>
             )}
 
             <Text variant="titleSmall" style={styles.sectionTitle}>
@@ -67,10 +70,11 @@ export default function ChildTodayScreen() {
             </Text>
           </View>
         }
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <ChildTaskCard
             task={item}
             onComplete={() => handleComplete(item)}
+            index={index}
           />
         )}
         ListEmptyComponent={

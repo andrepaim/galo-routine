@@ -1,24 +1,99 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Circle, Line } from 'react-native-svg';
+import Animated, {
+  useSharedValue,
+  useAnimatedProps,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
 import type { StarProgress } from '../../lib/types';
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface StarBudgetRingProps {
   progress: StarProgress;
   size?: number;
   strokeWidth?: number;
+  rewardPercent?: number;
+  penaltyPercent?: number;
+  animated?: boolean;
 }
 
-export function StarBudgetRing({ progress, size = 200, strokeWidth = 16 }: StarBudgetRingProps) {
+function ThresholdMarker({
+  percent,
+  center,
+  radius,
+  strokeWidth,
+  color,
+}: {
+  percent: number;
+  center: number;
+  radius: number;
+  strokeWidth: number;
+  color: string;
+}) {
+  const angle = ((-90 + (percent / 100) * 360) * Math.PI) / 180;
+  const innerR = radius - strokeWidth / 2 - 2;
+  const outerR = radius + strokeWidth / 2 + 2;
+
+  return (
+    <Line
+      x1={center + innerR * Math.cos(angle)}
+      y1={center + innerR * Math.sin(angle)}
+      x2={center + outerR * Math.cos(angle)}
+      y2={center + outerR * Math.sin(angle)}
+      stroke={color}
+      strokeWidth={3}
+      strokeLinecap="round"
+    />
+  );
+}
+
+export function StarBudgetRing({
+  progress,
+  size = 200,
+  strokeWidth = 16,
+  rewardPercent,
+  penaltyPercent,
+  animated = false,
+}: StarBudgetRingProps) {
   const center = size / 2;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
-  const earnedOffset = circumference - (circumference * Math.min(progress.earnedPercent, 100)) / 100;
+  const earnedTarget = (circumference * Math.min(progress.earnedPercent, 100)) / 100;
   const pendingEnd = Math.min(progress.earnedPercent + progress.pendingPercent, 100);
-  const pendingOffset = circumference - (circumference * pendingEnd) / 100;
+  const pendingTarget = (circumference * pendingEnd) / 100;
+
+  const animatedEarned = useSharedValue(animated ? 0 : earnedTarget);
+  const animatedPending = useSharedValue(animated ? 0 : pendingTarget);
+
+  useEffect(() => {
+    if (animated) {
+      animatedEarned.value = withTiming(earnedTarget, {
+        duration: 1000,
+        easing: Easing.out(Easing.cubic),
+      });
+      animatedPending.value = withTiming(pendingTarget, {
+        duration: 1000,
+        easing: Easing.out(Easing.cubic),
+      });
+    } else {
+      animatedEarned.value = earnedTarget;
+      animatedPending.value = pendingTarget;
+    }
+  }, [earnedTarget, pendingTarget, animated]);
+
+  const earnedAnimatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: circumference - animatedEarned.value,
+  }));
+
+  const pendingAnimatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: circumference - animatedPending.value,
+  }));
 
   let progressColor: string = Colors.neutral;
   if (progress.isRewardZone) progressColor = Colors.reward;
@@ -38,7 +113,7 @@ export function StarBudgetRing({ progress, size = 200, strokeWidth = 16 }: StarB
         />
         {/* Pending arc */}
         {progress.pendingPercent > 0 && (
-          <Circle
+          <AnimatedCircle
             cx={center}
             cy={center}
             r={radius}
@@ -46,13 +121,13 @@ export function StarBudgetRing({ progress, size = 200, strokeWidth = 16 }: StarB
             strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={`${circumference} ${circumference}`}
-            strokeDashoffset={pendingOffset}
+            animatedProps={pendingAnimatedProps}
             strokeLinecap="round"
             transform={`rotate(-90 ${center} ${center})`}
           />
         )}
         {/* Earned arc */}
-        <Circle
+        <AnimatedCircle
           cx={center}
           cy={center}
           r={radius}
@@ -60,10 +135,29 @@ export function StarBudgetRing({ progress, size = 200, strokeWidth = 16 }: StarB
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={`${circumference} ${circumference}`}
-          strokeDashoffset={earnedOffset}
+          animatedProps={earnedAnimatedProps}
           strokeLinecap="round"
           transform={`rotate(-90 ${center} ${center})`}
         />
+        {/* Threshold markers */}
+        {rewardPercent != null && (
+          <ThresholdMarker
+            percent={rewardPercent}
+            center={center}
+            radius={radius}
+            strokeWidth={strokeWidth}
+            color={Colors.reward}
+          />
+        )}
+        {penaltyPercent != null && (
+          <ThresholdMarker
+            percent={penaltyPercent}
+            center={center}
+            radius={radius}
+            strokeWidth={strokeWidth}
+            color={Colors.penalty}
+          />
+        )}
       </Svg>
       <View style={styles.centerContent}>
         <Text variant="displaySmall" style={[styles.earnedText, { color: progressColor }]}>

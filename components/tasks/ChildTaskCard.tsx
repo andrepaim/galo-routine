@@ -2,6 +2,13 @@ import React from 'react';
 import { StyleSheet, Pressable } from 'react-native';
 import { Card, Text, Icon } from 'react-native-paper';
 import * as Haptics from 'expo-haptics';
+import Animated, {
+  FadeInDown,
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
 import { StarDisplay } from '../stars/StarDisplay';
 import type { TodayTask, CompletionStatus } from '../../lib/types';
@@ -9,48 +16,64 @@ import type { TodayTask, CompletionStatus } from '../../lib/types';
 interface ChildTaskCardProps {
   task: TodayTask;
   onComplete: () => void;
+  index?: number;
 }
 
-export function ChildTaskCard({ task, onComplete }: ChildTaskCardProps) {
+export function ChildTaskCard({ task, onComplete, index = 0 }: ChildTaskCardProps) {
   const status = task.completion?.status;
   const isDone = status === 'pending' || status === 'approved';
   const isRejected = status === 'rejected';
 
+  const cardScale = useSharedValue(1);
+
+  const animatedCardStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: cardScale.value }],
+  }));
+
   const handlePress = async () => {
     if (isDone) return;
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    cardScale.value = withSequence(
+      withSpring(1.05, { damping: 6, stiffness: 300 }),
+      withSpring(1.0, { damping: 10, stiffness: 200 }),
+    );
     onComplete();
   };
 
   return (
-    <Pressable onPress={handlePress}>
-      <Card style={[styles.card, isDone && styles.done, isRejected && styles.rejected]}>
-        <Card.Title
-          title={task.name}
-          titleVariant="titleLarge"
-          titleStyle={[styles.title, isDone && styles.doneText]}
-          subtitle={task.description || undefined}
-          left={(props) => (
-            <Icon
-              {...props}
-              source={getStatusIcon(status)}
-              color={getStatusColor(status)}
-              size={36}
-            />
+    <Animated.View
+      entering={FadeInDown.delay(index * 80).springify()}
+      style={animatedCardStyle}
+    >
+      <Pressable onPress={handlePress}>
+        <Card style={[styles.card, isDone && styles.done, isRejected && styles.rejected]}>
+          <Card.Title
+            title={task.name}
+            titleVariant="titleLarge"
+            titleStyle={[styles.title, isDone && styles.doneText]}
+            subtitle={task.description || undefined}
+            left={(props) => (
+              <Icon
+                {...props}
+                source={getStatusIcon(status)}
+                color={getStatusColor(status)}
+                size={36}
+              />
+            )}
+            right={() => (
+              <StarDisplay count={task.starValue} maxStars={task.starValue} size={24} showEmpty={false} />
+            )}
+          />
+          {isRejected && task.completion?.rejectionReason && (
+            <Card.Content style={styles.rejectionContent}>
+              <Text variant="bodySmall" style={styles.rejectionText}>
+                {task.completion.rejectionReason}
+              </Text>
+            </Card.Content>
           )}
-          right={() => (
-            <StarDisplay count={task.starValue} maxStars={task.starValue} size={24} showEmpty={false} />
-          )}
-        />
-        {isRejected && task.completion?.rejectionReason && (
-          <Card.Content style={styles.rejectionContent}>
-            <Text variant="bodySmall" style={styles.rejectionText}>
-              {task.completion.rejectionReason}
-            </Text>
-          </Card.Content>
-        )}
-      </Card>
-    </Pressable>
+        </Card>
+      </Pressable>
+    </Animated.View>
   );
 }
 

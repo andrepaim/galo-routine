@@ -69,7 +69,12 @@ export default function PeriodScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         {starProgress && (
           <View style={styles.ringContainer}>
-            <StarBudgetRing progress={starProgress} size={220} />
+            <StarBudgetRing
+              progress={starProgress}
+              size={220}
+              rewardPercent={activePeriod.thresholds.rewardPercent}
+              penaltyPercent={activePeriod.thresholds.penaltyPercent}
+            />
           </View>
         )}
 

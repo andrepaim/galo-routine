@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { theme } from '../constants/theme';
 import { useAuthStore } from '../lib/stores';
-import { useSubscriptions } from '../lib/hooks';
+import { useSubscriptions, useStarBudgetSync } from '../lib/hooks';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
 
 function AuthGate() {
@@ -38,6 +38,7 @@ function AuthGate() {
 
 function DataSubscriptions() {
   useSubscriptions();
+  useStarBudgetSync();
   return null;
 }
 

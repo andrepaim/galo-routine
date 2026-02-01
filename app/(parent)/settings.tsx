@@ -1,20 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Text, SegmentedButtons, Divider, Switch } from 'react-native-paper';
+import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Layout, DAY_NAMES } from '../../constants';
 import { useAuthStore } from '../../lib/stores';
 import { updateFamilySettings, updateFamily } from '../../lib/firebase/firestore';
 import { hashPin } from '../../lib/utils/pin';
-import type { PeriodType } from '../../lib/types';
+import { StarBudgetRing } from '../../components/stars/StarBudgetRing';
+import type { PeriodType, StarProgress } from '../../lib/types';
+
+const MOCK_PROGRESS: StarProgress = {
+  earned: 65,
+  pending: 5,
+  budget: 100,
+  earnedPercent: 65,
+  pendingPercent: 5,
+  isRewardZone: false,
+  isPenaltyZone: false,
+  isNeutralZone: true,
+};
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { familyId, family, logout } = useAuthStore();
 
-  const [rewardThreshold, setRewardThreshold] = useState('80');
-  const [penaltyThreshold, setPenaltyThreshold] = useState('50');
+  const [rewardThreshold, setRewardThreshold] = useState(80);
+  const [penaltyThreshold, setPenaltyThreshold] = useState(50);
   const [rewardDesc, setRewardDesc] = useState('');
   const [penaltyDesc, setPenaltyDesc] = useState('');
   const [periodType, setPeriodType] = useState<PeriodType>('weekly');
@@ -26,8 +39,8 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     if (family?.settings) {
-      setRewardThreshold(String(family.settings.rewardThresholdPercent));
-      setPenaltyThreshold(String(family.settings.penaltyThresholdPercent));
+      setRewardThreshold(family.settings.rewardThresholdPercent);
+      setPenaltyThreshold(family.settings.penaltyThresholdPercent);
       setRewardDesc(family.settings.rewardDescription);
       setPenaltyDesc(family.settings.penaltyDescription);
       setPeriodType(family.settings.periodType);
@@ -44,8 +57,8 @@ export default function SettingsScreen() {
     setSaving(true);
     try {
       await updateFamilySettings(familyId, {
-        rewardThresholdPercent: parseInt(rewardThreshold, 10) || 80,
-        penaltyThresholdPercent: parseInt(penaltyThreshold, 10) || 50,
+        rewardThresholdPercent: rewardThreshold,
+        penaltyThresholdPercent: penaltyThreshold,
         rewardDescription: rewardDesc,
         penaltyDescription: penaltyDesc,
         periodType,
@@ -82,21 +95,51 @@ export default function SettingsScreen() {
         <Text variant="titleMedium" style={styles.sectionTitle}>
           Thresholds
         </Text>
-        <TextInput
-          label="Reward Threshold (%)"
+
+        <View style={styles.previewContainer}>
+          <StarBudgetRing
+            progress={MOCK_PROGRESS}
+            size={120}
+            strokeWidth={10}
+            rewardPercent={rewardThreshold}
+            penaltyPercent={penaltyThreshold}
+          />
+        </View>
+
+        <Text variant="bodyMedium" style={styles.sliderLabel}>
+          Reward Threshold: {rewardThreshold}%
+        </Text>
+        <Slider
           value={rewardThreshold}
-          onChangeText={setRewardThreshold}
-          mode="outlined"
-          keyboardType="number-pad"
-          style={styles.input}
+          onValueChange={(v) => {
+            const val = Math.round(v / 5) * 5;
+            setRewardThreshold(val);
+            if (penaltyThreshold >= val - 5) {
+              setPenaltyThreshold(Math.max(10, val - 10));
+            }
+          }}
+          minimumValue={50}
+          maximumValue={100}
+          step={5}
+          minimumTrackTintColor={Colors.reward}
+          maximumTrackTintColor={Colors.surfaceVariant}
+          thumbTintColor={Colors.reward}
+          style={styles.slider}
         />
-        <TextInput
-          label="Penalty Threshold (%)"
+
+        <Text variant="bodyMedium" style={styles.sliderLabel}>
+          Penalty Threshold: {penaltyThreshold}%
+        </Text>
+        <Slider
           value={penaltyThreshold}
-          onChangeText={setPenaltyThreshold}
-          mode="outlined"
-          keyboardType="number-pad"
-          style={styles.input}
+          onValueChange={(v) => setPenaltyThreshold(Math.round(v / 5) * 5)}
+          minimumValue={10}
+          maximumValue={rewardThreshold - 5}
+          step={5}
+          minimumTrackTintColor={Colors.penalty}
+          maximumTrackTintColor={Colors.surfaceVariant}
+          thumbTintColor={Colors.penalty}
+          style={styles.slider}
         />
 
         <Divider style={styles.divider} />
@@ -237,6 +280,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.text,
     marginBottom: Layout.padding.sm,
+  },
+  previewContainer: {
+    alignItems: 'center',
+    marginBottom: Layout.padding.md,
+  },
+  sliderLabel: {
+    color: Colors.textSecondary,
+    marginBottom: Layout.padding.xs,
+  },
+  slider: {
+    marginBottom: Layout.padding.md,
+    height: 40,
   },
   input: {
     marginBottom: Layout.padding.sm,
