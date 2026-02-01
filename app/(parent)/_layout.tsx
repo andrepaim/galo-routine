@@ -1,8 +1,11 @@
-import { Tabs } from 'expo-router';
-import { Icon } from 'react-native-paper';
+import { Tabs, useRouter } from 'expo-router';
+import { Icon, IconButton } from 'react-native-paper';
 import { Colors } from '../../constants';
+import { useAuthStore } from '../../lib/stores';
 
 export default function ParentLayout() {
+  const router = useRouter();
+
   return (
     <Tabs
       screenOptions={{
@@ -11,6 +14,14 @@ export default function ParentLayout() {
         tabBarStyle: { backgroundColor: Colors.surface },
         headerStyle: { backgroundColor: Colors.primaryContainer },
         headerTintColor: Colors.text,
+        headerRight: () => (
+          <IconButton
+            icon="account-child"
+            iconColor={Colors.secondary}
+            size={24}
+            onPress={() => router.replace('/(auth)/child-pin')}
+          />
+        ),
       }}
     >
       <Tabs.Screen

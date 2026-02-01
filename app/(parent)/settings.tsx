@@ -203,6 +203,15 @@ export default function SettingsScreen() {
 
         <Button
           mode="outlined"
+          icon="account-child"
+          onPress={() => router.replace('/(auth)/child-pin')}
+          style={styles.switchButton}
+        >
+          Switch to Child Mode
+        </Button>
+
+        <Button
+          mode="outlined"
           icon="logout"
           textColor={Colors.error}
           onPress={handleLogout}
@@ -264,6 +273,10 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: Layout.padding.md,
+  },
+  switchButton: {
+    marginBottom: Layout.padding.md,
+    borderColor: Colors.secondary,
   },
   logoutButton: {
     borderColor: Colors.error,

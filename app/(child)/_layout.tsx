@@ -1,8 +1,17 @@
-import { Tabs } from 'expo-router';
-import { Icon } from 'react-native-paper';
+import { Tabs, useRouter } from 'expo-router';
+import { Icon, IconButton } from 'react-native-paper';
 import { Colors } from '../../constants';
+import { useAuthStore } from '../../lib/stores';
 
 export default function ChildLayout() {
+  const router = useRouter();
+  const setRole = useAuthStore((s) => s.setRole);
+
+  const switchToParent = async () => {
+    await setRole('parent');
+    router.replace('/(parent)');
+  };
+
   return (
     <Tabs
       screenOptions={{
@@ -19,6 +28,14 @@ export default function ChildLayout() {
         },
         headerStyle: { backgroundColor: Colors.secondaryContainer },
         headerTintColor: Colors.text,
+        headerRight: () => (
+          <IconButton
+            icon="account-switch"
+            iconColor={Colors.primary}
+            size={24}
+            onPress={switchToParent}
+          />
+        ),
       }}
     >
       <Tabs.Screen

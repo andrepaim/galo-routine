@@ -38,9 +38,22 @@ export default function LoginScreen() {
 
   const handleChildMode = async () => {
     if (isAuthenticated) {
+      // Already logged in, go straight to PIN
       router.push('/(auth)/child-pin');
+    } else if (email.trim() && password) {
+      // Log in first, then go to PIN entry
+      setError('');
+      setLoading(true);
+      try {
+        await login(email.trim(), password);
+        router.replace('/(auth)/child-pin');
+      } catch (e: any) {
+        setError(e.message || 'Login failed');
+      } finally {
+        setLoading(false);
+      }
     } else {
-      setError('A parent must log in first to set up child mode');
+      setError('Enter email and password first, then tap "I\'m the Child"');
     }
   };
 
