@@ -32,7 +32,7 @@ export default function ChildTodayScreen() {
   };
 
   if (isLoading) {
-    return <LoadingScreen message="Loading your tasks..." />;
+    return <LoadingScreen variant="skeleton-list" />;
   }
 
   return (

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, SegmentedButtons, Text, Chip, IconButton } from 'react-native-paper';
 import { Colors, Layout, DAY_NAMES, STAR_VALUES, TASK_ICONS } from '../../constants';
+import { TimePicker } from '../ui/TimePicker';
 import type { TaskFormData } from '../../lib/types';
 
 interface TaskFormProps {
@@ -27,6 +28,8 @@ export function TaskForm({
   );
   const [days, setDays] = useState<number[]>(initialData?.days ?? []);
   const [icon, setIcon] = useState(initialData?.icon ?? 'star-circle');
+  const [startTime, setStartTime] = useState<string | undefined>(initialData?.startTime);
+  const [endTime, setEndTime] = useState<string | undefined>(initialData?.endTime);
 
   const toggleDay = (day: number) => {
     setDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]));
@@ -41,6 +44,8 @@ export function TaskForm({
       icon,
       recurrenceType,
       days,
+      startTime,
+      endTime,
     });
   };
 
@@ -108,6 +113,12 @@ export function TaskForm({
         ]}
         style={styles.segment}
       />
+
+      <Text variant="titleSmall" style={styles.label}>
+        Schedule (optional)
+      </Text>
+      <TimePicker label="Start Time" value={startTime} onChange={setStartTime} />
+      <TimePicker label="End Time" value={endTime} onChange={setEndTime} />
 
       {recurrenceType === 'specific_days' && (
         <View style={styles.daysRow}>

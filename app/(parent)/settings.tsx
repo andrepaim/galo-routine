@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { TextInput, Button, Text, SegmentedButtons, Divider, Switch } from 'react-native-paper';
+import { TextInput, Button, Text, SegmentedButtons, Card, Switch } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { Colors, Layout, DAY_NAMES } from '../../constants';
 import { useAuthStore } from '../../lib/stores';
 import { updateFamilySettings, updateFamily } from '../../lib/firebase/firestore';
@@ -73,6 +75,7 @@ export default function SettingsScreen() {
         setNewPin('');
       }
 
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Saved', 'Settings updated successfully');
     } catch (e) {
       console.error('Failed to save settings:', e);
@@ -92,145 +95,167 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Thresholds
-        </Text>
+        {/* Thresholds Section */}
+        <Animated.View entering={FadeInUp.delay(0).duration(400)}>
+          <Card style={styles.sectionCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Thresholds
+              </Text>
 
-        <View style={styles.previewContainer}>
-          <StarBudgetRing
-            progress={MOCK_PROGRESS}
-            size={120}
-            strokeWidth={10}
-            rewardPercent={rewardThreshold}
-            penaltyPercent={penaltyThreshold}
-          />
-        </View>
+              <View style={styles.previewContainer}>
+                <StarBudgetRing
+                  progress={MOCK_PROGRESS}
+                  size={120}
+                  strokeWidth={10}
+                  rewardPercent={rewardThreshold}
+                  penaltyPercent={penaltyThreshold}
+                />
+              </View>
 
-        <Text variant="bodyMedium" style={styles.sliderLabel}>
-          Reward Threshold: {rewardThreshold}%
-        </Text>
-        <Slider
-          value={rewardThreshold}
-          onValueChange={(v) => {
-            const val = Math.round(v / 5) * 5;
-            setRewardThreshold(val);
-            if (penaltyThreshold >= val - 5) {
-              setPenaltyThreshold(Math.max(10, val - 10));
-            }
-          }}
-          minimumValue={50}
-          maximumValue={100}
-          step={5}
-          minimumTrackTintColor={Colors.reward}
-          maximumTrackTintColor={Colors.surfaceVariant}
-          thumbTintColor={Colors.reward}
-          style={styles.slider}
-        />
+              <Text variant="bodyMedium" style={styles.sliderLabel}>
+                Reward Threshold: {rewardThreshold}%
+              </Text>
+              <Slider
+                value={rewardThreshold}
+                onValueChange={(v) => {
+                  const val = Math.round(v / 5) * 5;
+                  setRewardThreshold(val);
+                  if (penaltyThreshold >= val - 5) {
+                    setPenaltyThreshold(Math.max(10, val - 10));
+                  }
+                }}
+                minimumValue={50}
+                maximumValue={100}
+                step={5}
+                minimumTrackTintColor={Colors.reward}
+                maximumTrackTintColor={Colors.surfaceVariant}
+                thumbTintColor={Colors.reward}
+                style={styles.slider}
+              />
 
-        <Text variant="bodyMedium" style={styles.sliderLabel}>
-          Penalty Threshold: {penaltyThreshold}%
-        </Text>
-        <Slider
-          value={penaltyThreshold}
-          onValueChange={(v) => setPenaltyThreshold(Math.round(v / 5) * 5)}
-          minimumValue={10}
-          maximumValue={rewardThreshold - 5}
-          step={5}
-          minimumTrackTintColor={Colors.penalty}
-          maximumTrackTintColor={Colors.surfaceVariant}
-          thumbTintColor={Colors.penalty}
-          style={styles.slider}
-        />
+              <Text variant="bodyMedium" style={styles.sliderLabel}>
+                Penalty Threshold: {penaltyThreshold}%
+              </Text>
+              <Slider
+                value={penaltyThreshold}
+                onValueChange={(v) => setPenaltyThreshold(Math.round(v / 5) * 5)}
+                minimumValue={10}
+                maximumValue={rewardThreshold - 5}
+                step={5}
+                minimumTrackTintColor={Colors.penalty}
+                maximumTrackTintColor={Colors.surfaceVariant}
+                thumbTintColor={Colors.penalty}
+                style={styles.slider}
+              />
+            </Card.Content>
+          </Card>
+        </Animated.View>
 
-        <Divider style={styles.divider} />
+        {/* Messages Section */}
+        <Animated.View entering={FadeInUp.delay(100).duration(400)}>
+          <Card style={styles.sectionCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Reward & Penalty Messages
+              </Text>
+              <TextInput
+                label="Reward Message"
+                value={rewardDesc}
+                onChangeText={setRewardDesc}
+                mode="outlined"
+                multiline
+                style={styles.input}
+              />
+              <TextInput
+                label="Penalty Message"
+                value={penaltyDesc}
+                onChangeText={setPenaltyDesc}
+                mode="outlined"
+                multiline
+                style={styles.input}
+              />
+            </Card.Content>
+          </Card>
+        </Animated.View>
 
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Reward & Penalty Messages
-        </Text>
-        <TextInput
-          label="Reward Message"
-          value={rewardDesc}
-          onChangeText={setRewardDesc}
-          mode="outlined"
-          multiline
-          style={styles.input}
-        />
-        <TextInput
-          label="Penalty Message"
-          value={penaltyDesc}
-          onChangeText={setPenaltyDesc}
-          mode="outlined"
-          multiline
-          style={styles.input}
-        />
+        {/* Period Settings Section */}
+        <Animated.View entering={FadeInUp.delay(200).duration(400)}>
+          <Card style={styles.sectionCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Period Settings
+              </Text>
+              <SegmentedButtons
+                value={periodType}
+                onValueChange={(v) => setPeriodType(v as PeriodType)}
+                buttons={[
+                  { value: 'weekly', label: 'Weekly' },
+                  { value: 'biweekly', label: 'Biweekly' },
+                  { value: 'monthly', label: 'Monthly' },
+                  { value: 'custom', label: 'Custom' },
+                ]}
+                style={styles.segment}
+              />
 
-        <Divider style={styles.divider} />
+              {periodType === 'custom' && (
+                <TextInput
+                  label="Custom Period (days)"
+                  value={customDays}
+                  onChangeText={setCustomDays}
+                  mode="outlined"
+                  keyboardType="number-pad"
+                  style={styles.input}
+                />
+              )}
 
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Period Settings
-        </Text>
-        <SegmentedButtons
-          value={periodType}
-          onValueChange={(v) => setPeriodType(v as PeriodType)}
-          buttons={[
-            { value: 'weekly', label: 'Weekly' },
-            { value: 'biweekly', label: 'Biweekly' },
-            { value: 'monthly', label: 'Monthly' },
-            { value: 'custom', label: 'Custom' },
-          ]}
-          style={styles.segment}
-        />
+              {(periodType === 'weekly' || periodType === 'biweekly') && (
+                <View>
+                  <Text variant="bodyMedium" style={styles.label}>Start Day</Text>
+                  <View style={styles.daysRow}>
+                    {DAY_NAMES.map((name, i) => (
+                      <Button
+                        key={i}
+                        mode={periodStartDay === i ? 'contained' : 'outlined'}
+                        compact
+                        onPress={() => setPeriodStartDay(i)}
+                        style={styles.dayBtn}
+                        labelStyle={styles.dayBtnLabel}
+                      >
+                        {name}
+                      </Button>
+                    ))}
+                  </View>
+                </View>
+              )}
 
-        {periodType === 'custom' && (
-          <TextInput
-            label="Custom Period (days)"
-            value={customDays}
-            onChangeText={setCustomDays}
-            mode="outlined"
-            keyboardType="number-pad"
-            style={styles.input}
-          />
-        )}
+              <View style={styles.switchRow}>
+                <Text variant="bodyMedium">Auto-roll periods</Text>
+                <Switch value={autoRoll} onValueChange={setAutoRoll} />
+              </View>
+            </Card.Content>
+          </Card>
+        </Animated.View>
 
-        {(periodType === 'weekly' || periodType === 'biweekly') && (
-          <View>
-            <Text variant="bodyMedium" style={styles.label}>Start Day</Text>
-            <View style={styles.daysRow}>
-              {DAY_NAMES.map((name, i) => (
-                <Button
-                  key={i}
-                  mode={periodStartDay === i ? 'contained' : 'outlined'}
-                  compact
-                  onPress={() => setPeriodStartDay(i)}
-                  style={styles.dayBtn}
-                  labelStyle={styles.dayBtnLabel}
-                >
-                  {name}
-                </Button>
-              ))}
-            </View>
-          </View>
-        )}
-
-        <View style={styles.switchRow}>
-          <Text variant="bodyMedium">Auto-roll periods</Text>
-          <Switch value={autoRoll} onValueChange={setAutoRoll} />
-        </View>
-
-        <Divider style={styles.divider} />
-
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Child PIN
-        </Text>
-        <TextInput
-          label="New Child PIN (leave blank to keep current)"
-          value={newPin}
-          onChangeText={(t) => setNewPin(t.replace(/[^0-9]/g, '').slice(0, 6))}
-          mode="outlined"
-          keyboardType="number-pad"
-          maxLength={6}
-          style={styles.input}
-        />
+        {/* Child PIN Section */}
+        <Animated.View entering={FadeInUp.delay(300).duration(400)}>
+          <Card style={styles.sectionCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Child PIN
+              </Text>
+              <TextInput
+                label="New Child PIN (leave blank to keep current)"
+                value={newPin}
+                onChangeText={(t) => setNewPin(t.replace(/[^0-9]/g, '').slice(0, 6))}
+                mode="outlined"
+                keyboardType="number-pad"
+                maxLength={6}
+                style={styles.input}
+              />
+            </Card.Content>
+          </Card>
+        </Animated.View>
 
         <Button
           mode="contained"
@@ -242,26 +267,34 @@ export default function SettingsScreen() {
           Save Settings
         </Button>
 
-        <Divider style={styles.divider} />
+        {/* Account Section */}
+        <Animated.View entering={FadeInUp.delay(400).duration(400)}>
+          <Card style={styles.sectionCard}>
+            <Card.Content style={styles.accountContent}>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Account
+              </Text>
+              <Button
+                mode="outlined"
+                icon="account-child"
+                onPress={() => router.replace('/(auth)/child-pin')}
+                style={styles.switchButton}
+              >
+                Switch to Child Mode
+              </Button>
 
-        <Button
-          mode="outlined"
-          icon="account-child"
-          onPress={() => router.replace('/(auth)/child-pin')}
-          style={styles.switchButton}
-        >
-          Switch to Child Mode
-        </Button>
-
-        <Button
-          mode="outlined"
-          icon="logout"
-          textColor={Colors.error}
-          onPress={handleLogout}
-          style={styles.logoutButton}
-        >
-          Log Out
-        </Button>
+              <Button
+                mode="outlined"
+                icon="logout"
+                textColor={Colors.error}
+                onPress={handleLogout}
+                style={styles.logoutButton}
+              >
+                Log Out
+              </Button>
+            </Card.Content>
+          </Card>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -275,6 +308,11 @@ const styles = StyleSheet.create({
   content: {
     padding: Layout.padding.md,
     paddingBottom: Layout.padding.xl * 2,
+  },
+  sectionCard: {
+    backgroundColor: Colors.surface,
+    elevation: Layout.elevation.low,
+    marginBottom: Layout.padding.md,
   },
   sectionTitle: {
     fontWeight: 'bold',
@@ -296,9 +334,6 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: Layout.padding.sm,
     backgroundColor: Colors.surface,
-  },
-  divider: {
-    marginVertical: Layout.padding.lg,
   },
   segment: {
     marginBottom: Layout.padding.md,
@@ -327,13 +362,16 @@ const styles = StyleSheet.create({
     paddingVertical: Layout.padding.sm,
   },
   saveButton: {
-    marginTop: Layout.padding.md,
+    marginBottom: Layout.padding.md,
+  },
+  accountContent: {
+    gap: Layout.padding.sm,
   },
   switchButton: {
-    marginBottom: Layout.padding.md,
     borderColor: Colors.secondary,
   },
   logoutButton: {
     borderColor: Colors.error,
+    backgroundColor: Colors.penaltyContainer,
   },
 });

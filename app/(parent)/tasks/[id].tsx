@@ -71,6 +71,8 @@ export default function EditTaskScreen() {
           icon: task.icon,
           recurrenceType: task.recurrence.type,
           days: task.recurrence.days ?? [],
+          startTime: task.startTime,
+          endTime: task.endTime,
         }}
         onSubmit={handleSubmit}
         onCancel={() => router.back()}

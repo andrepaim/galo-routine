@@ -3,6 +3,7 @@ import { FlatList, StyleSheet } from 'react-native';
 import { FAB } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Colors, Layout } from '../../../constants';
 import { useTaskStore, useAuthStore } from '../../../lib/stores';
 import { TaskCard } from '../../../components/tasks/TaskCard';
@@ -15,7 +16,7 @@ export default function TasksListScreen() {
   const { tasks, isLoading } = useTaskStore();
 
   if (isLoading) {
-    return <LoadingScreen message="Loading tasks..." />;
+    return <LoadingScreen variant="skeleton-list" />;
   }
 
   if (tasks.length === 0) {
@@ -37,19 +38,23 @@ export default function TasksListScreen() {
       <FlatList
         data={tasks}
         keyExtractor={(item) => item.id!}
-        renderItem={({ item }) => (
-          <TaskCard
-            task={item}
-            onPress={() => router.push(`/(parent)/tasks/${item.id}`)}
-          />
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInDown.delay(index * 60).springify()}>
+            <TaskCard
+              task={item}
+              onPress={() => router.push(`/(parent)/tasks/${item.id}`)}
+            />
+          </Animated.View>
         )}
         contentContainerStyle={styles.list}
       />
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        onPress={() => router.push('/(parent)/tasks/new')}
-      />
+      <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.fabContainer}>
+        <FAB
+          icon="plus"
+          style={styles.fab}
+          onPress={() => router.push('/(parent)/tasks/new')}
+        />
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -62,10 +67,13 @@ const styles = StyleSheet.create({
   list: {
     padding: Layout.padding.md,
   },
-  fab: {
+  fabContainer: {
     position: 'absolute',
     right: Layout.padding.md,
     bottom: Layout.padding.md,
+  },
+  fab: {
     backgroundColor: Colors.primary,
+    elevation: Layout.elevation.floating,
   },
 });

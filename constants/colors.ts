@@ -42,6 +42,10 @@ export const Colors = {
   textLight: '#BDBDBD',
   textOnPrimary: '#FFFFFF',
 
+  // Pending approval
+  pending: '#7C4DFF',
+  pendingContainer: '#EDE7F6',
+
   // Misc
   divider: '#E0E0E0',
   disabled: '#9E9E9E',

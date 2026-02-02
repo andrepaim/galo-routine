@@ -6,6 +6,7 @@ import { eachDayOfInterval, format, isToday, isBefore, startOfDay } from 'date-f
 import { Colors, Layout } from '../../constants';
 import { useTaskStore, usePeriodStore, useCompletionStore } from '../../lib/stores';
 import { getTasksForDate } from '../../lib/utils/recurrence';
+import { compareTimeStrings, formatTimeRange } from '../../lib/utils/time';
 import { StarDisplay } from '../../components/stars/StarDisplay';
 import { EmptyState } from '../../components/ui/EmptyState';
 import type { TodayTask } from '../../lib/types';
@@ -24,11 +25,13 @@ export default function ChildTasksScreen() {
 
     return days.map((date) => {
       const dayTasks = getTasksForDate(tasks, date);
-      const todayTasks: TodayTask[] = dayTasks.map((t) => ({
-        ...t,
-        id: t.id!,
-        completion: getCompletionForTask(t.id!, date),
-      }));
+      const todayTasks: TodayTask[] = dayTasks
+        .map((t) => ({
+          ...t,
+          id: t.id!,
+          completion: getCompletionForTask(t.id!, date),
+        }))
+        .sort((a, b) => compareTimeStrings(a.startTime, b.startTime));
 
       return {
         title: format(date, 'EEEE, MMM d'),
@@ -69,29 +72,34 @@ export default function ChildTasksScreen() {
             )}
           </View>
         )}
-        renderItem={({ item, section }) => (
-          <Card style={[styles.taskItem, section.isPast && styles.pastItem]}>
-            <Card.Title
-              title={item.name}
-              titleVariant="bodyLarge"
-              left={(props) => (
-                <Icon
-                  {...props}
-                  source={getCompletionIcon(item.completion?.status)}
-                  color={getCompletionColor(item.completion?.status)}
-                />
-              )}
-              right={() => (
-                <StarDisplay
-                  count={item.starValue}
-                  maxStars={item.starValue}
-                  size={14}
-                  showEmpty={false}
-                />
-              )}
-            />
-          </Card>
-        )}
+        renderItem={({ item, section }) => {
+          const timeLabel = formatTimeRange(item.startTime, item.endTime);
+          return (
+            <Card style={[styles.taskItem, section.isPast && styles.pastItem]}>
+              <Card.Title
+                title={item.name}
+                titleVariant="bodyLarge"
+                subtitle={timeLabel}
+                subtitleStyle={styles.timeSubtitle}
+                left={(props) => (
+                  <Icon
+                    {...props}
+                    source={getCompletionIcon(item.completion?.status)}
+                    color={getCompletionColor(item.completion?.status)}
+                  />
+                )}
+                right={() => (
+                  <StarDisplay
+                    count={item.starValue}
+                    maxStars={item.starValue}
+                    size={14}
+                    showEmpty={false}
+                  />
+                )}
+              />
+            </Card>
+          );
+        }}
         stickySectionHeadersEnabled
         contentContainerStyle={styles.list}
       />
@@ -102,7 +110,7 @@ export default function ChildTasksScreen() {
 function getCompletionIcon(status?: string): string {
   switch (status) {
     case 'approved': return 'check-circle';
-    case 'pending': return 'clock-outline';
+    case 'pending': return 'check-circle-outline';
     case 'rejected': return 'close-circle';
     default: return 'circle-outline';
   }
@@ -111,7 +119,7 @@ function getCompletionIcon(status?: string): string {
 function getCompletionColor(status?: string): string {
   switch (status) {
     case 'approved': return Colors.reward;
-    case 'pending': return Colors.neutral;
+    case 'pending': return Colors.pending;
     case 'rejected': return Colors.penalty;
     default: return Colors.textLight;
   }
@@ -151,5 +159,9 @@ const styles = StyleSheet.create({
   },
   pastItem: {
     opacity: 0.6,
+  },
+  timeSubtitle: {
+    fontSize: 12,
+    color: Colors.textSecondary,
   },
 });

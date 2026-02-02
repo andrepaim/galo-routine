@@ -1,6 +1,7 @@
 import React from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
 import { useAuthStore, usePeriodStore, useCompletionStore } from '../../lib/stores';
 import { ApprovalCard } from '../../components/tasks/ApprovalCard';
@@ -15,7 +16,7 @@ export default function ApprovalsScreen() {
   const pendingCompletions = completions.filter((c) => c.status === 'pending');
 
   if (isLoading) {
-    return <LoadingScreen message="Loading approvals..." />;
+    return <LoadingScreen variant="skeleton-list" />;
   }
 
   if (pendingCompletions.length === 0) {
@@ -30,28 +31,14 @@ export default function ApprovalsScreen() {
     );
   }
 
-  const handleApprove = async (completionId: string, starValue: number) => {
+  const handleApprove = async (completionId: string) => {
     if (!familyId || !activePeriod?.id) return;
-    await approveCompletion(
-      familyId,
-      activePeriod.id,
-      completionId,
-      starValue,
-      activePeriod.starsEarned,
-      activePeriod.starsPending,
-    );
+    await approveCompletion(familyId, activePeriod.id, completionId);
   };
 
-  const handleReject = async (completionId: string, reason: string, starValue: number) => {
+  const handleReject = async (completionId: string, reason: string) => {
     if (!familyId || !activePeriod?.id) return;
-    await rejectCompletion(
-      familyId,
-      activePeriod.id,
-      completionId,
-      reason,
-      starValue,
-      activePeriod.starsPending,
-    );
+    await rejectCompletion(familyId, activePeriod.id, completionId, reason);
   };
 
   return (
@@ -59,12 +46,14 @@ export default function ApprovalsScreen() {
       <FlatList
         data={pendingCompletions}
         keyExtractor={(item) => item.id!}
-        renderItem={({ item }) => (
-          <ApprovalCard
-            completion={item}
-            onApprove={() => handleApprove(item.id!, item.taskStarValue)}
-            onReject={(reason) => handleReject(item.id!, reason, item.taskStarValue)}
-          />
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
+            <ApprovalCard
+              completion={item}
+              onApprove={() => handleApprove(item.id!)}
+              onReject={(reason) => handleReject(item.id!, reason)}
+            />
+          </Animated.View>
         )}
         contentContainerStyle={styles.list}
       />

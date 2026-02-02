@@ -6,7 +6,6 @@ import {
   createCompletion,
   updateCompletion,
   subscribeCompletions,
-  updatePeriod,
 } from '../firebase/firestore';
 
 interface CompletionStore {
@@ -18,17 +17,12 @@ interface CompletionStore {
     familyId: string,
     periodId: string,
     completionId: string,
-    starValue: number,
-    currentEarned: number,
-    currentPending: number,
   ) => Promise<void>;
   rejectCompletion: (
     familyId: string,
     periodId: string,
     completionId: string,
     reason: string,
-    starValue: number,
-    currentPending: number,
   ) => Promise<void>;
   getPendingCompletions: () => TaskCompletion[];
   getCompletionForTask: (taskId: string, date: Date) => TaskCompletion | undefined;
@@ -61,35 +55,16 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
     };
 
     await createCompletion(familyId, periodId, completion, completionId);
-
-    // Update pending star count on the period
-    const { completions } = get();
-    const currentPending = completions.filter((c) => c.status === 'pending').length;
-    // We add the star value of the new completion to pending
-    await updatePeriod(familyId, periodId, {
-      starsPending: currentPending > 0
-        ? completions
-            .filter((c) => c.status === 'pending')
-            .reduce((s, c) => s + c.taskStarValue, 0) + task.starValue
-        : task.starValue,
-    });
   },
 
   approveCompletion: async (
     familyId: string,
     periodId: string,
     completionId: string,
-    starValue: number,
-    currentEarned: number,
-    currentPending: number,
   ) => {
     await updateCompletion(familyId, periodId, completionId, {
       status: 'approved',
       reviewedAt: Timestamp.fromDate(new Date()),
-    });
-    await updatePeriod(familyId, periodId, {
-      starsEarned: currentEarned + starValue,
-      starsPending: Math.max(0, currentPending - starValue),
     });
   },
 
@@ -98,16 +73,11 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
     periodId: string,
     completionId: string,
     reason: string,
-    starValue: number,
-    currentPending: number,
   ) => {
     await updateCompletion(familyId, periodId, completionId, {
       status: 'rejected',
       rejectionReason: reason,
       reviewedAt: Timestamp.fromDate(new Date()),
-    });
-    await updatePeriod(familyId, periodId, {
-      starsPending: Math.max(0, currentPending - starValue),
     });
   },
 

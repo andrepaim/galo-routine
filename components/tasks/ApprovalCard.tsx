@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Card, Text, Button, Icon, TextInput } from 'react-native-paper';
 import { format } from 'date-fns';
+import * as Haptics from 'expo-haptics';
 import { Colors, Layout } from '../../constants';
 import { StarDisplay } from '../stars/StarDisplay';
 import type { TaskCompletion } from '../../lib/types';
@@ -17,7 +18,13 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
   const [showReject, setShowReject] = useState(false);
   const [reason, setReason] = useState('');
 
-  const handleReject = () => {
+  const handleApprove = async () => {
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onApprove();
+  };
+
+  const handleReject = async () => {
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     onReject(reason.trim() || 'Not completed properly');
     setShowReject(false);
     setReason('');
@@ -30,7 +37,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
         titleVariant="titleMedium"
         subtitle={`Completed ${format(completion.completedAt.toDate(), 'MMM d, h:mm a')}`}
         left={(props) => (
-          <Icon {...props} source="clock-outline" color={Colors.neutral} />
+          <Icon {...props} source="check-circle-outline" color={Colors.pending} />
         )}
         right={() => (
           <StarDisplay count={completion.taskStarValue} maxStars={completion.taskStarValue} size={18} showEmpty={false} />
@@ -73,7 +80,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
           <Button
             mode="contained"
             buttonColor={Colors.reward}
-            onPress={onApprove}
+            onPress={handleApprove}
             loading={isLoading}
             icon="check"
           >
@@ -89,6 +96,7 @@ const styles = StyleSheet.create({
   card: {
     marginVertical: Layout.padding.xs,
     backgroundColor: Colors.surface,
+    elevation: Layout.elevation.medium,
   },
   actions: {
     justifyContent: 'flex-end',

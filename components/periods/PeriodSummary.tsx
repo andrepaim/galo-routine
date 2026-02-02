@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Card, Text, Icon, Chip } from 'react-native-paper';
 import { Colors, Layout } from '../../constants';
 import { StarCounter } from '../stars/StarCounter';
+import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { formatPeriodRange, getRemainingDays } from '../../lib/utils/periodUtils';
 import type { Period } from '../../lib/types';
 
@@ -15,8 +16,8 @@ export function PeriodSummary({ period, onPress }: PeriodSummaryProps) {
   const remaining = getRemainingDays(period);
   const isActive = period.status === 'active';
 
-  return (
-    <Card style={styles.card} onPress={onPress}>
+  const card = (
+    <Card style={styles.card}>
       <Card.Content>
         <View style={styles.header}>
           <Text variant="titleMedium">{formatPeriodRange(period)}</Text>
@@ -67,6 +68,16 @@ export function PeriodSummary({ period, onPress }: PeriodSummaryProps) {
       </Card.Content>
     </Card>
   );
+
+  if (onPress) {
+    return (
+      <AnimatedPressable onPress={onPress} haptic="light">
+        {card}
+      </AnimatedPressable>
+    );
+  }
+
+  return card;
 }
 
 function getStatusIcon(status: string): string {
@@ -111,6 +122,7 @@ const styles = StyleSheet.create({
   card: {
     marginVertical: Layout.padding.xs,
     backgroundColor: Colors.surface,
+    elevation: Layout.elevation.low,
   },
   header: {
     flexDirection: 'row',

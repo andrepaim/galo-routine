@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTaskStore } from '../stores';
 import { useCompletionStore } from '../stores/completionStore';
 import { getTasksForDate } from '../utils/recurrence';
+import { compareTimeStrings } from '../utils/time';
 import type { TodayTask } from '../types';
 
 export function useTodayTasks(): { todayTasks: TodayTask[]; isLoading: boolean } {
@@ -15,11 +16,13 @@ export function useTodayTasks(): { todayTasks: TodayTask[]; isLoading: boolean }
     const today = new Date();
     const scheduledTasks = getTasksForDate(tasks, today);
 
-    return scheduledTasks.map((task): TodayTask => ({
+    const mapped = scheduledTasks.map((task): TodayTask => ({
       ...task,
       id: task.id!,
       completion: getCompletionForTask(task.id!, today),
     }));
+
+    return mapped.sort((a, b) => compareTimeStrings(a.startTime, b.startTime));
   }, [tasks, completions]);
 
   return {

@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, Button, Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInLeft, FadeInUp } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
 import { useAuthStore, usePeriodStore, useCompletionStore } from '../../lib/stores';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
@@ -10,6 +11,7 @@ import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { StarCounter } from '../../components/stars/StarCounter';
 import { PeriodSummary } from '../../components/periods/PeriodSummary';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
+import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
 
 export default function ParentHomeScreen() {
   const router = useRouter();
@@ -20,34 +22,42 @@ export default function ParentHomeScreen() {
   const pendingCount = useCompletionStore((s) => s.getPendingCompletions().length);
 
   if (periodLoading) {
-    return <LoadingScreen message="Loading period..." />;
+    return <LoadingScreen variant="skeleton-dashboard" />;
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="headlineSmall" style={styles.greeting}>
-          Hello, {parentName || 'Parent'}!
-        </Text>
-        <Text variant="bodyLarge" style={styles.subtitle}>
-          Managing {childName || 'your child'}'s routine
-        </Text>
+        <Animated.View entering={FadeInLeft.duration(400)}>
+          <Text variant="headlineSmall" style={styles.greeting}>
+            Hello, {parentName || 'Parent'}!
+          </Text>
+          <Text variant="bodyLarge" style={styles.subtitle}>
+            Managing {childName || 'your child'}'s routine
+          </Text>
+        </Animated.View>
 
         {/* Quick Stats */}
-        <View style={styles.statsRow}>
-          <Card style={styles.statCard} onPress={() => router.push('/(parent)/approvals')}>
-            <Card.Content style={styles.statContent}>
-              <Icon source="clock-outline" size={32} color={Colors.neutral} />
-              <Text variant="headlineMedium" style={styles.statNumber}>
-                {pendingCount}
-              </Text>
-              <Text variant="bodySmall" style={styles.statLabel}>
-                Pending
-              </Text>
-            </Card.Content>
-          </Card>
+        <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.statsRow}>
+          <AnimatedPressable
+            onPress={() => router.push('/(parent)/approvals')}
+            haptic="light"
+            style={styles.statCardWrapper}
+          >
+            <Card style={styles.statCard}>
+              <Card.Content style={styles.statContent}>
+                <Icon source="clock-outline" size={32} color={Colors.neutral} />
+                <Text variant="headlineMedium" style={styles.statNumber}>
+                  {pendingCount}
+                </Text>
+                <Text variant="bodySmall" style={styles.statLabel}>
+                  Pending
+                </Text>
+              </Card.Content>
+            </Card>
+          </AnimatedPressable>
 
-          <Card style={styles.statCard}>
+          <Card style={[styles.statCard, styles.statCardWrapper]}>
             <Card.Content style={styles.statContent}>
               {starProgress && (
                 <StarCounter
@@ -58,20 +68,20 @@ export default function ParentHomeScreen() {
               )}
             </Card.Content>
           </Card>
-        </View>
+        </Animated.View>
 
         {/* Active Period */}
         {activePeriod && (
-          <View style={styles.section}>
+          <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.section}>
             <Text variant="titleMedium" style={styles.sectionTitle}>
               Current Period
             </Text>
             <PeriodSummary period={activePeriod} />
-          </View>
+          </Animated.View>
         )}
 
         {/* Quick Actions */}
-        <View style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
             Quick Actions
           </Text>
@@ -93,7 +103,7 @@ export default function ParentHomeScreen() {
               Review ({pendingCount})
             </Button>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -120,9 +130,12 @@ const styles = StyleSheet.create({
     gap: Layout.padding.md,
     marginBottom: Layout.padding.lg,
   },
-  statCard: {
+  statCardWrapper: {
     flex: 1,
+  },
+  statCard: {
     backgroundColor: Colors.surface,
+    elevation: Layout.elevation.low,
   },
   statContent: {
     alignItems: 'center',

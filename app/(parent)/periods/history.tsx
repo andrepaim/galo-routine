@@ -1,6 +1,7 @@
 import React from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Layout } from '../../../constants';
 import { usePeriodStore } from '../../../lib/stores';
 import { PeriodSummary } from '../../../components/periods/PeriodSummary';
@@ -27,7 +28,11 @@ export default function PeriodHistoryScreen() {
       <FlatList
         data={completedPeriods}
         keyExtractor={(item) => item.id!}
-        renderItem={({ item }) => <PeriodSummary period={item} />}
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
+            <PeriodSummary period={item} />
+          </Animated.View>
+        )}
         contentContainerStyle={styles.list}
       />
     </SafeAreaView>

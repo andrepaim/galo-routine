@@ -3,8 +3,7 @@
 A parent-child task & reward app built with Expo (SDK 54), React Native, Firebase, and Zustand.
 
 ## Commands
-- `npm start` — start Expo dev server
-- `npm run android` — launch on Android emulator
+- `npx expo start --tunnel` — start Expo dev server with tunnel (tested on physical device via Expo Go)
 - `npx tsc --noEmit` — type-check (no test suite yet)
 - Cloud functions: `cd functions && npm run build && npm run deploy`
 

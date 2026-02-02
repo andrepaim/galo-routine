@@ -8,6 +8,7 @@ import {
 } from '../firebase/firestore';
 import { buildPeriod } from '../utils/periodUtils';
 import { determinePeriodOutcome } from '../utils/starCalculations';
+import { useCompletionStore } from './completionStore';
 
 interface PeriodStore {
   periods: Period[];
@@ -47,8 +48,13 @@ export const usePeriodStore = create<PeriodStore>((set, get) => ({
     const period = get().periods.find((p) => p.id === periodId);
     if (!period) return;
 
+    const completions = useCompletionStore.getState().completions;
+    const starsEarned = completions
+      .filter((c) => c.status === 'approved')
+      .reduce((sum, c) => sum + c.taskStarValue, 0);
+
     const outcome = determinePeriodOutcome(
-      period.starsEarned,
+      starsEarned,
       period.starBudget,
       period.thresholds.rewardPercent,
       period.thresholds.penaltyPercent,
@@ -57,6 +63,8 @@ export const usePeriodStore = create<PeriodStore>((set, get) => ({
     await updatePeriod(familyId, periodId, {
       status: 'completed',
       outcome,
+      starsEarned,
+      starsPending: 0,
     });
   },
 }));

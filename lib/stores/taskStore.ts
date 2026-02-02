@@ -30,16 +30,19 @@ export const useTaskStore = create<TaskStore>((set) => ({
   },
 
   addTask: async (familyId: string, data: TaskFormData) => {
+    const recurrence: Task['recurrence'] = { type: data.recurrenceType };
+    if (data.recurrenceType === 'specific_days') {
+      recurrence.days = data.days;
+    }
     const task: Omit<Task, 'id'> = {
       name: data.name,
       description: data.description,
       starValue: data.starValue,
       icon: data.icon,
       isActive: true,
-      recurrence: {
-        type: data.recurrenceType,
-        days: data.recurrenceType === 'specific_days' ? data.days : undefined,
-      },
+      recurrence,
+      ...(data.startTime ? { startTime: data.startTime } : {}),
+      ...(data.endTime ? { endTime: data.endTime } : {}),
     };
     return createTask(familyId, task);
   },
@@ -51,11 +54,16 @@ export const useTaskStore = create<TaskStore>((set) => ({
     if (data.starValue !== undefined) update.starValue = data.starValue;
     if (data.icon !== undefined) update.icon = data.icon;
     if (data.recurrenceType !== undefined) {
-      update.recurrence = {
-        type: data.recurrenceType,
-        days: data.recurrenceType === 'specific_days' ? data.days : undefined,
-      };
+      const recurrence: Task['recurrence'] = { type: data.recurrenceType };
+      if (data.recurrenceType === 'specific_days') {
+        recurrence.days = data.days;
+      }
+      update.recurrence = recurrence;
     }
+    // Use deleteField() sentinel or simply set; Firestore won't store undefined
+    // So we always set the field — if cleared, store empty string which we treat as unset
+    if ('startTime' in data) update.startTime = data.startTime || undefined;
+    if ('endTime' in data) update.endTime = data.endTime || undefined;
     await updateTask(familyId, taskId, update);
   },
 

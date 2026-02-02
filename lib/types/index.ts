@@ -31,6 +31,8 @@ export interface Task {
   icon?: string;
   isActive: boolean;
   recurrence: TaskRecurrence;
+  startTime?: string; // "HH:mm" format
+  endTime?: string; // "HH:mm" format
 }
 
 export interface TaskRecurrence {
@@ -106,6 +108,8 @@ export interface TaskFormData {
   icon?: string;
   recurrenceType: 'daily' | 'specific_days' | 'once';
   days: number[];
+  startTime?: string; // "HH:mm" format
+  endTime?: string; // "HH:mm" format
 }
 
 // ── Computed Types ────────────────────────────────────────────────

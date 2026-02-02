@@ -27,4 +27,11 @@ export const Layout = {
     xxl: 32,
     hero: 48,
   },
+  elevation: {
+    none: 0,
+    low: 1,
+    medium: 2,
+    high: 4,
+    floating: 8,
+  },
 } as const;
