@@ -41,6 +41,38 @@ service cloud.firestore {
           allow delete: if false; // Completions cannot be deleted
         }
       }
+
+      // Rewards subcollection
+      match /rewards/{rewardId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+      }
+
+      // Redemptions subcollection
+      match /redemptions/{redemptionId} {
+        allow read: if isFamilyMember(familyId);
+        allow create: if isFamilyMember(familyId);
+        allow update: if isFamilyMember(familyId);
+        allow delete: if false; // Redemptions cannot be deleted
+      }
+
+      // Goals subcollection
+      match /goals/{goalId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+      }
+
+      // Earned badges subcollection
+      match /earnedBadges/{badgeId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+      }
+
+      // Streak freezes subcollection
+      match /streakFreezes/{freezeId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+      }
     }
 
     // Deny all other access

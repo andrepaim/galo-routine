@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable, View } from 'react-native';
 import { Card, Text, Icon } from 'react-native-paper';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -9,7 +9,7 @@ import Animated, {
   withSequence,
   withSpring,
 } from 'react-native-reanimated';
-import { Colors, Layout } from '../../constants';
+import { Colors, Layout, getCategoryColor } from '../../constants';
 import { StarDisplay } from '../stars/StarDisplay';
 import { formatTimeRange } from '../../lib/utils/time';
 import type { TodayTask, CompletionStatus } from '../../lib/types';
@@ -53,6 +53,8 @@ export function ChildTaskCard({ task, onComplete, index = 0 }: ChildTaskCardProp
   }
   const subtitle = descParts.length > 0 ? descParts.join(' · ') : undefined;
 
+  const categoryColor = getCategoryColor(task.category);
+
   return (
     <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
       <Animated.View style={animatedCardStyle}>
@@ -63,6 +65,9 @@ export function ChildTaskCard({ task, onComplete, index = 0 }: ChildTaskCardProp
             isPending && styles.pending,
             isRejected && styles.rejected,
           ]}>
+            {task.category && (
+              <View style={[styles.categoryStripe, { backgroundColor: categoryColor }]} />
+            )}
             <Card.Title
               title={task.name}
               titleVariant="titleLarge"
@@ -126,6 +131,11 @@ const styles = StyleSheet.create({
     marginVertical: Layout.padding.xs,
     backgroundColor: Colors.surface,
     elevation: 2,
+    overflow: 'hidden',
+  },
+  categoryStripe: {
+    height: 4,
+    width: '100%',
   },
   approved: {
     backgroundColor: Colors.rewardContainer,

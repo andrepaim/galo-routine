@@ -12,32 +12,48 @@ A parent-child task & reward app built with Expo (SDK 54), React Native, Firebas
 ### Routing (Expo Router)
 File-based routing with three groups:
 - `app/(auth)/` — login, register, child-pin (no auth required)
-- `app/(parent)/` — tab layout: home, tasks/, periods/, approvals, settings
-- `app/(child)/` — today's tasks, all tasks, stars screen
+- `app/(parent)/` — tab layout: home, tasks/, periods/, approvals, rewards/, goals, analytics, settings
+- `app/(child)/` — tab layout: today, tasks, stars, shop, badges, profile
 
 Auth gate in `app/_layout.tsx` redirects based on `role` (parent/child/null).
 
 ### State (Zustand)
-Four stores in `lib/stores/`:
+Seven stores in `lib/stores/`:
 - `authStore` — auth state, role, family data (persists role via expo-secure-store)
-- `taskStore` — tasks CRUD + real-time Firestore subscription
+- `taskStore` — tasks CRUD + batch creation + real-time Firestore subscription
 - `periodStore` — periods, active period, completion logic
-- `completionStore` — task completions (pending/approved/rejected)
+- `completionStore` — task completions (pending/approved/rejected), star balance increment on approval
+- `rewardStore` — rewards CRUD, redemptions, star balance deduction on redemption
+- `goalStore` — long-term goals CRUD
+- `badgeStore` — earned badges tracking
 
-Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in `lib/hooks/useSubscriptions.ts`, called from root layout's `DataSubscriptions` component.
+Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in `lib/hooks/useSubscriptions.ts`, called from root layout's `DataSubscriptions` component. Family document is also subscribed for real-time balance/streak updates.
 
 ### Firebase
 - **Auth**: single account per family; child uses PIN stored as hash
-- **Firestore**: `families/{familyId}/tasks`, `families/{familyId}/periods/{periodId}/completions`
+- **Firestore collections** under `families/{familyId}/`:
+  - `tasks` — task definitions with categories and scheduling
+  - `periods/{periodId}/completions` — task completion records
+  - `rewards` — reward definitions (shop items)
+  - `redemptions` — reward redemption records
+  - `goals` — long-term star goals
+  - `earnedBadges` — badge awards
+  - `streakFreezes` — streak freeze records
 - **Cloud Functions** (`functions/src/index.ts`):
-  - `autoRollPeriods` — daily cron, auto-completes expired periods + creates new ones
-  - `onCompletionWrite` — trigger that recalculates `starsEarned`/`starsPending` on period
+  - `autoRollPeriods` — daily cron at midnight, auto-completes expired periods + creates new ones
+  - `onCompletionWrite` — trigger that recalculates period star counts, handles bonus stars, streak updates, and badge awards
+  - `dailyStreakCheck` — daily cron at 11 PM, resets broken streaks
 
 ### Key types (`lib/types/index.ts`)
-- `Family` / `FamilySettings` — family config + thresholds
-- `Task` / `TaskRecurrence` — tasks with daily/specific_days/once recurrence
+- `Family` / `FamilySettings` — family config, thresholds, bonus settings, streak settings, notification settings
+- `Task` / `TaskRecurrence` — tasks with daily/specific_days/once recurrence, categories, time scheduling
 - `Period` / `PeriodThresholds` — time periods with star budgets and reward/penalty zones
-- `TaskCompletion` — pending → approved/rejected flow
+- `TaskCompletion` — pending → approved/rejected flow with on-time bonus and proof fields
+- `Reward` / `Redemption` — shop rewards with star costs and approval flow
+- `LongTermGoal` — lifetime star goals with deadlines
+- `Badge` / `EarnedBadge` — achievement badges (milestone, consistency, category)
+- `StreakFreeze` / `StreakMilestone` — streak tracking helpers
+- `TaskCategory` / `TaskTemplate` — category system and task templates
 - `StarProgress` — computed: earned/pending/budget percentages + zone flags
 
 ## Conventions
@@ -53,19 +69,36 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
 | Directory | Purpose |
 |-----------|---------|
 | `components/stars/` | StarBudgetRing, StarCounter, StarDisplay |
-| `components/tasks/` | TaskCard, ChildTaskCard, ApprovalCard, TaskForm |
+| `components/tasks/` | TaskCard, ChildTaskCard, ApprovalCard, TaskForm, TemplateSelector |
+| `components/rewards/` | RewardCard, RewardForm |
+| `components/timeline/` | TimelineView, FocusModeCard |
+| `components/badges/` | BadgeGrid |
+| `components/goals/` | GoalCard |
+| `components/streaks/` | StreakDisplay |
 | `lib/hooks/` | useCurrentPeriod, useTodayTasks, useStarBudget, useStarBudgetSync, useSubscriptions |
-| `lib/utils/` | starCalculations, recurrence, periodUtils, pin |
+| `lib/utils/` | starCalculations, recurrence, periodUtils, pin, time |
 | `lib/firebase/` | config, auth, firestore |
-| `constants/` | colors, layout, defaults, theme |
+| `constants/` | colors, layout, defaults (categories, badges, templates, milestones), theme |
 
-## Current status (2026-02-01)
-Phase 2 (Star System & Thresholds) is code-complete but not runtime-tested. Changes:
-- StarBudgetRing: animated arcs + threshold tick markers
-- StarCounter: animated number + star pulse
-- ChildTaskCard: staggered entrance + completion bounce
-- Child screens: entrance animations (FadeInLeft, FadeInUp, FadeInRight)
-- Parent settings: slider-based thresholds + mini preview ring
-- useStarBudgetSync: recalculates star budget when tasks change mid-period
+## Feature status (2026-02-02)
 
-Runtime verification still needed (see plan file for checklist).
+### Code-complete (not runtime-tested)
+- **Phase 2**: Star system & thresholds (animated rings, counters, cards)
+- **Feature 1**: Rewards CRUD & shop (parent CRUD, child shop with redemptions)
+- **Feature 2**: Timeline view & focus mode (components created, integrated in child tasks)
+- **Feature 3**: Cumulative points & long-term goals (star balance, lifetime counter, goals screen)
+- **Feature 4**: Task templates (19 predefined templates, bulk creation)
+- **Feature 5**: Notifications (settings UI only, no expo-notifications integration yet)
+- **Feature 6**: Streaks & consistency bonuses (display, cloud function tracking, freezes)
+- **Feature 7**: Achievement badges (badge grid, cloud function awarding)
+- **Feature 8**: Task categories/tags (9 predefined categories, color stripes)
+- **Feature 9**: Parent analytics dashboard (overview card, category breakdown, task analysis)
+- **Feature 10**: Bonus star mechanics (on-time, perfect day, early finish bonuses)
+- **Feature 11**: Task completion proof (fields added, no photo picker yet)
+- **Feature 12**: Child profile (avatar picker, accent color, stats)
+
+### Not yet implemented
+- Push notifications via expo-notifications
+- Photo picker for task completion proof
+- Custom category creation
+- Early finish bonus check in cloud functions

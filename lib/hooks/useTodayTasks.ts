@@ -16,11 +16,22 @@ export function useTodayTasks(): { todayTasks: TodayTask[]; isLoading: boolean }
     const today = new Date();
     const scheduledTasks = getTasksForDate(tasks, today);
 
-    const mapped = scheduledTasks.map((task): TodayTask => ({
-      ...task,
-      id: task.id!,
-      completion: getCompletionForTask(task.id!, today),
-    }));
+    const mapped = scheduledTasks
+      .map((task): TodayTask => ({
+        ...task,
+        id: task.id!,
+        completion: getCompletionForTask(task.id!, today),
+      }))
+      .filter((task) => {
+        // Hide "once" tasks that were already completed on any day this period
+        if (task.recurrence.type === 'once' && !task.completion) {
+          const hasAnyCompletion = completions.some(
+            (c) => c.taskId === task.id && (c.status === 'approved' || c.status === 'pending'),
+          );
+          if (hasAnyCompletion) return false;
+        }
+        return true;
+      });
 
     return mapped.sort((a, b) => compareTimeStrings(a.startTime, b.startTime));
   }, [tasks, completions]);

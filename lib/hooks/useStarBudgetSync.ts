@@ -10,7 +10,7 @@ export function useStarBudgetSync() {
   const lastBudgetRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!familyId || !activePeriod?.id || tasks.length === 0) return;
+    if (!familyId || !activePeriod?.id) return;
 
     const startDate = activePeriod.startDate.toDate();
     const endDate = activePeriod.endDate.toDate();

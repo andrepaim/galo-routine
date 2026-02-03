@@ -25,6 +25,10 @@ export async function registerParent(data: RegisterFormData): Promise<string> {
     childName: data.childName,
     parentName: data.parentName,
     settings: { ...DEFAULT_SETTINGS },
+    starBalance: 0,
+    lifetimeStarsEarned: 0,
+    currentStreak: 0,
+    bestStreak: 0,
   };
 
   await setDoc(doc(db, 'families', familyId), family);

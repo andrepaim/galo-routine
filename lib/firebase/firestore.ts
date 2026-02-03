@@ -12,10 +12,22 @@ import {
   orderBy,
   onSnapshot,
   Timestamp,
+  increment,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './config';
-import type { Task, Period, TaskCompletion, Family, FamilySettings } from '../types';
+import type {
+  Task,
+  Period,
+  TaskCompletion,
+  Family,
+  FamilySettings,
+  Reward,
+  Redemption,
+  LongTermGoal,
+  EarnedBadge,
+  StreakFreeze,
+} from '../types';
 
 // ── Family ────────────────────────────────────────────────────────
 
@@ -36,6 +48,10 @@ export function subscribeToFamily(familyId: string, callback: (family: Family | 
   return onSnapshot(doc(db, 'families', familyId), (snap) => {
     callback(snap.exists() ? (snap.data() as Family) : null);
   });
+}
+
+export async function incrementFamilyField(familyId: string, field: string, amount: number) {
+  await updateDoc(doc(db, 'families', familyId), { [field]: increment(amount) });
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────
@@ -147,4 +163,115 @@ export async function getCompletionsForDate(
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as TaskCompletion));
+}
+
+// ── Rewards (Feature 1) ──────────────────────────────────────────
+
+function rewardsRef(familyId: string) {
+  return collection(db, 'families', familyId, 'rewards');
+}
+
+export async function createReward(familyId: string, reward: Omit<Reward, 'id'>): Promise<string> {
+  const ref = await addDoc(rewardsRef(familyId), reward);
+  return ref.id;
+}
+
+export async function updateReward(familyId: string, rewardId: string, data: Partial<Reward>) {
+  await updateDoc(doc(db, 'families', familyId, 'rewards', rewardId), data);
+}
+
+export async function deleteReward(familyId: string, rewardId: string) {
+  await deleteDoc(doc(db, 'families', familyId, 'rewards', rewardId));
+}
+
+export function subscribeRewards(familyId: string, callback: (rewards: Reward[]) => void): Unsubscribe {
+  return onSnapshot(rewardsRef(familyId), (snap) => {
+    const rewards = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Reward));
+    callback(rewards);
+  });
+}
+
+// ── Redemptions (Feature 1) ──────────────────────────────────────
+
+function redemptionsRef(familyId: string) {
+  return collection(db, 'families', familyId, 'redemptions');
+}
+
+export async function createRedemption(familyId: string, redemption: Omit<Redemption, 'id'>): Promise<string> {
+  const ref = await addDoc(redemptionsRef(familyId), redemption);
+  return ref.id;
+}
+
+export async function updateRedemption(familyId: string, redemptionId: string, data: Partial<Redemption>) {
+  await updateDoc(doc(db, 'families', familyId, 'redemptions', redemptionId), data);
+}
+
+export function subscribeRedemptions(familyId: string, callback: (redemptions: Redemption[]) => void): Unsubscribe {
+  const q = query(redemptionsRef(familyId), orderBy('redeemedAt', 'desc'));
+  return onSnapshot(q, (snap) => {
+    const redemptions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Redemption));
+    callback(redemptions);
+  });
+}
+
+// ── Long-Term Goals (Feature 3) ──────────────────────────────────
+
+function goalsRef(familyId: string) {
+  return collection(db, 'families', familyId, 'goals');
+}
+
+export async function createGoal(familyId: string, goal: Omit<LongTermGoal, 'id'>): Promise<string> {
+  const ref = await addDoc(goalsRef(familyId), goal);
+  return ref.id;
+}
+
+export async function updateGoal(familyId: string, goalId: string, data: Partial<LongTermGoal>) {
+  await updateDoc(doc(db, 'families', familyId, 'goals', goalId), data);
+}
+
+export async function deleteGoal(familyId: string, goalId: string) {
+  await deleteDoc(doc(db, 'families', familyId, 'goals', goalId));
+}
+
+export function subscribeGoals(familyId: string, callback: (goals: LongTermGoal[]) => void): Unsubscribe {
+  return onSnapshot(goalsRef(familyId), (snap) => {
+    const goals = snap.docs.map((d) => ({ id: d.id, ...d.data() } as LongTermGoal));
+    callback(goals);
+  });
+}
+
+// ── Earned Badges (Feature 7) ────────────────────────────────────
+
+function badgesRef(familyId: string) {
+  return collection(db, 'families', familyId, 'earnedBadges');
+}
+
+export async function createEarnedBadge(familyId: string, badge: Omit<EarnedBadge, 'id'>): Promise<string> {
+  const ref = await addDoc(badgesRef(familyId), badge);
+  return ref.id;
+}
+
+export function subscribeEarnedBadges(familyId: string, callback: (badges: EarnedBadge[]) => void): Unsubscribe {
+  return onSnapshot(badgesRef(familyId), (snap) => {
+    const badges = snap.docs.map((d) => ({ id: d.id, ...d.data() } as EarnedBadge));
+    callback(badges);
+  });
+}
+
+// ── Streak Freezes (Feature 6) ───────────────────────────────────
+
+function streakFreezesRef(familyId: string) {
+  return collection(db, 'families', familyId, 'streakFreezes');
+}
+
+export async function createStreakFreeze(familyId: string, freeze: Omit<StreakFreeze, 'id'>): Promise<string> {
+  const ref = await addDoc(streakFreezesRef(familyId), freeze);
+  return ref.id;
+}
+
+export function subscribeStreakFreezes(familyId: string, callback: (freezes: StreakFreeze[]) => void): Unsubscribe {
+  return onSnapshot(streakFreezesRef(familyId), (snap) => {
+    const freezes = snap.docs.map((d) => ({ id: d.id, ...d.data() } as StreakFreeze));
+    callback(freezes);
+  });
 }

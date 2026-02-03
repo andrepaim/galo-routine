@@ -12,9 +12,29 @@ interface TaskStore {
   isLoading: boolean;
   subscribe: (familyId: string) => () => void;
   addTask: (familyId: string, data: TaskFormData) => Promise<string>;
+  addTasksBatch: (familyId: string, dataList: TaskFormData[]) => Promise<void>;
   editTask: (familyId: string, taskId: string, data: Partial<TaskFormData>) => Promise<void>;
   removeTask: (familyId: string, taskId: string) => Promise<void>;
   toggleTask: (familyId: string, taskId: string, isActive: boolean) => Promise<void>;
+}
+
+function formDataToTask(data: TaskFormData): Omit<Task, 'id'> {
+  const recurrence: Task['recurrence'] = { type: data.recurrenceType };
+  if (data.recurrenceType === 'specific_days') {
+    recurrence.days = data.days;
+  }
+  return {
+    name: data.name,
+    description: data.description,
+    starValue: data.starValue,
+    icon: data.icon,
+    isActive: true,
+    recurrence,
+    ...(data.startTime ? { startTime: data.startTime } : {}),
+    ...(data.endTime ? { endTime: data.endTime } : {}),
+    ...(data.category ? { category: data.category } : {}),
+    ...(data.requiresProof ? { requiresProof: data.requiresProof } : {}),
+  };
 }
 
 export const useTaskStore = create<TaskStore>((set) => ({
@@ -30,21 +50,11 @@ export const useTaskStore = create<TaskStore>((set) => ({
   },
 
   addTask: async (familyId: string, data: TaskFormData) => {
-    const recurrence: Task['recurrence'] = { type: data.recurrenceType };
-    if (data.recurrenceType === 'specific_days') {
-      recurrence.days = data.days;
-    }
-    const task: Omit<Task, 'id'> = {
-      name: data.name,
-      description: data.description,
-      starValue: data.starValue,
-      icon: data.icon,
-      isActive: true,
-      recurrence,
-      ...(data.startTime ? { startTime: data.startTime } : {}),
-      ...(data.endTime ? { endTime: data.endTime } : {}),
-    };
-    return createTask(familyId, task);
+    return createTask(familyId, formDataToTask(data));
+  },
+
+  addTasksBatch: async (familyId: string, dataList: TaskFormData[]) => {
+    await Promise.all(dataList.map((data) => createTask(familyId, formDataToTask(data))));
   },
 
   editTask: async (familyId: string, taskId: string, data: Partial<TaskFormData>) => {
@@ -60,10 +70,10 @@ export const useTaskStore = create<TaskStore>((set) => ({
       }
       update.recurrence = recurrence;
     }
-    // Use deleteField() sentinel or simply set; Firestore won't store undefined
-    // So we always set the field — if cleared, store empty string which we treat as unset
     if ('startTime' in data) update.startTime = data.startTime || undefined;
     if ('endTime' in data) update.endTime = data.endTime || undefined;
+    if ('category' in data) update.category = data.category || undefined;
+    if ('requiresProof' in data) update.requiresProof = data.requiresProof;
     await updateTask(familyId, taskId, update);
   },
 

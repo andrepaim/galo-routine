@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { TextInput, Button, SegmentedButtons, Text, Chip, IconButton } from 'react-native-paper';
-import { Colors, Layout, DAY_NAMES, STAR_VALUES, TASK_ICONS } from '../../constants';
+import { TextInput, Button, SegmentedButtons, Text, Chip, IconButton, Switch, Icon } from 'react-native-paper';
+import { Colors, Layout, DAY_NAMES, STAR_VALUES, TASK_ICONS, TASK_CATEGORIES } from '../../constants';
 import { TimePicker } from '../ui/TimePicker';
-import type { TaskFormData } from '../../lib/types';
+import type { TaskFormData, TaskCategoryId } from '../../lib/types';
 
 interface TaskFormProps {
   initialData?: Partial<TaskFormData>;
@@ -30,6 +30,8 @@ export function TaskForm({
   const [icon, setIcon] = useState(initialData?.icon ?? 'star-circle');
   const [startTime, setStartTime] = useState<string | undefined>(initialData?.startTime);
   const [endTime, setEndTime] = useState<string | undefined>(initialData?.endTime);
+  const [category, setCategory] = useState<string | undefined>(initialData?.category);
+  const [requiresProof, setRequiresProof] = useState(initialData?.requiresProof ?? false);
 
   const toggleDay = (day: number) => {
     setDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]));
@@ -46,6 +48,8 @@ export function TaskForm({
       days,
       startTime,
       endTime,
+      category: category as TaskCategoryId,
+      requiresProof,
     });
   };
 
@@ -67,6 +71,27 @@ export function TaskForm({
         multiline
         style={styles.input}
       />
+
+      <Text variant="titleSmall" style={styles.label}>
+        Category
+      </Text>
+      <View style={styles.categoryGrid}>
+        {TASK_CATEGORIES.map((cat) => (
+          <Chip
+            key={cat.id}
+            selected={category === cat.id}
+            onPress={() => setCategory(category === cat.id ? undefined : cat.id)}
+            icon={() => <Icon source={cat.icon} size={16} color={category === cat.id ? Colors.white : cat.color} />}
+            style={[
+              styles.categoryChip,
+              category === cat.id && { backgroundColor: cat.color },
+            ]}
+            textStyle={category === cat.id ? { color: Colors.white } : undefined}
+          >
+            {cat.name}
+          </Chip>
+        ))}
+      </View>
 
       <Text variant="titleSmall" style={styles.label}>
         Star Value
@@ -135,6 +160,11 @@ export function TaskForm({
         </View>
       )}
 
+      <View style={styles.switchRow}>
+        <Text variant="bodyMedium">Requires proof (photo/note)</Text>
+        <Switch value={requiresProof} onValueChange={setRequiresProof} />
+      </View>
+
       <View style={styles.actions}>
         <Button mode="outlined" onPress={onCancel} style={styles.actionBtn}>
           Cancel
@@ -168,6 +198,15 @@ const styles = StyleSheet.create({
     marginBottom: Layout.padding.sm,
     color: Colors.textSecondary,
   },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Layout.padding.sm,
+    marginBottom: Layout.padding.md,
+  },
+  categoryChip: {
+    backgroundColor: Colors.surfaceVariant,
+  },
   starRow: {
     flexDirection: 'row',
     gap: Layout.padding.sm,
@@ -197,6 +236,13 @@ const styles = StyleSheet.create({
     marginBottom: Layout.padding.md,
   },
   dayChip: {},
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Layout.padding.sm,
+    marginBottom: Layout.padding.sm,
+  },
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',

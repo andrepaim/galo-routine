@@ -6,6 +6,7 @@ import {
   createCompletion,
   updateCompletion,
   subscribeCompletions,
+  incrementFamilyField,
 } from '../firebase/firestore';
 
 interface CompletionStore {
@@ -33,7 +34,7 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
   isLoading: true,
 
   subscribe: (familyId: string, periodId: string) => {
-    set({ isLoading: true });
+    set({ completions: [], isLoading: true });
     const unsubscribe = subscribeCompletions(familyId, periodId, (completions) => {
       set({ completions, isLoading: false });
     });
@@ -45,6 +46,15 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
     const dateStr = format(now, 'yyyy-MM-dd');
     const completionId = `${task.id}_${dateStr}`;
 
+    // Check if the task was completed on time (within its scheduled window)
+    let onTimeBonus = false;
+    if (task.startTime && task.endTime) {
+      const [endH, endM] = task.endTime.split(':').map(Number);
+      const endMinutes = endH * 60 + endM;
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      onTimeBonus = nowMinutes <= endMinutes;
+    }
+
     const completion: Omit<TaskCompletion, 'id'> = {
       taskId: task.id!,
       taskName: task.name,
@@ -52,6 +62,7 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
       date: Timestamp.fromDate(now),
       status: 'pending',
       completedAt: Timestamp.fromDate(now),
+      onTimeBonus,
     };
 
     await createCompletion(familyId, periodId, completion, completionId);
@@ -62,10 +73,20 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
     periodId: string,
     completionId: string,
   ) => {
+    // Find the completion to get its star value
+    const completion = get().completions.find((c) => c.id === completionId);
+    const starValue = completion?.taskStarValue ?? 0;
+
     await updateCompletion(familyId, periodId, completionId, {
       status: 'approved',
       reviewedAt: Timestamp.fromDate(new Date()),
     });
+
+    // Increment star balance and lifetime stars
+    if (starValue > 0) {
+      await incrementFamilyField(familyId, 'starBalance', starValue);
+      await incrementFamilyField(familyId, 'lifetimeStarsEarned', starValue);
+    }
   },
 
   rejectCompletion: async (

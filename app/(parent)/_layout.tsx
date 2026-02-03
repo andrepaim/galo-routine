@@ -44,6 +44,16 @@ export default function ParentLayout() {
         }}
       />
       <Tabs.Screen
+        name="rewards"
+        options={{
+          title: 'Rewards',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Icon source="gift" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="approvals"
         options={{
           title: 'Approvals',
@@ -59,6 +69,24 @@ export default function ParentLayout() {
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon source="calendar-range" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="goals"
+        options={{
+          title: 'Goals',
+          tabBarIcon: ({ color, size }) => (
+            <Icon source="flag-checkered" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="analytics"
+        options={{
+          title: 'Analytics',
+          tabBarIcon: ({ color, size }) => (
+            <Icon source="chart-line" size={size} color={color} />
           ),
         }}
       />

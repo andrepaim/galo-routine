@@ -1,23 +1,25 @@
 import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
-import { Text, Icon } from 'react-native-paper';
+import { Text, Icon, Card } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInLeft, FadeInUp } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
-import { useAuthStore, usePeriodStore, useCompletionStore } from '../../lib/stores';
+import { useAuthStore, useCompletionStore } from '../../lib/stores';
 import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
 import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
 import { ChildTaskCard } from '../../components/tasks/ChildTaskCard';
 import { StarCounter } from '../../components/stars/StarCounter';
+import { StreakDisplay } from '../../components/streaks/StreakDisplay';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 
 export default function ChildTodayScreen() {
   const childName = useAuthStore((s) => s.childName);
   const familyId = useAuthStore((s) => s.familyId);
+  const family = useAuthStore((s) => s.family);
   const { activePeriod } = useCurrentPeriod();
   const starProgress = useStarBudget();
   const { todayTasks, isLoading } = useTodayTasks();
@@ -27,7 +29,7 @@ export default function ChildTodayScreen() {
 
   const handleComplete = async (task: typeof todayTasks[0]) => {
     if (!familyId || !activePeriod?.id) return;
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await markTaskDone(familyId, activePeriod.id, task);
   };
 
@@ -64,6 +66,28 @@ export default function ChildTodayScreen() {
                 />
               </Animated.View>
             )}
+
+            {/* Mini stats row: star balance & streak */}
+            <Animated.View entering={FadeInUp.delay(250).duration(400)} style={styles.miniStatsRow}>
+              <Card style={[styles.miniStatCard, styles.miniStatFlex]}>
+                <Card.Content style={styles.miniStatContent}>
+                  <Icon source="star" size={20} color={Colors.starFilled} />
+                  <Text variant="titleMedium" style={styles.miniStatNumber}>
+                    {family?.starBalance ?? 0}
+                  </Text>
+                  <Text variant="bodySmall" style={styles.miniStatLabel}>balance</Text>
+                </Card.Content>
+              </Card>
+              <Card style={[styles.miniStatCard, styles.miniStatFlex]}>
+                <Card.Content style={styles.miniStatContent}>
+                  <StreakDisplay
+                    currentStreak={family?.currentStreak ?? 0}
+                    bestStreak={family?.bestStreak ?? 0}
+                    compact
+                  />
+                </Card.Content>
+              </Card>
+            </Animated.View>
 
             <Text variant="titleSmall" style={styles.sectionTitle}>
               Today's Tasks ({todayTasks.length})
@@ -119,6 +143,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Layout.padding.lg,
     elevation: 2,
+  },
+  miniStatsRow: {
+    flexDirection: 'row',
+    gap: Layout.padding.md,
+    marginBottom: Layout.padding.lg,
+  },
+  miniStatFlex: {
+    flex: 1,
+  },
+  miniStatCard: {
+    backgroundColor: Colors.surface,
+    elevation: Layout.elevation.low,
+  },
+  miniStatContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.padding.xs,
+    paddingVertical: Layout.padding.sm,
+  },
+  miniStatNumber: {
+    fontWeight: 'bold',
+    color: Colors.text,
+  },
+  miniStatLabel: {
+    color: Colors.textSecondary,
   },
   sectionTitle: {
     fontWeight: 'bold',

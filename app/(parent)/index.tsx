@@ -5,10 +5,11 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInLeft, FadeInUp } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
-import { useAuthStore, usePeriodStore, useCompletionStore } from '../../lib/stores';
+import { useAuthStore, usePeriodStore, useCompletionStore, useRewardStore } from '../../lib/stores';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
 import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { StarCounter } from '../../components/stars/StarCounter';
+import { StreakDisplay } from '../../components/streaks/StreakDisplay';
 import { PeriodSummary } from '../../components/periods/PeriodSummary';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
@@ -17,9 +18,11 @@ export default function ParentHomeScreen() {
   const router = useRouter();
   const parentName = useAuthStore((s) => s.parentName);
   const childName = useAuthStore((s) => s.childName);
+  const family = useAuthStore((s) => s.family);
   const { activePeriod, isLoading: periodLoading } = useCurrentPeriod();
   const starProgress = useStarBudget();
   const pendingCount = useCompletionStore((s) => s.getPendingCompletions().length);
+  const pendingRedemptions = useRewardStore((s) => s.redemptions.filter((r) => r.status === 'pending').length);
 
   if (periodLoading) {
     return <LoadingScreen variant="skeleton-dashboard" />;
@@ -70,6 +73,33 @@ export default function ParentHomeScreen() {
           </Card>
         </Animated.View>
 
+        {/* Star Balance & Streak */}
+        <Animated.View entering={FadeInUp.delay(150).duration(400)} style={styles.statsRow}>
+          <Card style={[styles.statCard, styles.statCardWrapper]}>
+            <Card.Content style={styles.statContent}>
+              <Icon source="star" size={28} color={Colors.starFilled} />
+              <Text variant="headlineSmall" style={styles.statNumber}>
+                {family?.starBalance ?? 0}
+              </Text>
+              <Text variant="bodySmall" style={styles.statLabel}>
+                Star Balance
+              </Text>
+            </Card.Content>
+          </Card>
+
+          <Card style={[styles.statCard, styles.statCardWrapper]}>
+            <Card.Content style={styles.statContent}>
+              <Icon source="fire" size={28} color={(family?.currentStreak ?? 0) > 0 ? Colors.streak : Colors.textLight} />
+              <Text variant="headlineSmall" style={styles.statNumber}>
+                {family?.currentStreak ?? 0}
+              </Text>
+              <Text variant="bodySmall" style={styles.statLabel}>
+                Day Streak
+              </Text>
+            </Card.Content>
+          </Card>
+        </Animated.View>
+
         {/* Active Period */}
         {activePeriod && (
           <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.section}>
@@ -77,6 +107,26 @@ export default function ParentHomeScreen() {
               Current Period
             </Text>
             <PeriodSummary period={activePeriod} />
+          </Animated.View>
+        )}
+
+        {/* Pending Redemptions */}
+        {pendingRedemptions > 0 && (
+          <Animated.View entering={FadeInUp.delay(250).duration(400)}>
+            <AnimatedPressable
+              onPress={() => router.push('/(parent)/rewards/history')}
+              haptic="light"
+            >
+              <Card style={styles.pendingRedemptionCard}>
+                <Card.Content style={styles.pendingRedemptionContent}>
+                  <Icon source="gift-outline" size={24} color={Colors.neutral} />
+                  <Text variant="bodyMedium" style={styles.pendingRedemptionText}>
+                    {pendingRedemptions} pending {pendingRedemptions === 1 ? 'redemption' : 'redemptions'} to review
+                  </Text>
+                  <Icon source="chevron-right" size={20} color={Colors.textSecondary} />
+                </Card.Content>
+              </Card>
+            </AnimatedPressable>
           </Animated.View>
         )}
 
@@ -101,6 +151,24 @@ export default function ParentHomeScreen() {
               style={styles.actionButton}
             >
               Review ({pendingCount})
+            </Button>
+          </View>
+          <View style={styles.actionsRow}>
+            <Button
+              mode="outlined"
+              icon="gift"
+              onPress={() => router.push('/(parent)/rewards')}
+              style={styles.actionButton}
+            >
+              Rewards
+            </Button>
+            <Button
+              mode="outlined"
+              icon="chart-line"
+              onPress={() => router.push('/(parent)/analytics')}
+              style={styles.actionButton}
+            >
+              Analytics
             </Button>
           </View>
         </Animated.View>
@@ -128,7 +196,7 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     gap: Layout.padding.md,
-    marginBottom: Layout.padding.lg,
+    marginBottom: Layout.padding.md,
   },
   statCardWrapper: {
     flex: 1,
@@ -156,9 +224,23 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: Layout.padding.sm,
   },
+  pendingRedemptionCard: {
+    backgroundColor: Colors.neutralContainer,
+    marginBottom: Layout.padding.md,
+  },
+  pendingRedemptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.padding.sm,
+  },
+  pendingRedemptionText: {
+    flex: 1,
+    color: Colors.text,
+  },
   actionsRow: {
     flexDirection: 'row',
     gap: Layout.padding.md,
+    marginBottom: Layout.padding.sm,
   },
   actionButton: {
     flex: 1,

@@ -4,6 +4,14 @@ import * as admin from 'firebase-admin';
 admin.initializeApp();
 const db = admin.firestore();
 
+// ── Streak Milestones (must match client-side STREAK_MILESTONES) ────
+const STREAK_MILESTONES = [
+  { days: 3, bonusStars: 2 },
+  { days: 7, bonusStars: 5 },
+  { days: 14, bonusStars: 10 },
+  { days: 30, bonusStars: 25 },
+];
+
 /**
  * Scheduled function that runs daily to check for periods that need to be
  * auto-rolled (completed and a new one started).
@@ -39,16 +47,18 @@ export const autoRollPeriods = functions.pubsub
 
         if (period.endDate.toMillis() < now.toMillis()) {
           // Calculate outcome
-          const budget = period.starBudget || 1;
-          const earnedPercent = (period.starsEarned / budget) * 100;
           let outcome: string;
-
-          if (earnedPercent >= period.thresholds.rewardPercent) {
-            outcome = 'reward';
-          } else if (earnedPercent < period.thresholds.penaltyPercent) {
-            outcome = 'penalty';
-          } else {
+          if (period.starBudget === 0) {
             outcome = 'neutral';
+          } else {
+            const earnedPercent = (period.starsEarned / period.starBudget) * 100;
+            if (earnedPercent >= period.thresholds.rewardPercent) {
+              outcome = 'reward';
+            } else if (earnedPercent < period.thresholds.penaltyPercent) {
+              outcome = 'penalty';
+            } else {
+              outcome = 'neutral';
+            }
           }
 
           // Complete the period
@@ -72,30 +82,48 @@ export const autoRollPeriods = functions.pubsub
 
           let newEnd: Date;
           switch (settings.periodType) {
-            case 'biweekly':
+            case 'biweekly': {
+              // Align to configured start day
+              const dayOfWeek = newStart.getDay();
+              const startDay = settings.periodStartDay ?? 1;
+              const diff = (dayOfWeek - startDay + 7) % 7;
+              const alignedStart = new Date(newStart);
+              alignedStart.setDate(alignedStart.getDate() - diff);
+              newStart.setTime(alignedStart.getTime());
               newEnd = new Date(newStart);
               newEnd.setDate(newEnd.getDate() + 13);
               break;
-            case 'monthly':
-              newEnd = new Date(newStart);
-              newEnd.setMonth(newEnd.getMonth() + 1);
-              newEnd.setDate(newEnd.getDate() - 1);
+            }
+            case 'monthly': {
+              // Use first/last of month to avoid overflow
+              newStart.setDate(1);
+              newEnd = new Date(newStart.getFullYear(), newStart.getMonth() + 1, 0);
               break;
+            }
             case 'custom':
               newEnd = new Date(newStart);
               newEnd.setDate(newEnd.getDate() + (settings.customPeriodDays || 7) - 1);
               break;
-            default: // weekly
+            default: { // weekly
+              // Align to configured start day
+              const dayOfWeek = newStart.getDay();
+              const startDay = settings.periodStartDay ?? 1;
+              const diff = (dayOfWeek - startDay + 7) % 7;
+              const alignedStart = new Date(newStart);
+              alignedStart.setDate(alignedStart.getDate() - diff);
+              newStart.setTime(alignedStart.getTime());
               newEnd = new Date(newStart);
               newEnd.setDate(newEnd.getDate() + 6);
+            }
           }
           newEnd.setHours(23, 59, 59, 999);
 
-          // Simple budget calculation for cloud function
+          // Calculate days by counting each day in the interval (inclusive)
           let starBudget = 0;
-          const daysInPeriod = Math.ceil(
-            (newEnd.getTime() - newStart.getTime()) / (1000 * 60 * 60 * 24),
-          ) + 1;
+          const msPerDay = 1000 * 60 * 60 * 24;
+          const startMs = newStart.getTime();
+          const endMs = new Date(newEnd.getFullYear(), newEnd.getMonth(), newEnd.getDate()).getTime();
+          const daysInPeriod = Math.round((endMs - startMs) / msPerDay) + 1;
 
           for (const taskDoc of tasksSnap.docs) {
             const task = taskDoc.data();
@@ -142,15 +170,18 @@ export const autoRollPeriods = functions.pubsub
   });
 
 /**
- * When a completion is updated (approved/rejected), recalculate the period's
- * star counts from the source of truth (all completions).
+ * When a completion is written (created or updated), recalculate the period's
+ * star counts and handle star balance, streaks, and badges.
  */
 export const onCompletionWrite = functions.firestore
   .document('families/{familyId}/periods/{periodId}/completions/{completionId}')
   .onWrite(async (change, context) => {
     const { familyId, periodId } = context.params;
 
-    // Get all completions for this period
+    const before = change.before.exists ? change.before.data() : null;
+    const after = change.after.exists ? change.after.data() : null;
+
+    // Get all completions for this period to recalculate totals
     const completionsSnap = await db
       .collection('families')
       .doc(familyId)
@@ -178,4 +209,333 @@ export const onCompletionWrite = functions.firestore
       .collection('periods')
       .doc(periodId)
       .update({ starsEarned, starsPending });
+
+    // Handle status transitions
+    const wasApproved = before?.status !== 'approved' && after?.status === 'approved';
+    const wasRejectedAfterApproval = before?.status === 'approved' && after?.status === 'rejected';
+
+    if (wasApproved && after) {
+      // Get family settings for bonus mechanics
+      const familyDoc = await db.collection('families').doc(familyId).get();
+      const family = familyDoc.data();
+      if (!family) return;
+
+      const settings = family.settings;
+      let bonusStars = 0;
+
+      // On-time bonus
+      if (settings?.onTimeBonusEnabled && after.onTimeBonus) {
+        bonusStars += settings.onTimeBonusStars || 1;
+      }
+
+      // Award bonus stars if any
+      if (bonusStars > 0) {
+        await db.collection('families').doc(familyId).update({
+          starBalance: admin.firestore.FieldValue.increment(bonusStars),
+          lifetimeStarsEarned: admin.firestore.FieldValue.increment(bonusStars),
+        });
+      }
+
+      // Check for perfect day bonus
+      if (settings?.perfectDayBonusEnabled) {
+        await checkPerfectDayBonus(familyId, periodId, after, settings);
+      }
+
+      // Check for streak updates
+      await updateStreak(familyId, periodId, family);
+
+      // Check for badge awards
+      await checkBadges(familyId, family);
+    }
+
+    // If an approval is reversed, deduct stars
+    if (wasRejectedAfterApproval && before) {
+      await db.collection('families').doc(familyId).update({
+        starBalance: admin.firestore.FieldValue.increment(-before.taskStarValue),
+        lifetimeStarsEarned: admin.firestore.FieldValue.increment(-before.taskStarValue),
+      });
+    }
   });
+
+/**
+ * Check if all tasks for today are completed and award perfect day bonus.
+ */
+async function checkPerfectDayBonus(
+  familyId: string,
+  periodId: string,
+  completion: FirebaseFirestore.DocumentData,
+  settings: FirebaseFirestore.DocumentData,
+) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = formatDate(today);
+
+  // Get all tasks
+  const tasksSnap = await db
+    .collection('families')
+    .doc(familyId)
+    .collection('tasks')
+    .where('isActive', '==', true)
+    .get();
+
+  // Get today's applicable tasks
+  const dayOfWeek = today.getDay();
+  const todayTasks = tasksSnap.docs.filter((doc) => {
+    const task = doc.data();
+    if (task.recurrence.type === 'daily') return true;
+    if (task.recurrence.type === 'specific_days' && task.recurrence.days?.includes(dayOfWeek)) return true;
+    return false;
+  });
+
+  if (todayTasks.length === 0) return;
+
+  // Get all completions for today
+  const completionsSnap = await db
+    .collection('families')
+    .doc(familyId)
+    .collection('periods')
+    .doc(periodId)
+    .collection('completions')
+    .get();
+
+  const todayApproved = new Set<string>();
+  for (const doc of completionsSnap.docs) {
+    const c = doc.data();
+    if (c.status === 'approved') {
+      // Check if this completion is for today using the ID format: taskId_yyyy-MM-dd
+      const parts = doc.id.split('_');
+      const dateStr = parts[parts.length - 1];
+      if (dateStr === todayStr) {
+        todayApproved.add(c.taskId);
+      }
+    }
+  }
+
+  // Check if all today's tasks are approved
+  const allComplete = todayTasks.every((doc) => todayApproved.has(doc.id));
+
+  if (allComplete) {
+    const bonus = settings.perfectDayBonusStars || 3;
+    await db.collection('families').doc(familyId).update({
+      starBalance: admin.firestore.FieldValue.increment(bonus),
+      lifetimeStarsEarned: admin.firestore.FieldValue.increment(bonus),
+    });
+
+    functions.logger.info(`Perfect day bonus awarded for family ${familyId}`, { bonus });
+  }
+}
+
+/**
+ * Update streak tracking when a completion is approved.
+ */
+async function updateStreak(
+  familyId: string,
+  periodId: string,
+  family: FirebaseFirestore.DocumentData,
+) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = formatDate(today);
+
+  // If already updated for today, skip
+  if (family.lastStreakDate === todayStr) return;
+
+  // Get all tasks active today
+  const dayOfWeek = today.getDay();
+  const tasksSnap = await db
+    .collection('families')
+    .doc(familyId)
+    .collection('tasks')
+    .where('isActive', '==', true)
+    .get();
+
+  const todayTasks = tasksSnap.docs.filter((doc) => {
+    const task = doc.data();
+    if (task.recurrence.type === 'daily') return true;
+    if (task.recurrence.type === 'specific_days' && task.recurrence.days?.includes(dayOfWeek)) return true;
+    return false;
+  });
+
+  if (todayTasks.length === 0) return;
+
+  // Get today's completions
+  const completionsSnap = await db
+    .collection('families')
+    .doc(familyId)
+    .collection('periods')
+    .doc(periodId)
+    .collection('completions')
+    .get();
+
+  const todayApproved = new Set<string>();
+  for (const doc of completionsSnap.docs) {
+    const c = doc.data();
+    if (c.status === 'approved') {
+      const parts = doc.id.split('_');
+      const dateStr = parts[parts.length - 1];
+      if (dateStr === todayStr) {
+        todayApproved.add(c.taskId);
+      }
+    }
+  }
+
+  const allComplete = todayTasks.every((doc) => todayApproved.has(doc.id));
+  if (!allComplete) return;
+
+  // All tasks for today are approved - update streak
+  const currentStreak = (family.currentStreak || 0) + 1;
+
+  // Check if yesterday was a streak day (for continuity)
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = formatDate(yesterday);
+
+  let newStreak = currentStreak;
+  if (family.lastStreakDate && family.lastStreakDate !== yesterdayStr) {
+    // Streak was broken - check for freeze
+    const freezeSnap = await db
+      .collection('families')
+      .doc(familyId)
+      .collection('streakFreezes')
+      .where('date', '==', family.lastStreakDate)
+      .get();
+
+    if (freezeSnap.empty) {
+      // No freeze found, reset streak
+      newStreak = 1;
+    }
+  }
+
+  const update: Record<string, unknown> = {
+    currentStreak: newStreak,
+    bestStreak: Math.max(newStreak, family.bestStreak || 0),
+    lastStreakDate: todayStr,
+  };
+
+  await db.collection('families').doc(familyId).update(update);
+
+  // Check for streak milestone bonuses
+  for (const milestone of STREAK_MILESTONES) {
+    const previousStreak = family.currentStreak || 0;
+    if (previousStreak < milestone.days && newStreak >= milestone.days) {
+      // Crossed a milestone - award bonus stars
+      await db.collection('families').doc(familyId).update({
+        starBalance: admin.firestore.FieldValue.increment(milestone.bonusStars),
+        lifetimeStarsEarned: admin.firestore.FieldValue.increment(milestone.bonusStars),
+      });
+
+      functions.logger.info(`Streak milestone ${milestone.days} reached for family ${familyId}`, {
+        bonusStars: milestone.bonusStars,
+        newStreak,
+      });
+    }
+  }
+}
+
+/**
+ * Check and award badges based on current family state.
+ */
+async function checkBadges(familyId: string, family: FirebaseFirestore.DocumentData) {
+  const lifetimeStars = family.lifetimeStarsEarned || 0;
+  const currentStreak = family.currentStreak || 0;
+
+  // Get currently earned badges
+  const earnedSnap = await db
+    .collection('families')
+    .doc(familyId)
+    .collection('earnedBadges')
+    .get();
+  const earnedIds = new Set(earnedSnap.docs.map((d) => d.data().badgeId));
+
+  const badgesToAward: string[] = [];
+
+  // Milestone badges - star counts
+  if (lifetimeStars >= 1 && !earnedIds.has('first_star')) badgesToAward.push('first_star');
+  if (lifetimeStars >= 10 && !earnedIds.has('star_collector_10')) badgesToAward.push('star_collector_10');
+  if (lifetimeStars >= 50 && !earnedIds.has('star_collector_50')) badgesToAward.push('star_collector_50');
+  if (lifetimeStars >= 100 && !earnedIds.has('star_collector_100')) badgesToAward.push('star_collector_100');
+  if (lifetimeStars >= 500 && !earnedIds.has('star_collector_500')) badgesToAward.push('star_collector_500');
+
+  // Milestone badges - streaks
+  if (currentStreak >= 3 && !earnedIds.has('streak_3')) badgesToAward.push('streak_3');
+  if (currentStreak >= 7 && !earnedIds.has('streak_7')) badgesToAward.push('streak_7');
+  if (currentStreak >= 14 && !earnedIds.has('streak_14')) badgesToAward.push('streak_14');
+  if (currentStreak >= 30 && !earnedIds.has('streak_30')) badgesToAward.push('streak_30');
+
+  // Check if child has redeemed a reward
+  const redemptionsSnap = await db
+    .collection('families')
+    .doc(familyId)
+    .collection('redemptions')
+    .limit(1)
+    .get();
+  if (!redemptionsSnap.empty && !earnedIds.has('reward_shopper')) {
+    badgesToAward.push('reward_shopper');
+  }
+
+  // Award badges
+  const batch = db.batch();
+  for (const badgeId of badgesToAward) {
+    const ref = db.collection('families').doc(familyId).collection('earnedBadges').doc();
+    batch.set(ref, {
+      badgeId,
+      earnedAt: admin.firestore.Timestamp.now(),
+    });
+  }
+
+  if (badgesToAward.length > 0) {
+    await batch.commit();
+    functions.logger.info(`Awarded ${badgesToAward.length} badges for family ${familyId}`, {
+      badges: badgesToAward,
+    });
+  }
+}
+
+/**
+ * Daily streak check - runs at end of day to reset broken streaks.
+ */
+export const dailyStreakCheck = functions.pubsub
+  .schedule('0 23 * * *')
+  .timeZone('UTC')
+  .onRun(async () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = formatDate(today);
+
+    const familiesSnap = await db.collection('families').get();
+
+    for (const familyDoc of familiesSnap.docs) {
+      const family = familyDoc.data();
+      const familyId = familyDoc.id;
+
+      // Skip if no active streak or already updated today
+      if (!family.currentStreak || family.currentStreak === 0) continue;
+      if (family.lastStreakDate === todayStr) continue;
+
+      // Check for a streak freeze for today
+      const freezeSnap = await db
+        .collection('families')
+        .doc(familyId)
+        .collection('streakFreezes')
+        .where('date', '==', todayStr)
+        .get();
+
+      if (freezeSnap.empty) {
+        // No freeze and day wasn't completed - reset streak
+        await db.collection('families').doc(familyId).update({
+          currentStreak: 0,
+        });
+        functions.logger.info(`Streak reset for family ${familyId}`);
+      }
+    }
+  });
+
+/**
+ * Format a date as "yyyy-MM-dd" for consistent date string comparison.
+ */
+function formatDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}

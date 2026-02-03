@@ -23,7 +23,7 @@ export default function ChildLayout() {
           paddingBottom: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 14,
+          fontSize: 12,
           fontWeight: 'bold',
         },
         headerStyle: { backgroundColor: Colors.secondaryContainer },
@@ -59,9 +59,36 @@ export default function ChildLayout() {
       <Tabs.Screen
         name="stars"
         options={{
-          title: 'My Stars',
+          title: 'Stars',
           tabBarIcon: ({ color, size }) => (
             <Icon source="star-shooting" size={size + 4} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="shop"
+        options={{
+          title: 'Shop',
+          tabBarIcon: ({ color, size }) => (
+            <Icon source="gift" size={size + 4} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="badges"
+        options={{
+          title: 'Badges',
+          tabBarIcon: ({ color, size }) => (
+            <Icon source="shield-star" size={size + 4} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Me',
+          tabBarIcon: ({ color, size }) => (
+            <Icon source="account-circle" size={size + 4} color={color} />
           ),
         }}
       />

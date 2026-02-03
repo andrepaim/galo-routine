@@ -33,9 +33,22 @@ export function determinePeriodOutcome(
  * Get star progress data for UI display.
  */
 export function getStarProgress(period: Period): StarProgress {
-  const budget = period.starBudget || 1; // prevent division by zero
-  const earnedPercent = (period.starsEarned / budget) * 100;
-  const pendingPercent = (period.starsPending / budget) * 100;
+  // When there are no tasks (budget=0), treat as neutral zone
+  if (period.starBudget === 0) {
+    return {
+      earned: period.starsEarned,
+      pending: period.starsPending,
+      budget: 0,
+      earnedPercent: 0,
+      pendingPercent: 0,
+      isRewardZone: false,
+      isPenaltyZone: false,
+      isNeutralZone: true,
+    };
+  }
+
+  const earnedPercent = (period.starsEarned / period.starBudget) * 100;
+  const pendingPercent = (period.starsPending / period.starBudget) * 100;
 
   return {
     earned: period.starsEarned,

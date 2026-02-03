@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Text, SegmentedButtons, Card, Switch } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
@@ -28,6 +28,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { familyId, family, logout } = useAuthStore();
 
+  // Existing settings
   const [rewardThreshold, setRewardThreshold] = useState(80);
   const [penaltyThreshold, setPenaltyThreshold] = useState(50);
   const [rewardDesc, setRewardDesc] = useState('');
@@ -39,8 +40,23 @@ export default function SettingsScreen() {
   const [newPin, setNewPin] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Bonus star settings
+  const [onTimeBonusEnabled, setOnTimeBonusEnabled] = useState(true);
+  const [onTimeBonusStars, setOnTimeBonusStars] = useState(1);
+  const [perfectDayBonusEnabled, setPerfectDayBonusEnabled] = useState(true);
+  const [perfectDayBonusStars, setPerfectDayBonusStars] = useState(3);
+  const [earlyFinishBonusEnabled, setEarlyFinishBonusEnabled] = useState(false);
+  const [earlyFinishBonusStars, setEarlyFinishBonusStars] = useState(2);
+  const [earlyFinishCutoff, setEarlyFinishCutoff] = useState('20:00');
+
+  // Streak settings
+  const [streakFreezeCost, setStreakFreezeCost] = useState(10);
+  const [maxFreezes, setMaxFreezes] = useState(2);
+
+  const initializedRef = useRef(false);
   useEffect(() => {
-    if (family?.settings) {
+    if (family?.settings && !initializedRef.current) {
+      initializedRef.current = true;
       setRewardThreshold(family.settings.rewardThresholdPercent);
       setPenaltyThreshold(family.settings.penaltyThresholdPercent);
       setRewardDesc(family.settings.rewardDescription);
@@ -51,6 +67,17 @@ export default function SettingsScreen() {
       if (family.settings.customPeriodDays) {
         setCustomDays(String(family.settings.customPeriodDays));
       }
+      // Bonus settings
+      if (family.settings.onTimeBonusEnabled !== undefined) setOnTimeBonusEnabled(family.settings.onTimeBonusEnabled);
+      if (family.settings.onTimeBonusStars !== undefined) setOnTimeBonusStars(family.settings.onTimeBonusStars);
+      if (family.settings.perfectDayBonusEnabled !== undefined) setPerfectDayBonusEnabled(family.settings.perfectDayBonusEnabled);
+      if (family.settings.perfectDayBonusStars !== undefined) setPerfectDayBonusStars(family.settings.perfectDayBonusStars);
+      if (family.settings.earlyFinishBonusEnabled !== undefined) setEarlyFinishBonusEnabled(family.settings.earlyFinishBonusEnabled);
+      if (family.settings.earlyFinishBonusStars !== undefined) setEarlyFinishBonusStars(family.settings.earlyFinishBonusStars);
+      if (family.settings.earlyFinishCutoff) setEarlyFinishCutoff(family.settings.earlyFinishCutoff);
+      // Streak settings
+      if (family.settings.streakFreezeCost !== undefined) setStreakFreezeCost(family.settings.streakFreezeCost);
+      if (family.settings.maxStreakFreezesPerPeriod !== undefined) setMaxFreezes(family.settings.maxStreakFreezesPerPeriod);
     }
   }, [family]);
 
@@ -67,6 +94,17 @@ export default function SettingsScreen() {
         periodStartDay,
         autoRollPeriods: autoRoll,
         customPeriodDays: periodType === 'custom' ? parseInt(customDays, 10) || 7 : undefined,
+        // Bonus settings
+        onTimeBonusEnabled,
+        onTimeBonusStars,
+        perfectDayBonusEnabled,
+        perfectDayBonusStars,
+        earlyFinishBonusEnabled,
+        earlyFinishBonusStars,
+        earlyFinishCutoff,
+        // Streak settings
+        streakFreezeCost,
+        maxStreakFreezesPerPeriod: maxFreezes,
       });
 
       if (newPin.length >= 4) {
@@ -237,8 +275,149 @@ export default function SettingsScreen() {
           </Card>
         </Animated.View>
 
-        {/* Child PIN Section */}
+        {/* Bonus Star Settings */}
         <Animated.View entering={FadeInUp.delay(300).duration(400)}>
+          <Card style={styles.sectionCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Bonus Stars
+              </Text>
+
+              <View style={styles.switchRow}>
+                <View style={styles.switchLabel}>
+                  <Text variant="bodyMedium">On-Time Bonus</Text>
+                  <Text variant="bodySmall" style={styles.switchDescription}>
+                    +{onTimeBonusStars} star when task completed within scheduled time
+                  </Text>
+                </View>
+                <Switch value={onTimeBonusEnabled} onValueChange={setOnTimeBonusEnabled} />
+              </View>
+              {onTimeBonusEnabled && (
+                <View style={styles.bonusValueRow}>
+                  <Text variant="bodySmall" style={styles.sliderLabel}>
+                    Bonus: {onTimeBonusStars} {onTimeBonusStars === 1 ? 'star' : 'stars'}
+                  </Text>
+                  <Slider
+                    value={onTimeBonusStars}
+                    onValueChange={(v) => setOnTimeBonusStars(Math.round(v))}
+                    minimumValue={1}
+                    maximumValue={5}
+                    step={1}
+                    minimumTrackTintColor={Colors.starFilled}
+                    maximumTrackTintColor={Colors.surfaceVariant}
+                    thumbTintColor={Colors.starFilled}
+                    style={styles.bonusSlider}
+                  />
+                </View>
+              )}
+
+              <View style={styles.switchRow}>
+                <View style={styles.switchLabel}>
+                  <Text variant="bodyMedium">Perfect Day Bonus</Text>
+                  <Text variant="bodySmall" style={styles.switchDescription}>
+                    +{perfectDayBonusStars} stars when all daily tasks approved
+                  </Text>
+                </View>
+                <Switch value={perfectDayBonusEnabled} onValueChange={setPerfectDayBonusEnabled} />
+              </View>
+              {perfectDayBonusEnabled && (
+                <View style={styles.bonusValueRow}>
+                  <Text variant="bodySmall" style={styles.sliderLabel}>
+                    Bonus: {perfectDayBonusStars} stars
+                  </Text>
+                  <Slider
+                    value={perfectDayBonusStars}
+                    onValueChange={(v) => setPerfectDayBonusStars(Math.round(v))}
+                    minimumValue={1}
+                    maximumValue={10}
+                    step={1}
+                    minimumTrackTintColor={Colors.starFilled}
+                    maximumTrackTintColor={Colors.surfaceVariant}
+                    thumbTintColor={Colors.starFilled}
+                    style={styles.bonusSlider}
+                  />
+                </View>
+              )}
+
+              <View style={styles.switchRow}>
+                <View style={styles.switchLabel}>
+                  <Text variant="bodyMedium">Early Finish Bonus</Text>
+                  <Text variant="bodySmall" style={styles.switchDescription}>
+                    +{earlyFinishBonusStars} stars when all tasks done before {earlyFinishCutoff}
+                  </Text>
+                </View>
+                <Switch value={earlyFinishBonusEnabled} onValueChange={setEarlyFinishBonusEnabled} />
+              </View>
+              {earlyFinishBonusEnabled && (
+                <View style={styles.bonusValueRow}>
+                  <Text variant="bodySmall" style={styles.sliderLabel}>
+                    Bonus: {earlyFinishBonusStars} stars
+                  </Text>
+                  <Slider
+                    value={earlyFinishBonusStars}
+                    onValueChange={(v) => setEarlyFinishBonusStars(Math.round(v))}
+                    minimumValue={1}
+                    maximumValue={10}
+                    step={1}
+                    minimumTrackTintColor={Colors.starFilled}
+                    maximumTrackTintColor={Colors.surfaceVariant}
+                    thumbTintColor={Colors.starFilled}
+                    style={styles.bonusSlider}
+                  />
+                  <TextInput
+                    label="Cutoff Time (HH:mm)"
+                    value={earlyFinishCutoff}
+                    onChangeText={setEarlyFinishCutoff}
+                    mode="outlined"
+                    style={styles.input}
+                  />
+                </View>
+              )}
+            </Card.Content>
+          </Card>
+        </Animated.View>
+
+        {/* Streak Settings */}
+        <Animated.View entering={FadeInUp.delay(350).duration(400)}>
+          <Card style={styles.sectionCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Streak Settings
+              </Text>
+              <Text variant="bodySmall" style={styles.sliderLabel}>
+                Streak Freeze Cost: {streakFreezeCost} stars
+              </Text>
+              <Slider
+                value={streakFreezeCost}
+                onValueChange={(v) => setStreakFreezeCost(Math.round(v))}
+                minimumValue={5}
+                maximumValue={50}
+                step={5}
+                minimumTrackTintColor={Colors.streak}
+                maximumTrackTintColor={Colors.surfaceVariant}
+                thumbTintColor={Colors.streak}
+                style={styles.slider}
+              />
+              <Text variant="bodySmall" style={styles.sliderLabel}>
+                Max Freezes Per Period: {maxFreezes}
+              </Text>
+              <Slider
+                value={maxFreezes}
+                onValueChange={(v) => setMaxFreezes(Math.round(v))}
+                minimumValue={0}
+                maximumValue={5}
+                step={1}
+                minimumTrackTintColor={Colors.streak}
+                maximumTrackTintColor={Colors.surfaceVariant}
+                thumbTintColor={Colors.streak}
+                style={styles.slider}
+              />
+            </Card.Content>
+          </Card>
+        </Animated.View>
+
+        {/* Child PIN Section */}
+        <Animated.View entering={FadeInUp.delay(400).duration(400)}>
           <Card style={styles.sectionCard}>
             <Card.Content>
               <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -268,7 +447,7 @@ export default function SettingsScreen() {
         </Button>
 
         {/* Account Section */}
-        <Animated.View entering={FadeInUp.delay(400).duration(400)}>
+        <Animated.View entering={FadeInUp.delay(500).duration(400)}>
           <Card style={styles.sectionCard}>
             <Card.Content style={styles.accountContent}>
               <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -360,6 +539,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: Layout.padding.sm,
+  },
+  switchLabel: {
+    flex: 1,
+    marginRight: Layout.padding.md,
+  },
+  switchDescription: {
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  bonusValueRow: {
+    paddingLeft: Layout.padding.md,
+    marginBottom: Layout.padding.sm,
+  },
+  bonusSlider: {
+    height: 32,
   },
   saveButton: {
     marginBottom: Layout.padding.md,

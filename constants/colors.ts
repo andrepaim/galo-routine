@@ -52,4 +52,34 @@ export const Colors = {
   error: '#D32F2F',
   white: '#FFFFFF',
   black: '#000000',
+
+  // Task Categories (Feature 8)
+  categoryHygiene: '#03A9F4',
+  categoryHygieneContainer: '#E1F5FE',
+  categorySchool: '#9C27B0',
+  categorySchoolContainer: '#F3E5F5',
+  categoryStudy: '#3F51B5',
+  categoryStudyContainer: '#E8EAF6',
+  categoryChores: '#FF9800',
+  categoryChoresContainer: '#FFF3E0',
+  categoryMeals: '#4CAF50',
+  categoryMealsContainer: '#E8F5E9',
+  categoryExercise: '#F44336',
+  categoryExerciseContainer: '#FFEBEE',
+  categoryExtracurricular: '#009688',
+  categoryExtracurricularContainer: '#E0F2F1',
+  categoryRest: '#795548',
+  categoryRestContainer: '#EFEBE9',
+  categoryOther: '#9E9E9E',
+  categoryOtherContainer: '#F5F5F5',
+
+  // Streak (Feature 6)
+  streak: '#FF6D00',
+  streakContainer: '#FFF3E0',
+
+  // Badges (Feature 7)
+  badgeGold: '#FFD700',
+  badgeSilver: '#C0C0C0',
+  badgeBronze: '#CD7F32',
+  badgeLocked: '#E0E0E0',
 } as const;
