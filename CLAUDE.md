@@ -80,9 +80,30 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
 | `lib/firebase/` | config, auth, firestore |
 | `constants/` | colors, layout, defaults (categories, badges, templates, milestones), theme |
 
-## Feature status (2026-02-02)
+## Feature status (2026-02-05)
 
-### Code-complete (not runtime-tested)
+### Web Testing Setup
+- **Expo Web** running at localhost:8081 (`npx expo start --web`)
+- **Puppeteer** for automated browser testing (scripts in `scripts/`)
+- **Test screenshots** saved to `test-screenshots/`
+- Start expo in screen: `screen -dmS expo bash -c 'cd /root/star-routine && npx expo start --web --port 8081'`
+
+### Bugs Fixed (2026-02-05)
+1. **expo-secure-store web compatibility** — Created `lib/utils/storage.ts` for cross-platform storage (SecureStore on native, AsyncStorage on web)
+2. **Login page navigation** — Replaced Button with Link component for "Create Family Account" navigation
+
+### Runtime-tested on Web (2026-02-05)
+- ✅ Auth flow (register, login)
+- ✅ Parent Dashboard
+- ✅ Task Management page
+- ✅ Rewards System
+- ✅ Approvals page
+- ✅ Goals page
+- ✅ Analytics page
+- ✅ Settings page
+- ✅ Periods page
+
+### Code-complete (not runtime-tested on native)
 - **Phase 2**: Star system & thresholds (animated rings, counters, cards)
 - **Feature 1**: Rewards CRUD & shop (parent CRUD, child shop with redemptions)
 - **Feature 2**: Timeline view & focus mode (components created, integrated in child tasks)

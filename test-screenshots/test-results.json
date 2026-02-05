@@ -1,0 +1,11 @@
+{
+  "passed": [
+    "App Load",
+    "Auth Screen Visible",
+    "No Console Errors"
+  ],
+  "failed": [],
+  "screenshots": [
+    "/root/star-routine/test-screenshots/01-initial-load.png"
+  ]
+}

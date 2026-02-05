@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { TextInput, Button, Text, Icon } from 'react-native-paper';
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Layout } from '../../constants';
 import { useAuthStore } from '../../lib/stores';
@@ -117,13 +117,11 @@ export default function LoginScreen() {
             Log In as Parent
           </Button>
 
-          <Button
-            mode="text"
-            onPress={() => router.push('/(auth)/register')}
-            style={styles.link}
-          >
-            Create Family Account
-          </Button>
+          <Link href="/(auth)/register" asChild>
+            <Pressable style={styles.link}>
+              <Text style={styles.linkText}>Create Family Account</Text>
+            </Pressable>
+          </Link>
         </View>
 
         <View style={styles.childSection}>
@@ -179,6 +177,13 @@ const styles = StyleSheet.create({
   },
   link: {
     marginTop: Layout.padding.xs,
+    alignSelf: 'center',
+    paddingVertical: Layout.padding.sm,
+  },
+  linkText: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontWeight: '500',
   },
   childSection: {
     marginTop: Layout.padding.xl,

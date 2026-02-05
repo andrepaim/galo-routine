@@ -1,0 +1,54 @@
+{
+  "tests": [
+    {
+      "status": "pass",
+      "message": "App title is correct: \"Star Routine\""
+    },
+    {
+      "status": "pass",
+      "message": "Auth: Email field label found"
+    },
+    {
+      "status": "pass",
+      "message": "Auth: Password field label found"
+    },
+    {
+      "status": "pass",
+      "message": "Auth: Login button found"
+    },
+    {
+      "status": "pass",
+      "message": "Auth: Create account link found"
+    },
+    {
+      "status": "pass",
+      "message": "Auth: Child login option found"
+    },
+    {
+      "status": "pass",
+      "message": "Clicked Create Family Account button"
+    },
+    {
+      "status": "pass",
+      "message": "Register screen content visible"
+    },
+    {
+      "status": "pass",
+      "message": "Clicked \"I'm the Child\" button"
+    },
+    {
+      "status": "pass",
+      "message": "Child login screen shows PIN entry"
+    },
+    {
+      "status": "pass",
+      "message": "No JavaScript console errors"
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "screenshots": [],
+  "passed": 11,
+  "failed": 0,
+  "warns": 0
+}

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import * as Storage from '../utils/storage';
 import type { UserRole, AuthState, RegisterFormData, Family } from '../types';
 import {
   onAuthChange,
@@ -36,8 +36,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   register: async (data: RegisterFormData) => {
     const familyId = await registerParent(data);
-    await SecureStore.setItemAsync(ROLE_KEY, 'parent');
-    await SecureStore.setItemAsync(FAMILY_ID_KEY, familyId);
+    await Storage.setItem(ROLE_KEY, 'parent');
+    await Storage.setItem(FAMILY_ID_KEY, familyId);
     set({
       familyId,
       role: 'parent',
@@ -53,8 +53,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   logout: async () => {
     await firebaseSignOut();
-    await SecureStore.deleteItemAsync(ROLE_KEY);
-    await SecureStore.deleteItemAsync(FAMILY_ID_KEY);
+    await Storage.deleteItem(ROLE_KEY);
+    await Storage.deleteItem(FAMILY_ID_KEY);
     set({
       uid: null,
       email: null,
@@ -69,9 +69,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   setRole: async (role: UserRole) => {
     if (role) {
-      await SecureStore.setItemAsync(ROLE_KEY, role);
+      await Storage.setItem(ROLE_KEY, role);
     } else {
-      await SecureStore.deleteItemAsync(ROLE_KEY);
+      await Storage.deleteItem(ROLE_KEY);
     }
     set({ role });
   },
@@ -85,7 +85,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   initAuth: () => {
     const unsubscribe = onAuthChange(async (user) => {
       if (user) {
-        const storedRole = await SecureStore.getItemAsync(ROLE_KEY);
+        const storedRole = await Storage.getItem(ROLE_KEY);
         const familyId = user.uid;
         const family = await getFamilyDoc(familyId);
 

@@ -1,0 +1,87 @@
+{
+  "passed": 3,
+  "failed": 0,
+  "warnings": 11,
+  "consoleLogs": [
+    {
+      "type": "warn",
+      "text": "\"shadow*\" style props are deprecated. Use \"boxShadow\"."
+    },
+    {
+      "type": "verbose",
+      "text": "[DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "Running application \"main\" with appParams:\n JSHandle@object \nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."
+    },
+    {
+      "type": "warn",
+      "text": "props.pointerEvents is deprecated. Use style.pointerEvents"
+    },
+    {
+      "type": "warn",
+      "text": "Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md"
+    },
+    {
+      "type": "warn",
+      "text": "\"shadow*\" style props are deprecated. Use \"boxShadow\"."
+    },
+    {
+      "type": "verbose",
+      "text": "[DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "Running application \"main\" with appParams:\n JSHandle@object \nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."
+    },
+    {
+      "type": "warn",
+      "text": "props.pointerEvents is deprecated. Use style.pointerEvents"
+    },
+    {
+      "type": "warn",
+      "text": "Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md"
+    },
+    {
+      "type": "warn",
+      "text": "\"shadow*\" style props are deprecated. Use \"boxShadow\"."
+    },
+    {
+      "type": "verbose",
+      "text": "[DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "Running application \"main\" with appParams:\n JSHandle@object \nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."
+    },
+    {
+      "type": "warn",
+      "text": "props.pointerEvents is deprecated. Use style.pointerEvents"
+    },
+    {
+      "type": "warn",
+      "text": "Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md"
+    },
+    {
+      "type": "warn",
+      "text": "\"shadow*\" style props are deprecated. Use \"boxShadow\"."
+    },
+    {
+      "type": "verbose",
+      "text": "[DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o"
+    }
+  ]
+}
