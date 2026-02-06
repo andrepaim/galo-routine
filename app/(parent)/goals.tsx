@@ -4,7 +4,7 @@ import { FAB, Text, TextInput, Button, Card } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore, useGoalStore } from '../../lib/stores';
 import { GoalCard } from '../../components/goals/GoalCard';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -49,10 +49,10 @@ export default function GoalsScreen() {
   };
 
   const handleDelete = (goalId: string, goalName: string) => {
-    Alert.alert('Delete Goal', `Delete "${goalName}"?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert('Excluir Meta', `Excluir "${goalName}"?`, [
+      { text: 'Cancelar', style: 'cancel' },
       {
-        text: 'Delete',
+        text: 'Excluir',
         style: 'destructive',
         onPress: () => familyId && removeGoal(familyId, goalId),
       },
@@ -68,7 +68,7 @@ export default function GoalsScreen() {
           <View>
             <Animated.View entering={FadeInUp.duration(400)} style={styles.lifetimeCard}>
               <Text variant="bodySmall" style={styles.lifetimeLabel}>
-                LIFETIME STARS EARNED
+                TOTAL DE ESTRELAS GANHAS
               </Text>
               <Text variant="headlineLarge" style={styles.lifetimeCount}>
                 {lifetimeStars}
@@ -80,50 +80,69 @@ export default function GoalsScreen() {
                 <Card style={styles.formCard}>
                   <Card.Content style={styles.formContent}>
                     <Text variant="titleMedium" style={styles.formTitle}>
-                      New Long-Term Goal
+                      Nova Meta de Longo Prazo
                     </Text>
                     <TextInput
-                      label="Goal Name"
+                      label="Nome da Meta"
                       value={name}
                       onChangeText={setName}
                       mode="outlined"
                       style={styles.input}
+                      textColor={ChildColors.textPrimary}
+                      outlineColor={ChildColors.cardBorder}
+                      activeOutlineColor={ChildColors.starGold}
                     />
                     <TextInput
-                      label="Description (optional)"
+                      label="Descrição (opcional)"
                       value={description}
                       onChangeText={setDescription}
                       mode="outlined"
                       multiline
                       style={styles.input}
+                      textColor={ChildColors.textPrimary}
+                      outlineColor={ChildColors.cardBorder}
+                      activeOutlineColor={ChildColors.starGold}
                     />
                     <TextInput
-                      label="Target Stars"
+                      label="Estrelas Necessárias"
                       value={targetStars}
                       onChangeText={(t) => setTargetStars(t.replace(/[^0-9]/g, ''))}
                       mode="outlined"
                       keyboardType="number-pad"
                       style={styles.input}
+                      textColor={ChildColors.textPrimary}
+                      outlineColor={ChildColors.cardBorder}
+                      activeOutlineColor={ChildColors.starGold}
                     />
                     <TextInput
-                      label="Reward Description"
+                      label="Recompensa"
                       value={rewardDescription}
                       onChangeText={setRewardDescription}
                       mode="outlined"
-                      placeholder="e.g., Trip to the soccer final"
+                      placeholder="ex: Ir ao jogo do Galo"
                       style={styles.input}
+                      textColor={ChildColors.textPrimary}
+                      outlineColor={ChildColors.cardBorder}
+                      activeOutlineColor={ChildColors.starGold}
                     />
                     <View style={styles.formActions}>
-                      <Button mode="outlined" onPress={() => setShowForm(false)}>
-                        Cancel
+                      <Button 
+                        mode="outlined" 
+                        onPress={() => setShowForm(false)}
+                        textColor={ChildColors.textSecondary}
+                        style={styles.cancelButton}
+                      >
+                        Cancelar
                       </Button>
                       <Button
                         mode="contained"
                         onPress={handleCreate}
                         loading={saving}
                         disabled={!name.trim() || saving}
+                        buttonColor={ChildColors.starGold}
+                        textColor={ChildColors.galoBlack}
                       >
-                        Create Goal
+                        Criar Meta
                       </Button>
                     </View>
                   </Card.Content>
@@ -144,8 +163,8 @@ export default function GoalsScreen() {
         ListEmptyComponent={
           <EmptyState
             icon="flag-checkered"
-            title="No Goals Yet"
-            description="Create long-term goals to motivate your child!"
+            title="Nenhuma Meta"
+            description="Crie metas de longo prazo para motivar seu filho!"
           />
         }
         contentContainerStyle={styles.list}
@@ -156,6 +175,7 @@ export default function GoalsScreen() {
           icon="plus"
           onPress={() => setShowForm(true)}
           style={styles.fab}
+          color={ChildColors.galoBlack}
         />
       )}
     </SafeAreaView>
@@ -165,50 +185,56 @@ export default function GoalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   list: {
-    padding: Layout.padding.md,
+    padding: 16,
   },
   lifetimeCard: {
     alignItems: 'center',
-    backgroundColor: Colors.primaryContainer,
-    borderRadius: Layout.radius.lg,
-    padding: Layout.padding.lg,
-    marginBottom: Layout.padding.lg,
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    padding: 24,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: ChildColors.starGold,
   },
   lifetimeLabel: {
-    color: Colors.textSecondary,
+    color: ChildColors.textSecondary,
     letterSpacing: 1,
   },
   lifetimeCount: {
     fontWeight: 'bold',
-    color: Colors.primaryDark,
+    color: ChildColors.starGold,
   },
   formCard: {
-    backgroundColor: Colors.surface,
-    marginBottom: Layout.padding.lg,
+    backgroundColor: ChildColors.cardBackground,
+    marginBottom: 24,
+    borderRadius: ChildSizes.cardRadius,
   },
   formContent: {
-    gap: Layout.padding.sm,
+    gap: 12,
   },
   formTitle: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   input: {
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
   },
   formActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: Layout.padding.md,
-    marginTop: Layout.padding.sm,
+    gap: 16,
+    marginTop: 8,
+  },
+  cancelButton: {
+    borderColor: ChildColors.cardBorder,
   },
   fab: {
     position: 'absolute',
-    right: Layout.padding.md,
-    bottom: Layout.padding.md,
-    backgroundColor: Colors.primary,
+    right: 16,
+    bottom: 16,
+    backgroundColor: ChildColors.starGold,
   },
 });

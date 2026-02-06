@@ -1,16 +1,17 @@
 import { Stack } from 'expo-router';
-import { Colors } from '../../../constants';
+import { ChildColors } from '../../../constants/childTheme';
 
 export default function PeriodsLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.primaryContainer },
-        headerTintColor: Colors.text,
+        headerStyle: { backgroundColor: ChildColors.galoBlack },
+        headerTintColor: ChildColors.textPrimary,
+        contentStyle: { backgroundColor: ChildColors.galoBlack },
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Current Period' }} />
-      <Stack.Screen name="history" options={{ title: 'Period History' }} />
+      <Stack.Screen name="index" options={{ title: 'Períodos' }} />
+      <Stack.Screen name="history" options={{ title: 'Histórico' }} />
     </Stack>
   );
 }

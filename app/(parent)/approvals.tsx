@@ -2,7 +2,7 @@ import React from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Colors, Layout } from '../../constants';
+import { ChildColors } from '../../constants/childTheme';
 import { useAuthStore, usePeriodStore, useCompletionStore } from '../../lib/stores';
 import { ApprovalCard } from '../../components/tasks/ApprovalCard';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -24,8 +24,8 @@ export default function ApprovalsScreen() {
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <EmptyState
           icon="check-all"
-          title="All Caught Up!"
-          description="No pending completions to review."
+          title="Tudo em Dia!"
+          description="Nenhuma tarefa pendente para revisar."
         />
       </SafeAreaView>
     );
@@ -64,9 +64,9 @@ export default function ApprovalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   list: {
-    padding: Layout.padding.md,
+    padding: 16,
   },
 });

@@ -3,8 +3,10 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, Icon, ProgressBar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format, subDays, startOfDay } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Colors, Layout, TASK_CATEGORIES, getCategoryById } from '../../constants';
+import { TASK_CATEGORIES, getCategoryById } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore, useCompletionStore, usePeriodStore, useTaskStore } from '../../lib/stores';
 import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { StreakDisplay } from '../../components/streaks/StreakDisplay';
@@ -19,7 +21,6 @@ export default function AnalyticsScreen() {
 
   const completedPeriods = periods.filter((p) => p.status === 'completed');
 
-  // Compute task completion rates
   const taskStats = useMemo(() => {
     const stats: Record<string, { name: string; total: number; approved: number; category?: string }> = {};
     for (const c of completions) {
@@ -37,7 +38,6 @@ export default function AnalyticsScreen() {
     });
   }, [completions, tasks]);
 
-  // Category breakdown
   const categoryStats = useMemo(() => {
     const stats: Record<string, { total: number; approved: number }> = {};
     for (const c of completions) {
@@ -52,7 +52,6 @@ export default function AnalyticsScreen() {
       .sort((a, b) => b.rate - a.rate);
   }, [completions, tasks]);
 
-  // Overall completion rate
   const overallRate = completions.length > 0
     ? completions.filter((c) => c.status === 'approved').length / completions.length
     : 0;
@@ -60,7 +59,6 @@ export default function AnalyticsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Overview */}
         <Animated.View entering={FadeInUp.duration(400)}>
           <Card style={styles.overviewCard}>
             <Card.Content style={styles.overviewContent}>
@@ -69,7 +67,7 @@ export default function AnalyticsScreen() {
                   {Math.round(overallRate * 100)}%
                 </Text>
                 <Text variant="bodySmall" style={styles.overviewLabel}>
-                  Completion Rate
+                  Taxa de Conclusão
                 </Text>
               </View>
               <View style={styles.overviewStat}>
@@ -85,7 +83,7 @@ export default function AnalyticsScreen() {
                     {Math.round(starProgress.earnedPercent)}%
                   </Text>
                   <Text variant="bodySmall" style={styles.overviewLabel}>
-                    Stars Earned
+                    Estrelas Ganhas
                   </Text>
                 </View>
               )}
@@ -93,10 +91,9 @@ export default function AnalyticsScreen() {
           </Card>
         </Animated.View>
 
-        {/* Category Breakdown */}
         <Animated.View entering={FadeInUp.delay(100).duration(400)}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Category Breakdown
+            Por Categoria
           </Text>
           <Card style={styles.card}>
             <Card.Content style={styles.categoryList}>
@@ -105,15 +102,15 @@ export default function AnalyticsScreen() {
                 return (
                   <View key={stat.id} style={styles.categoryRow}>
                     <View style={styles.categoryInfo}>
-                      <Icon source={cat?.icon ?? 'dots-horizontal'} size={20} color={cat?.color ?? Colors.textSecondary} />
+                      <Icon source={cat?.icon ?? 'dots-horizontal'} size={20} color={cat?.color ?? ChildColors.textSecondary} />
                       <Text variant="bodyMedium" style={styles.categoryName}>
-                        {cat?.name ?? 'Other'}
+                        {cat?.name ?? 'Outros'}
                       </Text>
                     </View>
                     <View style={styles.categoryBar}>
                       <ProgressBar
                         progress={stat.rate}
-                        color={cat?.color ?? Colors.textSecondary}
+                        color={cat?.color ?? ChildColors.starGold}
                         style={styles.progressBar}
                       />
                     </View>
@@ -125,23 +122,21 @@ export default function AnalyticsScreen() {
               })}
               {categoryStats.length === 0 && (
                 <Text variant="bodyMedium" style={styles.emptyText}>
-                  No data yet
+                  Sem dados ainda
                 </Text>
               )}
             </Card.Content>
           </Card>
         </Animated.View>
 
-        {/* Task Analysis */}
         <Animated.View entering={FadeInUp.delay(200).duration(400)}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Task Analysis
+            Análise de Tarefas
           </Text>
           <Card style={styles.card}>
             <Card.Content>
               {taskStats.slice(0, 10).map((stat) => {
                 const rate = stat.total > 0 ? stat.approved / stat.total : 0;
-                const cat = getCategoryById(stat.category);
                 return (
                   <View key={stat.name} style={styles.taskRow}>
                     <View style={styles.taskInfo}>
@@ -149,14 +144,14 @@ export default function AnalyticsScreen() {
                         {stat.name}
                       </Text>
                       <Text variant="bodySmall" style={styles.taskMeta}>
-                        {stat.approved}/{stat.total} completed
+                        {stat.approved}/{stat.total} concluídas
                       </Text>
                     </View>
                     <Text
                       variant="bodyMedium"
                       style={[
                         styles.taskRate,
-                        { color: rate >= 0.8 ? Colors.reward : rate < 0.5 ? Colors.penalty : Colors.neutral },
+                        { color: rate >= 0.8 ? ChildColors.accentGreen : rate < 0.5 ? ChildColors.accentRed : ChildColors.starGold },
                       ]}
                     >
                       {Math.round(rate * 100)}%
@@ -166,41 +161,40 @@ export default function AnalyticsScreen() {
               })}
               {taskStats.length === 0 && (
                 <Text variant="bodyMedium" style={styles.emptyText}>
-                  No data yet
+                  Sem dados ainda
                 </Text>
               )}
             </Card.Content>
           </Card>
         </Animated.View>
 
-        {/* Period History */}
         <Animated.View entering={FadeInUp.delay(300).duration(400)}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Period History
+            Histórico de Períodos
           </Text>
           {completedPeriods.slice(0, 5).map((period) => {
             const starPercent = period.starBudget > 0
               ? Math.round((period.starsEarned / period.starBudget) * 100)
               : 0;
             const outcomeColor =
-              period.outcome === 'reward' ? Colors.reward
-              : period.outcome === 'penalty' ? Colors.penalty
-              : Colors.neutral;
+              period.outcome === 'reward' ? ChildColors.accentGreen
+              : period.outcome === 'penalty' ? ChildColors.accentRed
+              : ChildColors.starGold;
 
             return (
               <Card key={period.id} style={styles.periodCard}>
                 <Card.Content style={styles.periodContent}>
                   <View style={styles.periodInfo}>
                     <Text variant="bodyMedium" style={styles.periodDates}>
-                      {format(period.startDate.toDate(), 'MMM d')} - {format(period.endDate.toDate(), 'MMM d')}
+                      {format(period.startDate.toDate(), "d 'de' MMM", { locale: ptBR })} - {format(period.endDate.toDate(), "d 'de' MMM", { locale: ptBR })}
                     </Text>
                     <Text variant="bodySmall" style={styles.periodStars}>
-                      {period.starsEarned}/{period.starBudget} stars ({starPercent}%)
+                      {period.starsEarned}/{period.starBudget} estrelas ({starPercent}%)
                     </Text>
                   </View>
                   <View style={[styles.outcomeBadge, { backgroundColor: outcomeColor + '20' }]}>
                     <Text variant="labelSmall" style={{ color: outcomeColor, fontWeight: 'bold' }}>
-                      {period.outcome?.toUpperCase() ?? 'N/A'}
+                      {period.outcome === 'reward' ? 'PRÊMIO' : period.outcome === 'penalty' ? 'PENALIDADE' : 'NEUTRO'}
                     </Text>
                   </View>
                 </Card.Content>
@@ -211,7 +205,7 @@ export default function AnalyticsScreen() {
             <Card style={styles.card}>
               <Card.Content>
                 <Text variant="bodyMedium" style={styles.emptyText}>
-                  No completed periods yet
+                  Nenhum período concluído ainda
                 </Text>
               </Card.Content>
             </Card>
@@ -225,55 +219,60 @@ export default function AnalyticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   content: {
-    padding: Layout.padding.md,
-    paddingBottom: Layout.padding.xl * 2,
+    padding: 16,
+    paddingBottom: 48,
   },
   overviewCard: {
-    backgroundColor: Colors.primaryContainer,
-    marginBottom: Layout.padding.lg,
+    backgroundColor: ChildColors.cardBackground,
+    marginBottom: 24,
+    borderRadius: ChildSizes.cardRadius,
+    borderWidth: 2,
+    borderColor: ChildColors.starGold,
   },
   overviewContent: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    paddingVertical: 8,
   },
   overviewStat: {
     alignItems: 'center',
   },
   overviewNumber: {
     fontWeight: 'bold',
-    color: Colors.primaryDark,
+    color: ChildColors.starGold,
   },
   overviewLabel: {
-    color: Colors.textSecondary,
+    color: ChildColors.textSecondary,
   },
   sectionTitle: {
     fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: Layout.padding.sm,
+    color: ChildColors.textPrimary,
+    marginBottom: 12,
   },
   card: {
-    backgroundColor: Colors.surface,
-    marginBottom: Layout.padding.lg,
+    backgroundColor: ChildColors.cardBackground,
+    marginBottom: 24,
+    borderRadius: ChildSizes.cardRadius,
   },
   categoryList: {
-    gap: Layout.padding.sm,
+    gap: 12,
   },
   categoryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.padding.sm,
+    gap: 8,
   },
   categoryInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.padding.xs,
+    gap: 8,
     width: 120,
   },
   categoryName: {
-    color: Colors.text,
+    color: ChildColors.textPrimary,
     fontSize: 13,
   },
   categoryBar: {
@@ -282,28 +281,29 @@ const styles = StyleSheet.create({
   progressBar: {
     borderRadius: 4,
     height: 6,
+    backgroundColor: ChildColors.cardBorder,
   },
   categoryPercent: {
     width: 35,
     textAlign: 'right',
-    color: Colors.textSecondary,
+    color: ChildColors.textSecondary,
     fontWeight: 'bold',
   },
   taskRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Layout.padding.sm,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
+    borderBottomColor: ChildColors.cardBorder,
   },
   taskInfo: {
     flex: 1,
   },
   taskName: {
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   taskMeta: {
-    color: Colors.textSecondary,
+    color: ChildColors.textSecondary,
   },
   taskRate: {
     fontWeight: 'bold',
@@ -311,8 +311,9 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   periodCard: {
-    backgroundColor: Colors.surface,
-    marginBottom: Layout.padding.sm,
+    backgroundColor: ChildColors.cardBackground,
+    marginBottom: 8,
+    borderRadius: ChildSizes.cardRadius,
   },
   periodContent: {
     flexDirection: 'row',
@@ -322,19 +323,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   periodDates: {
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   periodStars: {
-    color: Colors.textSecondary,
+    color: ChildColors.textSecondary,
   },
   outcomeBadge: {
-    paddingHorizontal: Layout.padding.sm,
-    paddingVertical: Layout.padding.xs,
-    borderRadius: Layout.radius.sm,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   emptyText: {
-    color: Colors.textSecondary,
+    color: ChildColors.textSecondary,
     textAlign: 'center',
-    paddingVertical: Layout.padding.md,
+    paddingVertical: 16,
   },
 });

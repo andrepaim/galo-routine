@@ -4,7 +4,8 @@ import { FAB, Chip, Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { Colors, Layout, TASK_CATEGORIES } from '../../../constants';
+import { TASK_CATEGORIES } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { useTaskStore, useAuthStore } from '../../../lib/stores';
 import { TaskCard } from '../../../components/tasks/TaskCard';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -30,9 +31,9 @@ export default function TasksListScreen() {
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <EmptyState
           icon="format-list-checks"
-          title="No Tasks Yet"
-          description="Create tasks for your child to earn stars!"
-          actionLabel="Create First Task"
+          title="Sem Tarefas"
+          description="Crie tarefas para seu filho ganhar estrelas!"
+          actionLabel="Criar Primeira Tarefa"
           onAction={() => router.push('/(parent)/tasks/new')}
         />
         <FAB.Group
@@ -40,8 +41,8 @@ export default function TasksListScreen() {
           icon={fabOpen ? 'close' : 'plus'}
           visible
           actions={[
-            { icon: 'plus', label: 'New Task', onPress: () => router.push('/(parent)/tasks/new') },
-            { icon: 'file-document-outline', label: 'From Templates', onPress: () => router.push('/(parent)/tasks/templates') },
+            { icon: 'plus', label: 'Nova Tarefa', onPress: () => router.push('/(parent)/tasks/new') },
+            { icon: 'file-document-outline', label: 'De Modelos', onPress: () => router.push('/(parent)/tasks/templates') },
           ]}
           onStateChange={({ open }) => setFabOpen(open)}
           fabStyle={styles.fab}
@@ -60,18 +61,19 @@ export default function TasksListScreen() {
             <Chip
               selected={filterCategory === null}
               onPress={() => setFilterCategory(null)}
-              style={styles.filterChip}
+              style={[styles.filterChip, filterCategory === null && styles.filterChipSelected]}
+              textStyle={filterCategory === null ? styles.filterChipTextSelected : styles.filterChipText}
             >
-              All
+              Todas
             </Chip>
             {TASK_CATEGORIES.map((cat) => (
               <Chip
                 key={cat.id}
                 selected={filterCategory === cat.id}
                 onPress={() => setFilterCategory(filterCategory === cat.id ? null : cat.id)}
-                icon={() => <Icon source={cat.icon} size={14} color={filterCategory === cat.id ? Colors.white : cat.color} />}
+                icon={() => <Icon source={cat.icon} size={14} color={filterCategory === cat.id ? ChildColors.galoBlack : cat.color} />}
                 style={[styles.filterChip, filterCategory === cat.id && { backgroundColor: cat.color }]}
-                textStyle={filterCategory === cat.id ? { color: Colors.white } : undefined}
+                textStyle={filterCategory === cat.id ? { color: ChildColors.galoBlack } : { color: ChildColors.textSecondary }}
               >
                 {cat.name}
               </Chip>
@@ -93,11 +95,12 @@ export default function TasksListScreen() {
         icon={fabOpen ? 'close' : 'plus'}
         visible
         actions={[
-          { icon: 'plus', label: 'New Task', onPress: () => router.push('/(parent)/tasks/new') },
-          { icon: 'file-document-outline', label: 'From Templates', onPress: () => router.push('/(parent)/tasks/templates') },
+          { icon: 'plus', label: 'Nova Tarefa', onPress: () => router.push('/(parent)/tasks/new') },
+          { icon: 'file-document-outline', label: 'De Modelos', onPress: () => router.push('/(parent)/tasks/templates') },
         ]}
         onStateChange={({ open }) => setFabOpen(open)}
         fabStyle={styles.fab}
+        color={ChildColors.galoBlack}
       />
     </SafeAreaView>
   );
@@ -106,21 +109,30 @@ export default function TasksListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   list: {
-    padding: Layout.padding.md,
+    padding: 16,
   },
   filterRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Layout.padding.xs,
-    marginBottom: Layout.padding.md,
+    gap: 8,
+    marginBottom: 16,
   },
   filterChip: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackground,
+  },
+  filterChipSelected: {
+    backgroundColor: ChildColors.starGold,
+  },
+  filterChipText: {
+    color: ChildColors.textSecondary,
+  },
+  filterChipTextSelected: {
+    color: ChildColors.galoBlack,
   },
   fab: {
-    backgroundColor: Colors.primary,
+    backgroundColor: ChildColors.starGold,
   },
 });
