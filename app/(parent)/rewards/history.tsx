@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     color: ChildColors.starGoldDark,
   },
   date: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginLeft: Layout.padding.sm,
   },
   status: {

@@ -1,18 +1,21 @@
-import { MD3LightTheme } from 'react-native-paper';
-import { Colors } from './colors';
+import { MD3DarkTheme } from 'react-native-paper';
+import { ChildColors } from './childTheme';
 
 export const theme = {
-  ...MD3LightTheme,
+  ...MD3DarkTheme,
   colors: {
-    ...MD3LightTheme.colors,
-    primary: Colors.primary,
-    primaryContainer: Colors.primaryContainer,
-    secondary: Colors.secondary,
-    secondaryContainer: Colors.secondaryContainer,
-    background: Colors.background,
-    surface: Colors.surface,
-    surfaceVariant: Colors.surfaceVariant,
-    error: Colors.error,
+    ...MD3DarkTheme.colors,
+    primary: ChildColors.starGold,
+    primaryContainer: ChildColors.cardBackground,
+    secondary: ChildColors.starGoldLight,
+    secondaryContainer: ChildColors.cardBackgroundLight,
+    background: ChildColors.galoBlack,
+    surface: ChildColors.cardBackground,
+    surfaceVariant: ChildColors.cardBackgroundLight,
+    onSurface: ChildColors.textPrimary,
+    onSurfaceVariant: ChildColors.textSecondary,
+    outline: ChildColors.cardBorder,
+    error: ChildColors.accentRed,
   },
   roundness: 12,
 };

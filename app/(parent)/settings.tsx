@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
     marginBottom: Layout.padding.md,
   },
   sliderLabel: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginBottom: Layout.padding.xs,
   },
   slider: {
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
     marginBottom: Layout.padding.md,
   },
   label: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginBottom: Layout.padding.sm,
   },
   daysRow: {
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
     marginRight: Layout.padding.md,
   },
   switchDescription: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginTop: 2,
   },
   bonusValueRow: {

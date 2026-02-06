@@ -155,14 +155,14 @@ const styles = StyleSheet.create({
     gap: Layout.padding.sm,
   },
   description: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginBottom: Layout.padding.md,
   },
   input: {
     backgroundColor: ChildColors.cardBackground,
   },
   hint: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginTop: -4,
     marginLeft: Layout.padding.xs,
   },

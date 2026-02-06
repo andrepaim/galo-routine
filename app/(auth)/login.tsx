@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     color: ChildColors.starGoldDark,
   },
   subtitle: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginTop: Layout.padding.xs,
   },
   form: {

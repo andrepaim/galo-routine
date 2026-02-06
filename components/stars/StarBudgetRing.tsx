@@ -8,8 +8,8 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { Colors, Layout } from '../../constants';
-import { ChildColors, ChildSizes } from '../../constants/childTheme';
+import { Layout } from '../../constants';
+import { ChildColors } from '../../constants/childTheme';
 import type { StarProgress } from '../../lib/types';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -28,13 +28,11 @@ function ThresholdMarker({
   center,
   radius,
   strokeWidth,
-  color,
 }: {
   percent: number;
   center: number;
   radius: number;
   strokeWidth: number;
-  color: string;
 }) {
   const angle = ((-90 + (percent / 100) * 360) * Math.PI) / 180;
   const innerR = radius - strokeWidth / 2 - 2;
@@ -46,8 +44,8 @@ function ThresholdMarker({
       y1={center + innerR * Math.sin(angle)}
       x2={center + outerR * Math.cos(angle)}
       y2={center + outerR * Math.sin(angle)}
-      stroke={color}
-      strokeWidth={3}
+      stroke={ChildColors.textMuted}
+      strokeWidth={2}
       strokeLinecap="round"
     />
   );
@@ -96,9 +94,12 @@ export function StarBudgetRing({
     strokeDashoffset: circumference - animatedPending.value,
   }));
 
-  let progressColor: string = ChildColors.starGold;
-  if (progress.isRewardZone) progressColor = ChildColors.accentGreen;
-  if (progress.isPenaltyZone) progressColor = ChildColors.accentRed;
+  // Simple palette: gold for progress, always
+  const progressColor = ChildColors.starGold;
+  // Pending: lighter gold (semi-transparent)
+  const pendingColor = ChildColors.starGoldDark;
+  // Track: dark gray
+  const trackColor = '#333333';
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -108,17 +109,17 @@ export function StarBudgetRing({
           cx={center}
           cy={center}
           r={radius}
-          stroke={ChildColors.galoDark}
+          stroke={trackColor}
           strokeWidth={strokeWidth}
           fill="none"
         />
-        {/* Pending arc */}
+        {/* Pending arc (lighter gold) */}
         {progress.pendingPercent > 0 && (
           <AnimatedCircle
             cx={center}
             cy={center}
             r={radius}
-            stroke={ChildColors.accentPurple}
+            stroke={pendingColor}
             strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={`${circumference} ${circumference}`}
@@ -127,7 +128,7 @@ export function StarBudgetRing({
             transform={`rotate(-90 ${center} ${center})`}
           />
         )}
-        {/* Earned arc */}
+        {/* Earned arc (bright gold) */}
         <AnimatedCircle
           cx={center}
           cy={center}
@@ -140,14 +141,13 @@ export function StarBudgetRing({
           strokeLinecap="round"
           transform={`rotate(-90 ${center} ${center})`}
         />
-        {/* Threshold markers */}
+        {/* Threshold markers (subtle gray) */}
         {rewardPercent != null && (
           <ThresholdMarker
             percent={rewardPercent}
             center={center}
             radius={radius}
             strokeWidth={strokeWidth}
-            color={ChildColors.accentGreen}
           />
         )}
         {penaltyPercent != null && (
@@ -156,7 +156,6 @@ export function StarBudgetRing({
             center={center}
             radius={radius}
             strokeWidth={strokeWidth}
-            color={ChildColors.accentRed}
           />
         )}
       </Svg>
@@ -168,7 +167,7 @@ export function StarBudgetRing({
           of {progress.budget}
         </Text>
         <Text variant="labelSmall" style={styles.label}>
-          stars
+          STARS
         </Text>
       </View>
     </View>

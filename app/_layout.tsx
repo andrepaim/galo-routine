@@ -66,7 +66,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
-          <StatusBar style="dark" />
+          <StatusBar style="light" />
           <AuthGate />
           {isAuthenticated && <DataSubscriptions />}
           <Slot />
