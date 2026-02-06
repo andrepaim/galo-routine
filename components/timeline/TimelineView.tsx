@@ -160,7 +160,7 @@ export function TimelineView({ tasks, onTaskPress, onComplete }: TimelineViewPro
                   <Icon
                     source={isDone ? 'check-circle' : 'circle-outline'}
                     size={24}
-                    color={isDone ? ChildColors.accentGreen : ChildColors.textPrimaryLight}
+                    color={isDone ? ChildColors.accentGreen : ChildColors.textMuted}
                   />
                   <Text
                     variant="bodyMedium"
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   hourLabel: {
     width: 62,
     textAlign: 'right',
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     fontSize: 11,
     paddingRight: Layout.padding.sm,
   },
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   completedText: {
     textDecorationLine: 'line-through',
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   taskBlockInner: {
     padding: Layout.padding.sm,
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     marginRight: Layout.padding.sm,
   },
   taskBlockTime: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     fontSize: 11,
   },
   anytimeTitle: {

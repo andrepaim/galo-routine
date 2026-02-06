@@ -123,7 +123,7 @@ function getStatusColor(status?: CompletionStatus): string {
     case 'rejected':
       return ChildColors.accentRed;
     default:
-      return ChildColors.textPrimaryLight;
+      return ChildColors.textMuted;
   }
 }
 
@@ -145,14 +145,14 @@ const styles = StyleSheet.create({
     backgroundColor: ChildColors.accentPurpleContainer,
   },
   rejected: {
-    backgroundColor: ChildColors.accentRedContainer,
+    backgroundColor: ChildColors.cardBackground,
   },
   title: {
     fontSize: 18,
   },
   doneText: {
     textDecorationLine: 'line-through',
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   pendingSubtitle: {
     fontStyle: 'italic',

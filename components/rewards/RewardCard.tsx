@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text, Icon, Button } from 'react-native-paper';
-import { Colors, Layout } from '../../constants';
+import { Layout } from '../../constants';
 import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import type { Reward } from '../../lib/types';
 
@@ -39,7 +39,7 @@ export function RewardCard({ reward, starBalance, onRedeem, onPress, showRedeem 
             </Text>
             {reward.availability === 'limited' && (
               <Text variant="bodySmall" style={styles.quantity}>
-                ({reward.quantity} left)
+                ({reward.quantity} restantes)
               </Text>
             )}
           </View>
@@ -50,10 +50,12 @@ export function RewardCard({ reward, starBalance, onRedeem, onPress, showRedeem 
             compact
             onPress={onRedeem}
             disabled={!canAfford || !isAvailable}
+            buttonColor={ChildColors.starGold}
+            textColor={ChildColors.galoBlack}
             style={styles.redeemBtn}
             labelStyle={styles.redeemLabel}
           >
-            Redeem
+            Resgatar
           </Button>
         )}
       </Card.Content>
@@ -63,9 +65,11 @@ export function RewardCard({ reward, starBalance, onRedeem, onPress, showRedeem 
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: Layout.padding.xs,
+    marginVertical: 4,
     backgroundColor: ChildColors.cardBackground,
-    elevation: Layout.elevation.low,
+    borderRadius: ChildSizes.cardRadius,
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
   },
   unavailable: {
     opacity: 0.5,
@@ -73,13 +77,13 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.padding.md,
+    gap: 16,
   },
   iconContainer: {
     width: 56,
     height: 56,
-    borderRadius: Layout.radius.md,
-    backgroundColor: ChildColors.starGoldContainer,
+    borderRadius: 12,
+    backgroundColor: ChildColors.galoDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -94,21 +98,21 @@ const styles = StyleSheet.create({
     color: ChildColors.textMuted,
   },
   description: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginTop: 2,
   },
   costRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: Layout.padding.xs,
+    marginTop: 4,
   },
   cost: {
-    color: ChildColors.starGoldDark,
+    color: ChildColors.starGold,
     fontWeight: 'bold',
   },
   quantity: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   redeemBtn: {
     minWidth: 80,

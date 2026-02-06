@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Card, Text, Icon, Chip } from 'react-native-paper';
-import { Colors, Layout } from '../../constants';
+import { Layout } from '../../constants';
 import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { StarCounter } from '../stars/StarCounter';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
@@ -21,12 +21,12 @@ export function PeriodSummary({ period, onPress }: PeriodSummaryProps) {
     <Card style={styles.card}>
       <Card.Content>
         <View style={styles.header}>
-          <Text variant="titleMedium">{formatPeriodRange(period)}</Text>
+          <Text variant="titleMedium" style={styles.title}>{formatPeriodRange(period)}</Text>
           <Chip
             icon={getStatusIcon(period.status)}
             compact
-            style={[styles.statusChip, { backgroundColor: getStatusColor(period) }]}
-            textStyle={styles.statusText}
+            style={[styles.statusChip, { backgroundColor: getStatusBgColor(period) }]}
+            textStyle={[styles.statusText, { color: getStatusTextColor(period) }]}
           >
             {getStatusLabel(period)}
           </Chip>
@@ -44,14 +44,14 @@ export function PeriodSummary({ period, onPress }: PeriodSummaryProps) {
                 {remaining}
               </Text>
               <Text variant="bodySmall" style={styles.daysLabel}>
-                days left
+                dias restantes
               </Text>
             </View>
           )}
         </View>
 
         {period.outcome && (
-          <View style={styles.outcomeRow}>
+          <View style={[styles.outcomeRow, { backgroundColor: getOutcomeBgColor(period.outcome) }]}>
             <Icon
               source={getOutcomeIcon(period.outcome)}
               size={20}
@@ -62,7 +62,7 @@ export function PeriodSummary({ period, onPress }: PeriodSummaryProps) {
                 ? period.thresholds.rewardDescription
                 : period.outcome === 'penalty'
                   ? period.thresholds.penaltyDescription
-                  : 'Good effort!'}
+                  : 'Bom esforço!'}
             </Text>
           </View>
         )}
@@ -91,16 +91,27 @@ function getStatusIcon(status: string): string {
 
 function getStatusLabel(period: Period): string {
   if (period.status === 'completed' && period.outcome) {
-    return period.outcome.charAt(0).toUpperCase() + period.outcome.slice(1);
+    switch (period.outcome) {
+      case 'reward': return 'Prêmio';
+      case 'penalty': return 'Penalidade';
+      default: return 'Neutro';
+    }
   }
-  return period.status.charAt(0).toUpperCase() + period.status.slice(1);
+  return period.status === 'active' ? 'Ativo' : 'Concluído';
 }
 
-function getStatusColor(period: Period): string {
-  if (period.outcome === 'reward') return ChildColors.accentGreenLight;
-  if (period.outcome === 'penalty') return ChildColors.accentRedLight;
-  if (period.status === 'active') return ChildColors.starGoldLight;
-  return ChildColors.cardBackgroundVariant;
+function getStatusBgColor(period: Period): string {
+  if (period.outcome === 'reward') return ChildColors.accentGreen + '30';
+  if (period.outcome === 'penalty') return ChildColors.accentRed + '30';
+  if (period.status === 'active') return ChildColors.starGold + '30';
+  return ChildColors.galoDark;
+}
+
+function getStatusTextColor(period: Period): string {
+  if (period.outcome === 'reward') return ChildColors.accentGreen;
+  if (period.outcome === 'penalty') return ChildColors.accentRed;
+  if (period.status === 'active') return ChildColors.starGold;
+  return ChildColors.textSecondary;
 }
 
 function getOutcomeIcon(outcome: string): string {
@@ -119,23 +130,37 @@ function getOutcomeColor(outcome: string): string {
   }
 }
 
+function getOutcomeBgColor(outcome: string): string {
+  switch (outcome) {
+    case 'reward': return ChildColors.accentGreen + '20';
+    case 'penalty': return ChildColors.accentRed + '20';
+    default: return ChildColors.starGold + '20';
+  }
+}
+
 const styles = StyleSheet.create({
   card: {
-    marginVertical: Layout.padding.xs,
+    marginVertical: 4,
     backgroundColor: ChildColors.cardBackground,
-    elevation: Layout.elevation.low,
+    borderRadius: ChildSizes.cardRadius,
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Layout.padding.md,
+    marginBottom: 16,
+  },
+  title: {
+    color: ChildColors.textPrimary,
   },
   statusChip: {
     height: 28,
   },
   statusText: {
     fontSize: 12,
+    fontWeight: '600',
   },
   statsRow: {
     flexDirection: 'row',
@@ -150,16 +175,15 @@ const styles = StyleSheet.create({
     color: ChildColors.textPrimary,
   },
   daysLabel: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   outcomeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.padding.sm,
-    marginTop: Layout.padding.md,
-    padding: Layout.padding.sm,
-    borderRadius: Layout.radius.sm,
-    backgroundColor: ChildColors.cardBackgroundVariant,
+    gap: 8,
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 8,
   },
   outcomeText: {
     flex: 1,

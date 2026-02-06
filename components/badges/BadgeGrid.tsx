@@ -101,12 +101,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   earnedCircle: {
-    backgroundColor: ChildColors.starGoldContainer,
+    backgroundColor: ChildColors.galoDark,
     borderWidth: 2,
     borderColor: ChildColors.starGold,
   },
   lockedCircle: {
-    backgroundColor: ChildColors.cardBackgroundVariant,
+    backgroundColor: ChildColors.galoDark,
     borderWidth: 2,
     borderColor: ChildColors.cardBorder,
   },
@@ -116,6 +116,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   lockedText: {
-    color: ChildColors.textPrimaryLight,
+    color: ChildColors.textMuted,
   },
 });

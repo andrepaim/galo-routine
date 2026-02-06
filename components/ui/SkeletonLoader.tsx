@@ -103,7 +103,7 @@ export function SkeletonDashboard() {
 
 const skeletonStyles = StyleSheet.create({
   card: {
-    backgroundColor: ChildColors.cardBackgroundVariant,
+    backgroundColor: ChildColors.galoDark,
     borderRadius: Layout.radius.md,
     padding: Layout.padding.md,
     marginBottom: Layout.padding.sm,
@@ -135,7 +135,7 @@ const skeletonStyles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: ChildColors.cardBackgroundVariant,
+    backgroundColor: ChildColors.galoDark,
     borderRadius: Layout.radius.md,
     padding: Layout.padding.lg,
     alignItems: 'center',

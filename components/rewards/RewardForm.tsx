@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   label: {
     marginTop: Layout.padding.sm,
     marginBottom: Layout.padding.sm,
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   iconGrid: {
     flexDirection: 'row',

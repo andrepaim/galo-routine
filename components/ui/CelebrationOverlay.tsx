@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   dismiss: {
-    color: ChildColors.textPrimaryLight,
+    color: ChildColors.textMuted,
     marginTop: Layout.padding.xl,
   },
 });

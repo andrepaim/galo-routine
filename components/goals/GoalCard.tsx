@@ -116,10 +116,10 @@ const styles = StyleSheet.create({
     color: ChildColors.textPrimary,
   },
   deadline: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   description: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   progressSection: {
     gap: Layout.padding.xs,
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   progressText: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   progressPercent: {
     color: ChildColors.starGold,
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     height: 8,
   },
   remaining: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     fontStyle: 'italic',
   },
   rewardRow: {

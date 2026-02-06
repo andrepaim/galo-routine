@@ -108,7 +108,7 @@ export function StarBudgetRing({
           cx={center}
           cy={center}
           r={radius}
-          stroke={ChildColors.cardBackgroundVariant}
+          stroke={ChildColors.galoDark}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -188,10 +188,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   budgetText: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   label: {
-    color: ChildColors.textPrimaryLight,
+    color: ChildColors.textMuted,
     textTransform: 'uppercase',
   },
 });

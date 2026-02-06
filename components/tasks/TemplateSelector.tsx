@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     color: ChildColors.textPrimary,
   },
   subtitle: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginBottom: Layout.padding.lg,
   },
   categoryCard: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   templateTime: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   miniCategoryChip: {
     height: 20,

@@ -9,7 +9,7 @@ import Animated, {
   withSpring,
   useAnimatedStyle,
 } from 'react-native-reanimated';
-import { Colors, Layout } from '../../constants';
+import { Layout } from '../../constants';
 import { ChildColors, ChildSizes } from '../../constants/childTheme';
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -69,7 +69,7 @@ export function StarCounter({ earned, budget, pending = 0, size = 'small' }: Sta
       </View>
       {pending > 0 && (
         <Text variant="bodySmall" style={styles.pending}>
-          +{pending} pending
+          +{pending} pendentes
         </Text>
       )}
       <Text
@@ -109,14 +109,14 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   budget: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   pending: {
     color: ChildColors.starGold,
     marginTop: 2,
   },
   percent: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     marginTop: 2,
   },
   percentGood: {

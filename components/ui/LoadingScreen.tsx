@@ -50,6 +50,6 @@ const styles = StyleSheet.create({
   },
   text: {
     marginTop: 16,
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
 });

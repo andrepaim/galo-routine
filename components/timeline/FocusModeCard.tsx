@@ -62,7 +62,7 @@ export function FocusModeCard({ task, nextTask, onComplete, onDismiss }: FocusMo
             <Text variant="labelMedium" style={styles.label}>
               CURRENT TASK
             </Text>
-            <Button mode="text" compact onPress={onDismiss} textColor={ChildColors.textPrimarySecondary}>
+            <Button mode="text" compact onPress={onDismiss} textColor={ChildColors.textSecondary}>
               Dismiss
             </Button>
           </View>
@@ -106,7 +106,7 @@ export function FocusModeCard({ task, nextTask, onComplete, onDismiss }: FocusMo
                 UP NEXT
               </Text>
               <View style={styles.nextRow}>
-                <Icon source={nextTask.icon || 'star-circle'} size={20} color={ChildColors.textPrimarySecondary} />
+                <Icon source={nextTask.icon || 'star-circle'} size={20} color={ChildColors.textSecondary} />
                 <Text variant="bodyMedium" style={styles.nextName}>
                   {nextTask.name}
                 </Text>
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     letterSpacing: 1,
   },
   taskRow: {
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     paddingTop: Layout.padding.sm,
   },
   nextLabel: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     letterSpacing: 1,
     marginBottom: Layout.padding.xs,
   },
@@ -191,9 +191,9 @@ const styles = StyleSheet.create({
   },
   nextName: {
     flex: 1,
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   nextTime: {
-    color: ChildColors.textPrimaryLight,
+    color: ChildColors.textMuted,
   },
 });

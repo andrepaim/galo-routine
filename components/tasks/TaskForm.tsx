@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   label: {
     marginTop: Layout.padding.sm,
     marginBottom: Layout.padding.sm,
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   categoryGrid: {
     flexDirection: 'row',
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: Layout.padding.md,
   },
   categoryChip: {
-    backgroundColor: ChildColors.cardBackgroundVariant,
+    backgroundColor: ChildColors.galoDark,
   },
   starRow: {
     flexDirection: 'row',
@@ -214,10 +214,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   starChip: {
-    backgroundColor: ChildColors.cardBackgroundVariant,
+    backgroundColor: ChildColors.galoDark,
   },
   starChipSelected: {
-    backgroundColor: ChildColors.starGoldContainer,
+    backgroundColor: ChildColors.galoDark,
   },
   starChipTextSelected: {
     color: ChildColors.starGoldDark,

@@ -26,7 +26,7 @@ export function StreakDisplay({
   if (compact) {
     return (
       <View style={styles.compactContainer}>
-        <Icon source="fire" size={20} color={currentStreak > 0 ? ChildColors.accentRed : ChildColors.textPrimaryLight} />
+        <Icon source="fire" size={20} color={currentStreak > 0 ? ChildColors.accentRed : ChildColors.textMuted} />
         <Text variant="titleMedium" style={[styles.compactCount, currentStreak > 0 && styles.activeStreak]}>
           {currentStreak}
         </Text>
@@ -43,7 +43,7 @@ export function StreakDisplay({
         <Card.Content style={styles.content}>
           <View style={styles.mainRow}>
             <View style={styles.streakCircle}>
-              <Icon source="fire" size={40} color={currentStreak > 0 ? ChildColors.accentRed : ChildColors.textPrimaryLight} />
+              <Icon source="fire" size={40} color={currentStreak > 0 ? ChildColors.accentRed : ChildColors.textMuted} />
               <Text variant="headlineLarge" style={styles.streakCount}>
                 {currentStreak}
               </Text>
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     color: ChildColors.accentRed,
   },
   compactLabel: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   card: {
     backgroundColor: ChildColors.cardBackground,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   streakCircle: {
     alignItems: 'center',
-    backgroundColor: ChildColors.accentRedContainer,
+    backgroundColor: ChildColors.cardBackground,
     borderRadius: Layout.radius.round,
     width: 100,
     height: 100,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   streakLabel: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     fontSize: 10,
   },
   statsColumn: {
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     gap: Layout.padding.sm,
   },
   statText: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     flex: 1,
   },
   milestoneRow: {
@@ -180,25 +180,25 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: ChildColors.cardBackgroundVariant,
+    backgroundColor: ChildColors.galoDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   milestoneAchieved: {
-    backgroundColor: ChildColors.accentRedContainer,
+    backgroundColor: ChildColors.cardBackground,
     borderWidth: 2,
     borderColor: ChildColors.accentRed,
   },
   milestoneText: {
     fontWeight: 'bold',
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     fontSize: 12,
   },
   milestoneTextAchieved: {
     color: ChildColors.accentRed,
   },
   milestoneLabel: {
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
   },
   freezeBtn: {
     borderColor: ChildColors.categoryHygiene,

@@ -17,7 +17,7 @@ export function EmptyState({ icon, title, description, actionLabel, onAction }: 
   return (
     <View style={styles.container}>
       <Animated.View entering={BounceIn.delay(100)} style={styles.iconBackdrop}>
-        <Icon source={icon} size={72} color={ChildColors.textPrimaryLight} />
+        <Icon source={icon} size={72} color={ChildColors.textMuted} />
       </Animated.View>
       <Animated.View entering={FadeInUp.delay(300)}>
         <Text variant="titleMedium" style={styles.title}>
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: ChildColors.cardBackgroundVariant,
+    backgroundColor: ChildColors.galoDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
   description: {
     marginTop: Layout.padding.sm,
-    color: ChildColors.textPrimarySecondary,
+    color: ChildColors.textSecondary,
     textAlign: 'center',
   },
   button: {
