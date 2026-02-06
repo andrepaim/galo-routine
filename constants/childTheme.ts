@@ -15,11 +15,15 @@ export const ChildColors = {
   starGoldDark: '#E6C200',
   starGlow: 'rgba(255, 215, 0, 0.3)',
   
-  // Playful accent colors (still kid-friendly)
-  accentRed: '#E63946',      // For penalties/urgent
+  // Accent colors (semantic only)
+  accentRed: '#E63946',      // For penalties/urgent/reject
   accentGreen: '#2ECC71',    // For success/approved
-  accentPurple: '#9B59B6',   // For pending/magic
-  accentBlue: '#3498DB',     // For info
+  accentPurple: '#9B59B6',   // DEPRECATED - use pendingGold
+  accentBlue: '#3498DB',     // For info (sparingly)
+  
+  // Pending state - muted gold instead of purple
+  pendingGold: '#B8960B',    // Darker gold for pending items
+  pendingGoldLight: '#D4AF37', // Lighter pending gold
   
   // Gradients (for backgrounds)
   gradientStart: '#1A1A1A',
@@ -38,7 +42,7 @@ export const ChildColors = {
   textGold: '#FFD700',
   
   // Status colors
-  statusPending: '#9B59B6',
+  statusPending: '#B8960B',   // Muted gold (was purple)
   statusApproved: '#2ECC71',
   statusRejected: '#E63946',
   

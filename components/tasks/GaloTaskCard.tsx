@@ -91,7 +91,7 @@ export function GaloTaskCard({ task, onComplete, index = 0 }: GaloTaskCardProps)
     if (isPending) return { 
       icon: 'clock-outline', 
       color: ChildColors.statusPending,
-      bgColor: 'rgba(155, 89, 182, 0.15)',
+      bgColor: 'rgba(184, 150, 11, 0.15)',
       borderColor: ChildColors.statusPending,
     };
     if (isRejected) return { 

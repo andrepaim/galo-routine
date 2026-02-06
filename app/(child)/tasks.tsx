@@ -117,7 +117,7 @@ function getCompletionIcon(status?: string): string {
 function getStatusBgColor(status?: string): string {
   switch (status) {
     case 'approved': return ChildColors.accentGreen;
-    case 'pending': return ChildColors.accentPurple;
+    case 'pending': return ChildColors.pendingGold;
     case 'rejected': return ChildColors.accentRed;
     default: return ChildColors.cardBackgroundLight;
   }

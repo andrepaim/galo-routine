@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusPending: {
-    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+    backgroundColor: 'rgba(184, 150, 11, 0.2)', // pendingGold with opacity
   },
   statusFulfilled: {
     backgroundColor: 'rgba(46, 204, 113, 0.2)',

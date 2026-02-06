@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   },
   pendingRow: {
     marginTop: 12,
-    backgroundColor: 'rgba(155, 89, 182, 0.15)',
+    backgroundColor: 'rgba(184, 150, 11, 0.15)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,

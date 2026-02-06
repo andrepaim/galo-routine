@@ -57,7 +57,7 @@ export default function BadgesScreen() {
             <Text style={styles.statLabel}>Restantes</Text>
           </View>
           <View style={styles.statCard}>
-            <Icon source="trophy" size={28} color={ChildColors.accentPurple} />
+            <Icon source="trophy" size={28} color={ChildColors.starGold} />
             <Text style={styles.statNumber}>{totalBadges}</Text>
             <Text style={styles.statLabel}>Total</Text>
           </View>

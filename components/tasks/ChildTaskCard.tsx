@@ -119,7 +119,7 @@ function getStatusColor(status?: CompletionStatus): string {
     case 'approved':
       return ChildColors.accentGreen;
     case 'pending':
-      return ChildColors.accentPurple;
+      return ChildColors.pendingGold;
     case 'rejected':
       return ChildColors.accentRed;
     default:
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     backgroundColor: ChildColors.accentGreenContainer,
   },
   pending: {
-    backgroundColor: ChildColors.accentPurpleContainer,
+    backgroundColor: ChildColors.pendingGoldContainer,
   },
   rejected: {
     backgroundColor: ChildColors.cardBackground,
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   pendingSubtitle: {
     fontStyle: 'italic',
-    color: ChildColors.accentPurple,
+    color: ChildColors.pendingGold,
   },
   rejectionContent: {
     paddingBottom: Layout.padding.sm,

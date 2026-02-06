@@ -42,7 +42,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
         subtitleStyle={styles.subtitle}
         left={(props) => (
           <View style={styles.iconContainer}>
-            <Icon {...props} source="check-circle-outline" color={ChildColors.accentPurple} />
+            <Icon {...props} source="check-circle-outline" color={ChildColors.pendingGold} />
           </View>
         )}
         right={() => (
