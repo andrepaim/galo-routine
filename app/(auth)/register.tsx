@@ -3,7 +3,8 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 're
 import { TextInput, Button, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Layout, PIN_LENGTH } from '../../constants';
+import { Layout, PIN_LENGTH } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore } from '../../lib/stores';
 
 export default function RegisterScreen() {
@@ -144,7 +145,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   flex: {
     flex: 1,
@@ -154,19 +155,19 @@ const styles = StyleSheet.create({
     gap: Layout.padding.sm,
   },
   description: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginBottom: Layout.padding.md,
   },
   input: {
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
   },
   hint: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginTop: -4,
     marginLeft: Layout.padding.xs,
   },
   error: {
-    color: Colors.error,
+    color: ChildColors.accentRed,
     textAlign: 'center',
   },
   button: {

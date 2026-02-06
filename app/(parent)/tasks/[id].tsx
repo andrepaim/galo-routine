@@ -92,7 +92,7 @@ export default function EditTaskScreen() {
         <Button
           mode="outlined"
           icon="delete"
-          textColor={Colors.error}
+          textColor={ChildColors.accentRed}
           onPress={handleDelete}
           style={styles.footerBtn}
         >
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     gap: Layout.padding.md,
     padding: Layout.padding.md,
     borderTopWidth: 1,
-    borderTopColor: Colors.divider,
+    borderTopColor: ChildColors.cardBorder,
   },
   footerBtn: {
     flex: 1,

@@ -44,7 +44,7 @@ export default function RedemptionHistoryScreen() {
           const statusColor =
             item.status === 'fulfilled' ? ChildColors.accentGreen
             : item.status === 'rejected' ? ChildColors.accentRed
-            : Colors.neutral;
+            : ChildColors.starGold;
 
           return (
             <Animated.View entering={FadeInDown.delay(index * 60).duration(300)}>
@@ -55,7 +55,7 @@ export default function RedemptionHistoryScreen() {
                       {item.rewardName}
                     </Text>
                     <View style={styles.metaRow}>
-                      <Icon source="star" size={14} color={Colors.starFilled} />
+                      <Icon source="star" size={14} color={ChildColors.starGold} />
                       <Text variant="bodySmall" style={styles.cost}>
                         {item.starCost} stars
                       </Text>
@@ -82,7 +82,7 @@ export default function RedemptionHistoryScreen() {
                         mode="outlined"
                         compact
                         onPress={() => handleReject(item.id!)}
-                        textColor={Colors.error}
+                        textColor={ChildColors.accentRed}
                         style={styles.rejectBtn}
                         labelStyle={styles.btnLabel}
                       >
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: ChildColors.accentGreen,
   },
   rejectBtn: {
-    borderColor: Colors.error,
+    borderColor: ChildColors.accentRed,
   },
   btnLabel: {
     fontSize: 12,

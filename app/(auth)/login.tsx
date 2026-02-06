@@ -3,7 +3,8 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform, Pressable } from 'rea
 import { TextInput, Button, Text, Icon } from 'react-native-paper';
 import { useRouter, Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Layout } from '../../constants';
+import { Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore } from '../../lib/stores';
 
 export default function LoginScreen() {
@@ -64,7 +65,7 @@ export default function LoginScreen() {
         style={styles.content}
       >
         <View style={styles.header}>
-          <Icon source="star-shooting" size={64} color={Colors.primary} />
+          <Icon source="star-shooting" size={64} color={ChildColors.starGold} />
           <Text variant="headlineLarge" style={styles.title}>
             Star Routine
           </Text>
@@ -142,7 +143,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   content: {
     flex: 1,
@@ -156,20 +157,20 @@ const styles = StyleSheet.create({
   title: {
     marginTop: Layout.padding.md,
     fontWeight: 'bold',
-    color: Colors.primaryDark,
+    color: ChildColors.starGoldDark,
   },
   subtitle: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginTop: Layout.padding.xs,
   },
   form: {
     gap: Layout.padding.sm,
   },
   input: {
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
   },
   error: {
-    color: Colors.error,
+    color: ChildColors.accentRed,
     textAlign: 'center',
   },
   button: {
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     paddingVertical: Layout.padding.sm,
   },
   linkText: {
-    color: Colors.primary,
+    color: ChildColors.starGold,
     fontSize: 14,
     fontWeight: '500',
   },
@@ -190,6 +191,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   childButton: {
-    borderColor: Colors.secondary,
+    borderColor: ChildColors.starGold,
   },
 });

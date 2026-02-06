@@ -304,9 +304,9 @@ export default function SettingsScreen() {
                     minimumValue={1}
                     maximumValue={5}
                     step={1}
-                    minimumTrackTintColor={Colors.starFilled}
+                    minimumTrackTintColor={ChildColors.starGold}
                     maximumTrackTintColor={ChildColors.cardBackgroundVariant}
-                    thumbTintColor={Colors.starFilled}
+                    thumbTintColor={ChildColors.starGold}
                     style={styles.bonusSlider}
                   />
                 </View>
@@ -332,9 +332,9 @@ export default function SettingsScreen() {
                     minimumValue={1}
                     maximumValue={10}
                     step={1}
-                    minimumTrackTintColor={Colors.starFilled}
+                    minimumTrackTintColor={ChildColors.starGold}
                     maximumTrackTintColor={ChildColors.cardBackgroundVariant}
-                    thumbTintColor={Colors.starFilled}
+                    thumbTintColor={ChildColors.starGold}
                     style={styles.bonusSlider}
                   />
                 </View>
@@ -360,9 +360,9 @@ export default function SettingsScreen() {
                     minimumValue={1}
                     maximumValue={10}
                     step={1}
-                    minimumTrackTintColor={Colors.starFilled}
+                    minimumTrackTintColor={ChildColors.starGold}
                     maximumTrackTintColor={ChildColors.cardBackgroundVariant}
-                    thumbTintColor={Colors.starFilled}
+                    thumbTintColor={ChildColors.starGold}
                     style={styles.bonusSlider}
                   />
                   <TextInput
@@ -394,9 +394,9 @@ export default function SettingsScreen() {
                 minimumValue={5}
                 maximumValue={50}
                 step={5}
-                minimumTrackTintColor={Colors.streak}
+                minimumTrackTintColor={ChildColors.accentRed}
                 maximumTrackTintColor={ChildColors.cardBackgroundVariant}
-                thumbTintColor={Colors.streak}
+                thumbTintColor={ChildColors.accentRed}
                 style={styles.slider}
               />
               <Text variant="bodySmall" style={styles.sliderLabel}>
@@ -408,9 +408,9 @@ export default function SettingsScreen() {
                 minimumValue={0}
                 maximumValue={5}
                 step={1}
-                minimumTrackTintColor={Colors.streak}
+                minimumTrackTintColor={ChildColors.accentRed}
                 maximumTrackTintColor={ChildColors.cardBackgroundVariant}
-                thumbTintColor={Colors.streak}
+                thumbTintColor={ChildColors.accentRed}
                 style={styles.slider}
               />
             </Card.Content>
@@ -466,7 +466,7 @@ export default function SettingsScreen() {
               <Button
                 mode="outlined"
                 icon="logout"
-                textColor={Colors.error}
+                textColor={ChildColors.accentRed}
                 onPress={handleLogout}
                 style={styles.logoutButton}
               >
@@ -563,10 +563,10 @@ const styles = StyleSheet.create({
     gap: Layout.padding.sm,
   },
   switchButton: {
-    borderColor: Colors.secondary,
+    borderColor: ChildColors.starGold,
   },
   logoutButton: {
-    borderColor: Colors.error,
+    borderColor: ChildColors.accentRed,
     backgroundColor: ChildColors.accentRedContainer,
   },
 });
