@@ -1,7 +1,11 @@
 import { Tabs, useRouter } from 'expo-router';
-import { Icon, IconButton } from 'react-native-paper';
-import { Colors } from '../../constants';
+import { View, StyleSheet, Image } from 'react-native';
+import { Icon, IconButton, Text } from 'react-native-paper';
+import { ChildColors, ChildSizes } from '../../constants';
 import { useAuthStore } from '../../lib/stores';
+
+// Galo shield image
+const GaloShield = require('../../assets/images/mascot/galo-shield.png');
 
 export default function ChildLayout() {
   const router = useRouter();
@@ -15,83 +19,136 @@ export default function ChildLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.secondary,
-        tabBarInactiveTintColor: Colors.textSecondary,
-        tabBarStyle: {
-          backgroundColor: Colors.surface,
-          height: 64,
-          paddingBottom: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: 'bold',
-        },
-        headerStyle: { backgroundColor: Colors.secondaryContainer },
-        headerTintColor: Colors.text,
+        tabBarActiveTintColor: ChildColors.tabActive,
+        tabBarInactiveTintColor: ChildColors.tabInactive,
+        tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarItemStyle: styles.tabItem,
+        headerStyle: styles.header,
+        headerTintColor: ChildColors.textPrimary,
+        headerTitleStyle: styles.headerTitle,
         headerRight: () => (
-          <IconButton
-            icon="account-switch"
-            iconColor={Colors.primary}
-            size={24}
-            onPress={switchToParent}
-          />
+          <Image source={GaloShield} style={styles.headerShield} resizeMode="contain" />
         ),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Today',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="star-face" size={size + 4} color={color} />
+          title: 'Hoje',
+          headerTitle: 'Meu Dia',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="star-face" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="tasks"
         options={{
-          title: 'My Tasks',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="format-list-checks" size={size + 4} color={color} />
+          title: 'Tarefas',
+          headerTitle: 'Minhas Tarefas',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="format-list-checks" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="stars"
         options={{
-          title: 'Stars',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="star-shooting" size={size + 4} color={color} />
+          title: 'Estrelas',
+          headerTitle: 'Minhas Estrelas',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="star-shooting" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="shop"
         options={{
-          title: 'Shop',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="gift" size={size + 4} color={color} />
+          title: 'Loja',
+          headerTitle: 'Loja de Prêmios',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="gift" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="badges"
         options={{
-          title: 'Badges',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="shield-star" size={size + 4} color={color} />
+          title: 'Troféus',
+          headerTitle: 'Meus Troféus',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="trophy" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Me',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="account-circle" size={size + 4} color={color} />
+          title: 'Perfil',
+          headerTitle: 'Meu Perfil',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="account-circle" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: ChildColors.tabBackground,
+    borderTopWidth: 0,
+    height: ChildSizes.tabBarHeight,
+    paddingBottom: 8,
+    paddingTop: 8,
+    elevation: 8,
+    shadowColor: ChildColors.shadowColor,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 4,
+  },
+  tabItem: {
+    paddingTop: 4,
+  },
+  tabIconContainer: {
+    padding: 4,
+    borderRadius: 12,
+  },
+  tabIconActive: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+  },
+  header: {
+    backgroundColor: ChildColors.galoBlack,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  headerTitle: {
+    color: ChildColors.textPrimary,
+    fontWeight: '700',
+    fontSize: 18,
+  },
+  headerShield: {
+    width: 28,
+    height: 36,
+    marginRight: 12,
+  },
+});

@@ -1,5 +1,13 @@
 export { Colors } from './colors';
 export { Layout } from './layout';
+export { 
+  ChildColors, 
+  ChildGradients, 
+  ChildSizes, 
+  GALO_EMOJI, 
+  STAR_EMOJI, 
+  TROPHY_EMOJI 
+} from './childTheme';
 export {
   DEFAULT_SETTINGS,
   STAR_VALUES,

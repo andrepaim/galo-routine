@@ -83,6 +83,54 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   initAuth: () => {
+    // DEV MODE: Check for ?dev=child or ?dev=parent in URL to bypass Firebase auth
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const devMode = params.get('dev');
+      if (devMode === 'child' || devMode === 'parent') {
+        console.log('[DEV] Mocking auth state for role:', devMode);
+        set({
+          uid: 'dev-user-123',
+          email: 'dev@test.com',
+          familyId: 'dev-family-123',
+          role: devMode,
+          childName: 'Vitor',
+          parentName: 'Andre',
+          isAuthenticated: true,
+          isLoading: false,
+          family: {
+            parentUid: 'dev-user-123',
+            childPin: 'mock-hashed-pin',
+            parentName: 'Andre',
+            childName: 'Vitor',
+            starBalance: 42,
+            lifetimeStarsEarned: 150,
+            currentStreak: 7,
+            bestStreak: 14,
+            settings: {
+              rewardThresholdPercent: 80,
+              penaltyThresholdPercent: 50,
+              rewardDescription: 'Parabéns!',
+              penaltyDescription: 'Tente mais amanhã',
+              periodType: 'weekly',
+              periodStartDay: 0,
+              autoRollPeriods: true,
+              onTimeBonusEnabled: true,
+              onTimeBonusStars: 1,
+              perfectDayBonusEnabled: true,
+              perfectDayBonusStars: 3,
+              earlyFinishBonusEnabled: false,
+              earlyFinishBonusStars: 2,
+              earlyFinishCutoff: '12:00',
+              streakFreezeCost: 5,
+              maxStreakFreezesPerPeriod: 1,
+            } as any,
+          },
+        });
+        return () => {}; // No-op unsubscribe for dev mode
+      }
+    }
+
     const unsubscribe = onAuthChange(async (user) => {
       if (user) {
         const storedRole = await Storage.getItem(ROLE_KEY);

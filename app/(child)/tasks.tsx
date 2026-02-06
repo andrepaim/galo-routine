@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { View, SectionList, StyleSheet } from 'react-native';
-import { Text, Card, Icon } from 'react-native-paper';
+import { Text, Icon } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { eachDayOfInterval, format, isToday, isBefore, startOfDay } from 'date-fns';
-import { Colors, Layout } from '../../constants';
+import { ptBR } from 'date-fns/locale';
+import { ChildColors, ChildSizes, STAR_EMOJI } from '../../constants/childTheme';
 import { useTaskStore, usePeriodStore, useCompletionStore } from '../../lib/stores';
 import { getTasksForDate } from '../../lib/utils/recurrence';
 import { compareTimeStrings, formatTimeRange } from '../../lib/utils/time';
-import { StarDisplay } from '../../components/stars/StarDisplay';
 import { EmptyState } from '../../components/ui/EmptyState';
 import type { TodayTask } from '../../lib/types';
 
@@ -34,7 +34,7 @@ export default function ChildTasksScreen() {
         .sort((a, b) => compareTimeStrings(a.startTime, b.startTime));
 
       return {
-        title: format(date, 'EEEE, MMM d'),
+        title: format(date, "EEEE, d 'de' MMMM", { locale: ptBR }),
         isToday: isToday(date),
         isPast: isBefore(date, startOfDay(new Date())),
         data: todayTasks,
@@ -47,8 +47,8 @@ export default function ChildTasksScreen() {
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <EmptyState
           icon="calendar-blank"
-          title="No Active Period"
-          description="Wait for your parent to start a new period."
+          title="Sem Período Ativo"
+          description="Aguarde seus pais iniciarem um novo período."
         />
       </SafeAreaView>
     );
@@ -61,47 +61,45 @@ export default function ChildTasksScreen() {
         keyExtractor={(item, index) => `${item.id}_${index}`}
         renderSectionHeader={({ section }) => (
           <View style={[styles.sectionHeader, section.isToday && styles.todayHeader]}>
-            <Text
-              variant="titleSmall"
-              style={[styles.sectionTitle, section.isToday && styles.todayTitle]}
-            >
-              {section.isToday ? 'TODAY' : section.title}
+            <Text style={[styles.sectionTitle, section.isToday && styles.todayTitle]}>
+              {section.isToday ? 'HOJE' : section.title.toUpperCase()}
             </Text>
             {section.isToday && (
-              <Icon source="star" size={16} color={Colors.primary} />
+              <Text style={styles.starIcon}>{STAR_EMOJI}</Text>
             )}
           </View>
         )}
         renderItem={({ item, section }) => {
           const timeLabel = formatTimeRange(item.startTime, item.endTime);
+          const status = item.completion?.status;
           return (
-            <Card style={[styles.taskItem, section.isPast && styles.pastItem]}>
-              <Card.Title
-                title={item.name}
-                titleVariant="bodyLarge"
-                subtitle={timeLabel}
-                subtitleStyle={styles.timeSubtitle}
-                left={(props) => (
+            <View style={[styles.taskCard, section.isPast && styles.pastItem]}>
+              <View style={styles.taskLeft}>
+                <View style={[styles.statusIcon, { backgroundColor: getStatusBgColor(status) }]}>
                   <Icon
-                    {...props}
-                    source={getCompletionIcon(item.completion?.status)}
-                    color={getCompletionColor(item.completion?.status)}
+                    source={getCompletionIcon(status)}
+                    size={20}
+                    color={getStatusIconColor(status)}
                   />
-                )}
-                right={() => (
-                  <StarDisplay
-                    count={item.starValue}
-                    maxStars={item.starValue}
-                    size={14}
-                    showEmpty={false}
-                  />
-                )}
-              />
-            </Card>
+                </View>
+                <View style={styles.taskInfo}>
+                  <Text style={styles.taskName}>{item.name}</Text>
+                  <Text style={styles.taskTime}>{timeLabel}</Text>
+                </View>
+              </View>
+              <View style={styles.starBadge}>
+                <Text style={styles.starValue}>+{item.starValue}</Text>
+              </View>
+            </View>
           );
         }}
         stickySectionHeadersEnabled
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Nenhuma tarefa encontrada</Text>
+          </View>
+        }
       />
     </SafeAreaView>
   );
@@ -110,58 +108,123 @@ export default function ChildTasksScreen() {
 function getCompletionIcon(status?: string): string {
   switch (status) {
     case 'approved': return 'check-circle';
-    case 'pending': return 'check-circle-outline';
+    case 'pending': return 'clock-outline';
     case 'rejected': return 'close-circle';
     default: return 'circle-outline';
   }
 }
 
-function getCompletionColor(status?: string): string {
+function getStatusBgColor(status?: string): string {
   switch (status) {
-    case 'approved': return Colors.reward;
-    case 'pending': return Colors.pending;
-    case 'rejected': return Colors.penalty;
-    default: return Colors.textLight;
+    case 'approved': return ChildColors.accentGreen;
+    case 'pending': return ChildColors.accentPurple;
+    case 'rejected': return ChildColors.accentRed;
+    default: return ChildColors.cardBackgroundLight;
+  }
+}
+
+function getStatusIconColor(status?: string): string {
+  switch (status) {
+    case 'approved': 
+    case 'pending':
+    case 'rejected':
+      return ChildColors.galoWhite;
+    default: 
+      return ChildColors.textMuted;
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   list: {
-    padding: Layout.padding.sm,
+    padding: 12,
+    paddingBottom: 100,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.padding.xs,
-    backgroundColor: Colors.background,
-    paddingVertical: Layout.padding.sm,
-    paddingHorizontal: Layout.padding.md,
+    gap: 8,
+    backgroundColor: ChildColors.galoDark,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 12,
   },
   todayHeader: {
-    backgroundColor: Colors.primaryContainer,
-    borderRadius: Layout.radius.sm,
+    backgroundColor: ChildColors.starGold,
   },
   sectionTitle: {
-    color: Colors.textSecondary,
+    fontSize: 14,
     fontWeight: 'bold',
+    color: ChildColors.textSecondary,
+    letterSpacing: 1,
   },
   todayTitle: {
-    color: Colors.primaryDark,
+    color: ChildColors.galoBlack,
   },
-  taskItem: {
-    marginVertical: 2,
-    marginHorizontal: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+  starIcon: {
+    fontSize: 16,
+  },
+  taskCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    padding: 16,
+    marginVertical: 4,
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
   },
   pastItem: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
-  timeSubtitle: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+  taskLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  statusIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  taskInfo: {
+    flex: 1,
+  },
+  taskName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: ChildColors.textPrimary,
+  },
+  taskTime: {
+    fontSize: 13,
+    color: ChildColors.textSecondary,
+    marginTop: 2,
+  },
+  starBadge: {
+    backgroundColor: ChildColors.starGold,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  starValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: ChildColors.galoBlack,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: ChildColors.textMuted,
+    fontSize: 16,
   },
 });

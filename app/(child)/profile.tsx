@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Text, Card, Icon, IconButton, Button } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Alert, Image } from 'react-native';
+import { Text, Icon, IconButton, Button } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Colors, Layout, AVATAR_OPTIONS, ACCENT_COLOR_OPTIONS, ALL_BADGES } from '../../constants';
+import { AVATAR_OPTIONS, ACCENT_COLOR_OPTIONS, ALL_BADGES } from '../../constants';
+import { ChildColors, ChildSizes, GALO_EMOJI, STAR_EMOJI, TROPHY_EMOJI } from '../../constants/childTheme';
+
+// Galo Volpi mascot image (white version for dark background)
+const GaloVolpiImage = require('../../assets/images/mascot/galo-volpi-white.png');
 import { useAuthStore, useBadgeStore } from '../../lib/stores';
 import { updateFamily } from '../../lib/firebase/firestore';
-import { StreakDisplay } from '../../components/streaks/StreakDisplay';
 
 export default function ChildProfileScreen() {
   const { familyId, childName, family } = useAuthStore();
   const { earnedBadges } = useBadgeStore();
   const [selectedAvatar, setSelectedAvatar] = useState(family?.childAvatar ?? 'account-circle');
-  const [selectedColor, setSelectedColor] = useState(family?.childAccentColor ?? Colors.secondary);
+  const [selectedColor, setSelectedColor] = useState(family?.childAccentColor ?? ChildColors.starGold);
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -25,9 +28,10 @@ export default function ChildProfileScreen() {
         childAccentColor: selectedColor,
       } as any);
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Saved!', 'Your profile has been updated.');
+      Alert.alert('Salvo!', 'Seu perfil foi atualizado.');
     } catch (e) {
       console.error('Failed to save profile:', e);
+      Alert.alert('Erro', 'Não foi possível salvar.');
     } finally {
       setSaving(false);
     }
@@ -36,99 +40,95 @@ export default function ChildProfileScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Avatar section */}
+        {/* Avatar Section */}
         <Animated.View entering={FadeInUp.duration(400)} style={styles.avatarSection}>
-          <View style={[styles.currentAvatar, { borderColor: selectedColor }]}>
-            <Icon source={selectedAvatar} size={64} color={selectedColor} />
+          <View style={[styles.avatarRing, { borderColor: selectedColor }]}>
+            <View style={styles.avatarInner}>
+              <Icon source={selectedAvatar} size={64} color={selectedColor} />
+            </View>
           </View>
-          <Text variant="headlineSmall" style={styles.name}>
-            {childName || 'Star'}
-          </Text>
+          <Text style={styles.name}>{childName || 'Campeão'}</Text>
+          <View style={styles.subtitleRow}>
+            <Text style={styles.subtitle}>Jogador do Galo</Text>
+            <Image source={GaloVolpiImage} style={styles.miniMascot} resizeMode="contain" />
+          </View>
         </Animated.View>
 
-        {/* Stats */}
+        {/* Stats Row */}
         <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.statsRow}>
-          <Card style={styles.statCard}>
-            <Card.Content style={styles.statContent}>
-              <Icon source="star" size={24} color={Colors.starFilled} />
-              <Text variant="headlineSmall" style={styles.statNumber}>
-                {family?.starBalance ?? 0}
-              </Text>
-              <Text variant="bodySmall" style={styles.statLabel}>Stars</Text>
-            </Card.Content>
-          </Card>
-          <Card style={styles.statCard}>
-            <Card.Content style={styles.statContent}>
-              <Icon source="star-shooting" size={24} color={Colors.primary} />
-              <Text variant="headlineSmall" style={styles.statNumber}>
-                {family?.lifetimeStarsEarned ?? 0}
-              </Text>
-              <Text variant="bodySmall" style={styles.statLabel}>Lifetime</Text>
-            </Card.Content>
-          </Card>
-          <Card style={styles.statCard}>
-            <Card.Content style={styles.statContent}>
-              <Icon source="shield-star" size={24} color={Colors.badgeGold} />
-              <Text variant="headlineSmall" style={styles.statNumber}>
-                {earnedBadges.length}
-              </Text>
-              <Text variant="bodySmall" style={styles.statLabel}>Badges</Text>
-            </Card.Content>
-          </Card>
+          <View style={styles.statCard}>
+            <Text style={styles.statEmoji}>{STAR_EMOJI}</Text>
+            <Text style={styles.statNumber}>{family?.starBalance ?? 0}</Text>
+            <Text style={styles.statLabel}>Estrelas</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statEmoji}>🌟</Text>
+            <Text style={styles.statNumber}>{family?.lifetimeStarsEarned ?? 0}</Text>
+            <Text style={styles.statLabel}>Total Ganhas</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statEmoji}>{TROPHY_EMOJI}</Text>
+            <Text style={styles.statNumber}>{earnedBadges.length}</Text>
+            <Text style={styles.statLabel}>Troféus</Text>
+          </View>
         </Animated.View>
 
-        {/* Streak */}
-        <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.section}>
-          <StreakDisplay
-            currentStreak={family?.currentStreak ?? 0}
-            bestStreak={family?.bestStreak ?? 0}
-          />
+        {/* Streak Card */}
+        <Animated.View entering={FadeInUp.delay(150).duration(400)} style={styles.streakCard}>
+          <View style={styles.streakHeader}>
+            <Icon source="fire" size={28} color={ChildColors.accentRed} />
+            <Text style={styles.streakTitle}>Sequência</Text>
+          </View>
+          <View style={styles.streakStats}>
+            <View style={styles.streakItem}>
+              <Text style={styles.streakNumber}>{family?.currentStreak ?? 0}</Text>
+              <Text style={styles.streakLabel}>Dias seguidos</Text>
+            </View>
+            <View style={styles.streakDivider} />
+            <View style={styles.streakItem}>
+              <Text style={styles.streakNumber}>{family?.bestStreak ?? 0}</Text>
+              <Text style={styles.streakLabel}>Recorde</Text>
+            </View>
+          </View>
         </Animated.View>
 
-        {/* Avatar picker */}
-        <Animated.View entering={FadeInUp.delay(300).duration(400)}>
-          <Card style={styles.sectionCard}>
-            <Card.Content>
-              <Text variant="titleMedium" style={styles.sectionTitle}>
-                Choose Avatar
-              </Text>
-              <View style={styles.avatarGrid}>
-                {AVATAR_OPTIONS.map((av) => (
-                  <IconButton
-                    key={av}
-                    icon={av}
-                    size={32}
-                    mode={selectedAvatar === av ? 'contained' : 'outlined'}
-                    onPress={() => setSelectedAvatar(av)}
-                    iconColor={selectedAvatar === av ? Colors.white : Colors.text}
-                    containerColor={selectedAvatar === av ? selectedColor : undefined}
-                  />
-                ))}
-              </View>
-            </Card.Content>
-          </Card>
+        {/* Avatar Picker */}
+        <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Escolha seu Avatar</Text>
+          <View style={styles.avatarGrid}>
+            {AVATAR_OPTIONS.map((av) => (
+              <IconButton
+                key={av}
+                icon={av}
+                size={32}
+                mode={selectedAvatar === av ? 'contained' : 'outlined'}
+                onPress={() => setSelectedAvatar(av)}
+                iconColor={selectedAvatar === av ? ChildColors.galoBlack : ChildColors.textSecondary}
+                containerColor={selectedAvatar === av ? ChildColors.starGold : ChildColors.cardBackgroundLight}
+                style={styles.avatarOption}
+              />
+            ))}
+          </View>
         </Animated.View>
 
-        {/* Color picker */}
-        <Animated.View entering={FadeInUp.delay(400).duration(400)}>
-          <Card style={styles.sectionCard}>
-            <Card.Content>
-              <Text variant="titleMedium" style={styles.sectionTitle}>
-                Accent Color
-              </Text>
-              <View style={styles.colorRow}>
-                {ACCENT_COLOR_OPTIONS.map((color) => (
-                  <IconButton
-                    key={color}
-                    icon={selectedColor === color ? 'check-circle' : 'circle'}
-                    size={32}
-                    iconColor={color}
-                    onPress={() => setSelectedColor(color)}
-                  />
-                ))}
-              </View>
-            </Card.Content>
-          </Card>
+        {/* Color Picker */}
+        <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Cor Favorita</Text>
+          <View style={styles.colorRow}>
+            {ACCENT_COLOR_OPTIONS.map((color) => (
+              <IconButton
+                key={color}
+                icon={selectedColor === color ? 'check-circle' : 'circle'}
+                size={36}
+                iconColor={color}
+                onPress={() => setSelectedColor(color)}
+                style={[
+                  styles.colorOption,
+                  selectedColor === color && styles.colorSelected,
+                ]}
+              />
+            ))}
+          </View>
         </Animated.View>
 
         <Button
@@ -137,8 +137,11 @@ export default function ChildProfileScreen() {
           loading={saving}
           disabled={saving}
           style={styles.saveBtn}
+          buttonColor={ChildColors.starGold}
+          textColor={ChildColors.galoBlack}
+          labelStyle={styles.saveBtnLabel}
         >
-          Save Profile
+          Salvar Perfil
         </Button>
       </ScrollView>
     </SafeAreaView>
@@ -148,72 +151,158 @@ export default function ChildProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondaryContainer,
+    backgroundColor: ChildColors.galoBlack,
   },
   content: {
-    padding: Layout.padding.md,
-    paddingBottom: Layout.padding.xl * 2,
+    padding: 16,
+    paddingBottom: 100,
   },
   avatarSection: {
     alignItems: 'center',
-    marginBottom: Layout.padding.lg,
+    marginBottom: 24,
   },
-  currentAvatar: {
+  avatarRing: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: ChildColors.cardBackground,
+  },
+  avatarInner: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.galoDark,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
   },
   name: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: Colors.text,
-    marginTop: Layout.padding.sm,
+    color: ChildColors.textPrimary,
+    marginTop: 16,
+  },
+  subtitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: ChildColors.textSecondary,
+  },
+  miniMascot: {
+    width: 24,
+    height: 40,
   },
   statsRow: {
     flexDirection: 'row',
-    gap: Layout.padding.sm,
-    marginBottom: Layout.padding.lg,
+    gap: 12,
+    marginBottom: 16,
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.surface,
-  },
-  statContent: {
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: 16,
+    padding: 16,
     alignItems: 'center',
-    gap: 2,
+    gap: 4,
+  },
+  statEmoji: {
+    fontSize: 24,
   },
   statNumber: {
+    fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   statLabel: {
-    color: Colors.textSecondary,
+    fontSize: 11,
+    color: ChildColors.textSecondary,
+    textAlign: 'center',
   },
-  section: {
-    marginBottom: Layout.padding.lg,
+  streakCard: {
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    padding: 20,
+    marginBottom: 16,
+  },
+  streakHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  streakTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: ChildColors.textPrimary,
+  },
+  streakStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  streakItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  streakNumber: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: ChildColors.starGold,
+  },
+  streakLabel: {
+    fontSize: 13,
+    color: ChildColors.textSecondary,
+    marginTop: 4,
+  },
+  streakDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: ChildColors.cardBorder,
   },
   sectionCard: {
-    backgroundColor: Colors.surface,
-    marginBottom: Layout.padding.md,
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    padding: 20,
+    marginBottom: 16,
   },
   sectionTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: Layout.padding.sm,
+    color: ChildColors.textPrimary,
+    marginBottom: 16,
   },
   avatarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 4,
+    gap: 8,
+  },
+  avatarOption: {
+    margin: 0,
   },
   colorRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: 4,
+  },
+  colorOption: {
+    margin: 0,
+  },
+  colorSelected: {
+    backgroundColor: ChildColors.cardBackgroundLight,
+    borderRadius: 20,
   },
   saveBtn: {
-    marginTop: Layout.padding.sm,
+    marginTop: 8,
+    borderRadius: 12,
+    paddingVertical: 4,
+  },
+  saveBtnLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
