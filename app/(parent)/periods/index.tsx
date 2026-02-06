@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Colors, Layout } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { useAuthStore, usePeriodStore, useTaskStore } from '../../../lib/stores';
 import { useCurrentPeriod } from '../../../lib/hooks/useCurrentPeriod';
 import { useStarBudget } from '../../../lib/hooks/useStarBudget';
@@ -28,19 +28,19 @@ export default function PeriodScreen() {
   const [showCelebration, setShowCelebration] = useState(false);
 
   if (isLoading) {
-    return <LoadingScreen message="Loading period..." />;
+    return <LoadingScreen message="Carregando período..." />;
   }
 
   const handleEndPeriod = () => {
     if (!familyId || !activePeriod?.id) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     Alert.alert(
-      'End Period',
-      'Are you sure you want to end the current period? The outcome will be calculated based on stars earned.',
+      'Encerrar Período',
+      'Tem certeza que quer encerrar o período atual? O resultado será calculado com base nas estrelas ganhas.',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'End Period',
+          text: 'Encerrar',
           onPress: async () => {
             await completePeriod(familyId, activePeriod.id!);
             if (starProgress && starProgress.isRewardZone) {
@@ -63,9 +63,9 @@ export default function PeriodScreen() {
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <EmptyState
           icon="calendar-plus"
-          title="No Active Period"
-          description="Start a new period to begin tracking stars."
-          actionLabel="Start Period"
+          title="Sem Período Ativo"
+          description="Inicie um novo período para começar a acompanhar as estrelas."
+          actionLabel="Iniciar Período"
           onAction={handleNewPeriod}
         />
       </SafeAreaView>
@@ -94,13 +94,13 @@ export default function PeriodScreen() {
 
         <Animated.View entering={FadeInUp.delay(350).duration(400)} style={styles.thresholds}>
           <Text variant="titleSmall" style={styles.thresholdTitle}>
-            Thresholds
+            Metas
           </Text>
           <Text variant="bodyMedium" style={styles.thresholdItem}>
-            Reward ({activePeriod.thresholds.rewardPercent}%): {activePeriod.thresholds.rewardDescription}
+            🏆 Prêmio ({activePeriod.thresholds.rewardPercent}%): {activePeriod.thresholds.rewardDescription}
           </Text>
           <Text variant="bodyMedium" style={styles.thresholdItem}>
-            Penalty ({activePeriod.thresholds.penaltyPercent}%): {activePeriod.thresholds.penaltyDescription}
+            ⚠️ Penalidade ({activePeriod.thresholds.penaltyPercent}%): {activePeriod.thresholds.penaltyDescription}
           </Text>
         </Animated.View>
 
@@ -109,16 +109,18 @@ export default function PeriodScreen() {
             mode="outlined"
             onPress={() => router.push('/(parent)/periods/history')}
             icon="history"
+            textColor={ChildColors.starGold}
+            style={styles.outlinedButton}
           >
-            View History
+            Ver Histórico
           </Button>
           <Button
             mode="contained"
-            buttonColor={Colors.penalty}
+            buttonColor={ChildColors.accentRed}
             onPress={handleEndPeriod}
             icon="stop"
           >
-            End Period Early
+            Encerrar
           </Button>
         </Animated.View>
       </ScrollView>
@@ -126,7 +128,7 @@ export default function PeriodScreen() {
       <CelebrationOverlay
         visible={showCelebration}
         onDismiss={() => setShowCelebration(false)}
-        message="Period complete!"
+        message="Período concluído!"
       />
     </SafeAreaView>
   );
@@ -135,31 +137,35 @@ export default function PeriodScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   content: {
-    padding: Layout.padding.md,
+    padding: 16,
   },
   ringContainer: {
     alignItems: 'center',
-    marginVertical: Layout.padding.lg,
+    marginVertical: 24,
   },
   divider: {
-    marginVertical: Layout.padding.lg,
+    marginVertical: 24,
+    backgroundColor: ChildColors.cardBorder,
   },
   thresholds: {
-    gap: Layout.padding.sm,
+    gap: 12,
   },
   thresholdTitle: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   thresholdItem: {
-    color: Colors.textSecondary,
+    color: ChildColors.textSecondary,
   },
   actions: {
     flexDirection: 'row',
-    gap: Layout.padding.md,
-    marginTop: Layout.padding.xl,
+    gap: 16,
+    marginTop: 32,
+  },
+  outlinedButton: {
+    borderColor: ChildColors.starGold,
   },
 });

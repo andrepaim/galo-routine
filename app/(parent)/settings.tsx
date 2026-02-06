@@ -6,7 +6,8 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Colors, Layout, DAY_NAMES } from '../../constants';
+import { Layout, DAY_NAMES } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore } from '../../lib/stores';
 import { updateFamilySettings, updateFamily } from '../../lib/firebase/firestore';
 import { hashPin } from '../../lib/utils/pin';
@@ -166,9 +167,9 @@ export default function SettingsScreen() {
                 minimumValue={50}
                 maximumValue={100}
                 step={5}
-                minimumTrackTintColor={Colors.reward}
-                maximumTrackTintColor={Colors.surfaceVariant}
-                thumbTintColor={Colors.reward}
+                minimumTrackTintColor={ChildColors.accentGreen}
+                maximumTrackTintColor={ChildColors.cardBackgroundVariant}
+                thumbTintColor={ChildColors.accentGreen}
                 style={styles.slider}
               />
 
@@ -181,9 +182,9 @@ export default function SettingsScreen() {
                 minimumValue={10}
                 maximumValue={rewardThreshold - 5}
                 step={5}
-                minimumTrackTintColor={Colors.penalty}
-                maximumTrackTintColor={Colors.surfaceVariant}
-                thumbTintColor={Colors.penalty}
+                minimumTrackTintColor={ChildColors.accentRed}
+                maximumTrackTintColor={ChildColors.cardBackgroundVariant}
+                thumbTintColor={ChildColors.accentRed}
                 style={styles.slider}
               />
             </Card.Content>
@@ -304,7 +305,7 @@ export default function SettingsScreen() {
                     maximumValue={5}
                     step={1}
                     minimumTrackTintColor={Colors.starFilled}
-                    maximumTrackTintColor={Colors.surfaceVariant}
+                    maximumTrackTintColor={ChildColors.cardBackgroundVariant}
                     thumbTintColor={Colors.starFilled}
                     style={styles.bonusSlider}
                   />
@@ -332,7 +333,7 @@ export default function SettingsScreen() {
                     maximumValue={10}
                     step={1}
                     minimumTrackTintColor={Colors.starFilled}
-                    maximumTrackTintColor={Colors.surfaceVariant}
+                    maximumTrackTintColor={ChildColors.cardBackgroundVariant}
                     thumbTintColor={Colors.starFilled}
                     style={styles.bonusSlider}
                   />
@@ -360,7 +361,7 @@ export default function SettingsScreen() {
                     maximumValue={10}
                     step={1}
                     minimumTrackTintColor={Colors.starFilled}
-                    maximumTrackTintColor={Colors.surfaceVariant}
+                    maximumTrackTintColor={ChildColors.cardBackgroundVariant}
                     thumbTintColor={Colors.starFilled}
                     style={styles.bonusSlider}
                   />
@@ -394,7 +395,7 @@ export default function SettingsScreen() {
                 maximumValue={50}
                 step={5}
                 minimumTrackTintColor={Colors.streak}
-                maximumTrackTintColor={Colors.surfaceVariant}
+                maximumTrackTintColor={ChildColors.cardBackgroundVariant}
                 thumbTintColor={Colors.streak}
                 style={styles.slider}
               />
@@ -408,7 +409,7 @@ export default function SettingsScreen() {
                 maximumValue={5}
                 step={1}
                 minimumTrackTintColor={Colors.streak}
-                maximumTrackTintColor={Colors.surfaceVariant}
+                maximumTrackTintColor={ChildColors.cardBackgroundVariant}
                 thumbTintColor={Colors.streak}
                 style={styles.slider}
               />
@@ -482,20 +483,20 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   content: {
     padding: Layout.padding.md,
     paddingBottom: Layout.padding.xl * 2,
   },
   sectionCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: Layout.elevation.low,
     marginBottom: Layout.padding.md,
   },
   sectionTitle: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
     marginBottom: Layout.padding.sm,
   },
   previewContainer: {
@@ -503,7 +504,7 @@ const styles = StyleSheet.create({
     marginBottom: Layout.padding.md,
   },
   sliderLabel: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginBottom: Layout.padding.xs,
   },
   slider: {
@@ -512,13 +513,13 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: Layout.padding.sm,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
   },
   segment: {
     marginBottom: Layout.padding.md,
   },
   label: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginBottom: Layout.padding.sm,
   },
   daysRow: {
@@ -545,7 +546,7 @@ const styles = StyleSheet.create({
     marginRight: Layout.padding.md,
   },
   switchDescription: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginTop: 2,
   },
   bonusValueRow: {
@@ -566,6 +567,6 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     borderColor: Colors.error,
-    backgroundColor: Colors.penaltyContainer,
+    backgroundColor: ChildColors.accentRedContainer,
   },
 });

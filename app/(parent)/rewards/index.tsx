@@ -4,7 +4,7 @@ import { FAB, Text, Card, Icon, Button } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Colors, Layout } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { useAuthStore, useRewardStore } from '../../../lib/stores';
 import { RewardCard } from '../../../components/rewards/RewardCard';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -27,16 +27,17 @@ export default function RewardsScreen() {
       {pendingRedemptions.length > 0 && (
         <Card style={styles.pendingCard}>
           <Card.Content style={styles.pendingContent}>
-            <Icon source="clock-outline" size={24} color={Colors.neutral} />
+            <Icon source="clock-outline" size={24} color={ChildColors.starGold} />
             <Text variant="bodyMedium" style={styles.pendingText}>
-              {pendingRedemptions.length} pending {pendingRedemptions.length === 1 ? 'redemption' : 'redemptions'}
+              {pendingRedemptions.length} {pendingRedemptions.length === 1 ? 'resgate pendente' : 'resgates pendentes'}
             </Text>
             <Button
               mode="text"
               compact
               onPress={() => router.push('/(parent)/rewards/history')}
+              textColor={ChildColors.starGold}
             >
-              Review
+              Revisar
             </Button>
           </Card.Content>
         </Card>
@@ -57,8 +58,8 @@ export default function RewardsScreen() {
         ListEmptyComponent={
           <EmptyState
             icon="gift-outline"
-            title="No Rewards Yet"
-            description="Create rewards for your child to redeem with their stars!"
+            title="Sem Prêmios"
+            description="Crie prêmios para seu filho resgatar com as estrelas!"
           />
         }
         contentContainerStyle={styles.list}
@@ -68,6 +69,7 @@ export default function RewardsScreen() {
         icon="plus"
         onPress={() => router.push('/(parent)/rewards/new')}
         style={styles.fab}
+        color={ChildColors.galoBlack}
       />
     </SafeAreaView>
   );
@@ -76,29 +78,32 @@ export default function RewardsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   pendingCard: {
-    margin: Layout.padding.md,
+    margin: 16,
     marginBottom: 0,
-    backgroundColor: Colors.neutralContainer,
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    borderWidth: 1,
+    borderColor: ChildColors.starGold,
   },
   pendingContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.padding.sm,
+    gap: 12,
   },
   pendingText: {
     flex: 1,
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   list: {
-    padding: Layout.padding.md,
+    padding: 16,
   },
   fab: {
     position: 'absolute',
-    right: Layout.padding.md,
-    bottom: Layout.padding.md,
-    backgroundColor: Colors.primary,
+    right: 16,
+    bottom: 16,
+    backgroundColor: ChildColors.starGold,
   },
 });
