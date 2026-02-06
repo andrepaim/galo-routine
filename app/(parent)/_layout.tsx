@@ -1,104 +1,171 @@
 import { Tabs, useRouter } from 'expo-router';
-import { Icon, IconButton } from 'react-native-paper';
-import { Colors } from '../../constants';
-import { useAuthStore } from '../../lib/stores';
+import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Icon } from 'react-native-paper';
+import { ChildColors, ChildSizes } from '../../constants';
+
+// Galo shield image
+const GaloShield = require('../../assets/images/mascot/galo-shield.png');
 
 export default function ParentLayout() {
   const router = useRouter();
 
+  const switchToChild = () => {
+    router.replace('/(auth)/child-pin');
+  };
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textSecondary,
-        tabBarStyle: { backgroundColor: Colors.surface },
-        headerStyle: { backgroundColor: Colors.primaryContainer },
-        headerTintColor: Colors.text,
+        tabBarActiveTintColor: ChildColors.starGold,
+        tabBarInactiveTintColor: ChildColors.tabInactive,
+        tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabLabel,
+        headerStyle: styles.header,
+        headerTintColor: ChildColors.textPrimary,
+        headerTitleStyle: styles.headerTitle,
         headerRight: () => (
-          <IconButton
-            icon="account-child"
-            iconColor={Colors.secondary}
-            size={24}
-            onPress={() => router.replace('/(auth)/child-pin')}
-          />
+          <TouchableOpacity onPress={switchToChild} style={styles.headerRightContainer}>
+            <Image source={GaloShield} style={styles.headerShield} resizeMode="contain" />
+          </TouchableOpacity>
         ),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="home" size={size} color={color} />
+          title: 'Início',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="home" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="tasks"
         options={{
-          title: 'Tasks',
+          title: 'Tarefas',
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="format-list-checks" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="format-list-checks" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="rewards"
         options={{
-          title: 'Rewards',
+          title: 'Prêmios',
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="gift" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="gift" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="approvals"
         options={{
-          title: 'Approvals',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="check-decagram" size={size} color={color} />
+          title: 'Aprovar',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="check-decagram" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="periods"
         options={{
-          title: 'Periods',
+          title: 'Períodos',
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="calendar-range" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="calendar-range" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="goals"
         options={{
-          title: 'Goals',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="flag-checkered" size={size} color={color} />
+          title: 'Metas',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="flag-checkered" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="analytics"
         options={{
-          title: 'Analytics',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="chart-line" size={size} color={color} />
+          title: 'Relatórios',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="chart-line" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size }) => (
-            <Icon source="cog" size={size} color={color} />
+          title: 'Config',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="cog" size={ChildSizes.tabIconSize} color={color} />
+            </View>
           ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: ChildColors.tabBackground,
+    borderTopWidth: 0,
+    height: ChildSizes.tabBarHeight,
+    paddingBottom: 8,
+    paddingTop: 8,
+    elevation: 8,
+    shadowColor: ChildColors.shadowColor,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  tabIconContainer: {
+    padding: 4,
+    borderRadius: 12,
+  },
+  tabIconActive: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+  },
+  header: {
+    backgroundColor: ChildColors.galoBlack,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  headerTitle: {
+    color: ChildColors.textPrimary,
+    fontWeight: '700',
+    fontSize: 18,
+  },
+  headerRightContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  headerShield: {
+    width: 28,
+    height: 36,
+  },
+});

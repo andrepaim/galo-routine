@@ -1,18 +1,18 @@
 import { Stack } from 'expo-router';
-import { Colors } from '../../constants';
+import { ChildColors } from '../../constants/childTheme';
 
 export default function AuthLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.primaryContainer },
-        headerTintColor: Colors.text,
-        contentStyle: { backgroundColor: Colors.background },
+        headerStyle: { backgroundColor: ChildColors.galoBlack },
+        headerTintColor: ChildColors.textPrimary,
+        contentStyle: { backgroundColor: ChildColors.galoBlack },
       }}
     >
-      <Stack.Screen name="login" options={{ title: 'Welcome', headerShown: false }} />
-      <Stack.Screen name="register" options={{ title: 'Create Family Account' }} />
-      <Stack.Screen name="child-pin" options={{ title: 'Child Mode', headerShown: false }} />
+      <Stack.Screen name="login" options={{ title: 'Bem-vindo', headerShown: false }} />
+      <Stack.Screen name="register" options={{ title: 'Criar Conta' }} />
+      <Stack.Screen name="child-pin" options={{ title: 'Modo Criança', headerShown: false }} />
     </Stack>
   );
 }

@@ -1,11 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, Image } from 'react-native';
 import { Text, Icon, Button } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { Colors, Layout, PIN_LENGTH } from '../../constants';
+import { PIN_LENGTH } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore } from '../../lib/stores';
+
+// Galo mascot
+const GaloVolpi = require('../../assets/images/mascot/galo-volpi-white.png');
 
 export default function ChildPinScreen() {
   const router = useRouter();
@@ -33,11 +37,11 @@ export default function ChildPinScreen() {
           router.replace('/(child)');
         } else {
           await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-          setError('Wrong PIN. Try again!');
+          setError('PIN errado. Tenta de novo!');
           setPin('');
         }
       } catch {
-        setError('Something went wrong');
+        setError('Algo deu errado');
         setPin('');
       } finally {
         setLoading(false);
@@ -56,12 +60,12 @@ export default function ChildPinScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Icon source="account-child-circle" size={80} color={Colors.secondary} />
+        <Image source={GaloVolpi} style={styles.mascot} resizeMode="contain" />
         <Text variant="headlineMedium" style={styles.greeting}>
-          Hi{childName ? `, ${childName}` : ''}!
+          E aí{childName ? `, ${childName}` : ''}!
         </Text>
         <Text variant="bodyLarge" style={styles.subtitle}>
-          Enter your PIN
+          Digite seu PIN
         </Text>
       </View>
 
@@ -97,7 +101,11 @@ export default function ChildPinScreen() {
                 onPress={handleDelete}
                 disabled={pin.length === 0}
               >
-                <Icon source="backspace" size={28} color={pin.length > 0 ? Colors.text : Colors.textLight} />
+                <Icon 
+                  source="backspace" 
+                  size={28} 
+                  color={pin.length > 0 ? ChildColors.textPrimary : ChildColors.textMuted} 
+                />
               </Pressable>
             );
           }
@@ -120,8 +128,9 @@ export default function ChildPinScreen() {
         mode="text"
         onPress={() => router.back()}
         style={styles.back}
+        textColor={ChildColors.starGold}
       >
-        Go Back
+        Voltar
       </Button>
     </SafeAreaView>
   );
@@ -130,44 +139,50 @@ export default function ChildPinScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondaryContainer,
+    backgroundColor: ChildColors.galoBlack,
     alignItems: 'center',
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: Layout.padding.lg,
+    marginBottom: 32,
+  },
+  mascot: {
+    width: 80,
+    height: 130,
+    marginBottom: 16,
   },
   greeting: {
     fontWeight: 'bold',
-    color: Colors.secondaryDark,
-    marginTop: Layout.padding.sm,
+    color: ChildColors.textPrimary,
+    marginTop: 8,
   },
   subtitle: {
-    color: Colors.textSecondary,
+    color: ChildColors.textSecondary,
+    marginTop: 4,
   },
   dots: {
     flexDirection: 'row',
-    gap: Layout.padding.md,
-    marginBottom: Layout.padding.md,
+    gap: 16,
+    marginBottom: 16,
   },
   dot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.secondary,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: ChildColors.starGold,
     backgroundColor: 'transparent',
   },
   dotFilled: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: ChildColors.starGold,
   },
   dotError: {
-    borderColor: Colors.penalty,
-    backgroundColor: Colors.penaltyLight,
+    borderColor: ChildColors.accentRed,
+    backgroundColor: ChildColors.accentRed,
   },
   error: {
-    color: Colors.penalty,
+    color: ChildColors.accentRed,
     height: 24,
     textAlign: 'center',
   },
@@ -179,7 +194,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     width: 280,
     justifyContent: 'center',
-    marginTop: Layout.padding.md,
+    marginTop: 16,
   },
   key: {
     width: 80,
@@ -189,18 +204,19 @@ const styles = StyleSheet.create({
     margin: 4,
   },
   digitKey: {
-    borderRadius: Layout.radius.lg,
-    backgroundColor: Colors.surface,
-    elevation: 1,
+    borderRadius: ChildSizes.cardRadius,
+    backgroundColor: ChildColors.cardBackground,
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
   },
   keyPressed: {
-    backgroundColor: Colors.secondaryLight,
+    backgroundColor: ChildColors.starGold,
   },
   digitText: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   back: {
-    marginTop: Layout.padding.lg,
+    marginTop: 32,
   },
 });
