@@ -1,5 +1,5 @@
 import { Tabs, useRouter } from 'expo-router';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Icon, IconButton, Text } from 'react-native-paper';
 import { ChildColors, ChildSizes } from '../../constants';
 import { useAuthStore } from '../../lib/stores';
@@ -28,7 +28,9 @@ export default function ChildLayout() {
         headerTintColor: ChildColors.textPrimary,
         headerTitleStyle: styles.headerTitle,
         headerRight: () => (
-          <Image source={GaloShield} style={styles.headerShield} resizeMode="contain" />
+          <TouchableOpacity onPress={switchToParent} style={styles.headerRightContainer}>
+            <Image source={GaloShield} style={styles.headerShield} resizeMode="contain" />
+          </TouchableOpacity>
         ),
       }}
     >
@@ -146,9 +148,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 18,
   },
+  headerRightContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
   headerShield: {
     width: 28,
     height: 36,
-    marginRight: 12,
   },
 });
