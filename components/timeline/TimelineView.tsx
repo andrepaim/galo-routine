@@ -4,6 +4,7 @@ import { Text, Icon, Card, Button } from 'react-native-paper';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Colors, Layout, getCategoryColor } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { StarDisplay } from '../stars/StarDisplay';
 import { formatTimeDisplay } from '../../lib/utils/time';
 import type { TodayTask } from '../../lib/types';
@@ -130,7 +131,7 @@ export function TimelineView({ tasks, onTaskPress, onComplete }: TimelineViewPro
                   {task.endTime ? ` - ${formatTimeDisplay(task.endTime)}` : ''}
                 </Text>
                 {isDone && (
-                  <Icon source="check-circle" size={16} color={Colors.reward} />
+                  <Icon source="check-circle" size={16} color={ChildColors.accentGreen} />
                 )}
               </Pressable>
             </Animated.View>
@@ -159,7 +160,7 @@ export function TimelineView({ tasks, onTaskPress, onComplete }: TimelineViewPro
                   <Icon
                     source={isDone ? 'check-circle' : 'circle-outline'}
                     size={24}
-                    color={isDone ? Colors.reward : Colors.textLight}
+                    color={isDone ? ChildColors.accentGreen : ChildColors.textPrimaryLight}
                   />
                   <Text
                     variant="bodyMedium"
@@ -200,14 +201,14 @@ const styles = StyleSheet.create({
   hourLabel: {
     width: 62,
     textAlign: 'right',
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     fontSize: 11,
     paddingRight: Layout.padding.sm,
   },
   hourLine: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.divider,
+    backgroundColor: ChildColors.cardBorder,
   },
   currentTimeIndicator: {
     position: 'absolute',
@@ -221,27 +222,27 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: Colors.penalty,
+    backgroundColor: ChildColors.accentRed,
   },
   currentTimeLine: {
     flex: 1,
     height: 2,
-    backgroundColor: Colors.penalty,
+    backgroundColor: ChildColors.accentRed,
   },
   taskBlock: {
     position: 'absolute',
     left: 0,
     right: 0,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     borderRadius: Layout.radius.sm,
     borderLeftWidth: 4,
-    borderLeftColor: Colors.primary,
+    borderLeftColor: ChildColors.starGold,
     elevation: Layout.elevation.low,
     overflow: 'hidden',
   },
   currentTask: {
     borderWidth: 2,
-    borderColor: Colors.secondary,
+    borderColor: ChildColors.starGold,
     elevation: Layout.elevation.medium,
   },
   completedTask: {
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   },
   completedText: {
     textDecorationLine: 'line-through',
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   taskBlockInner: {
     padding: Layout.padding.sm,
@@ -263,17 +264,17 @@ const styles = StyleSheet.create({
   },
   taskBlockName: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
     flex: 1,
     marginRight: Layout.padding.sm,
   },
   taskBlockTime: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     fontSize: 11,
   },
   anytimeTitle: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
     marginTop: Layout.padding.lg,
     marginBottom: Layout.padding.sm,
     paddingHorizontal: Layout.padding.md,
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
   anytimeCard: {
     marginHorizontal: Layout.padding.md,
     marginVertical: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
   },
   anytimeContent: {
     flexDirection: 'row',
@@ -290,6 +291,6 @@ const styles = StyleSheet.create({
   },
   anytimeName: {
     flex: 1,
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
 });

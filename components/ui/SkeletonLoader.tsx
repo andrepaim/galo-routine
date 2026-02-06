@@ -8,6 +8,7 @@ import Animated, {
   FadeIn,
 } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 
 interface SkeletonBoxProps {
   width: number | string;
@@ -34,7 +35,7 @@ export function SkeletonBox({ width, height, borderRadius = Layout.radius.sm, st
           width: width as number,
           height,
           borderRadius,
-          backgroundColor: Colors.divider,
+          backgroundColor: ChildColors.cardBorder,
         },
         animatedStyle,
         style,
@@ -102,7 +103,7 @@ export function SkeletonDashboard() {
 
 const skeletonStyles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackgroundVariant,
     borderRadius: Layout.radius.md,
     padding: Layout.padding.md,
     marginBottom: Layout.padding.sm,
@@ -134,7 +135,7 @@ const skeletonStyles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackgroundVariant,
     borderRadius: Layout.radius.md,
     padding: Layout.padding.lg,
     alignItems: 'center',

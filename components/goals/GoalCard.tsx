@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Card, Text, Icon, ProgressBar, Button } from 'react-native-paper';
 import { format } from 'date-fns';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import type { LongTermGoal } from '../../lib/types';
 
 interface GoalCardProps {
@@ -24,7 +25,7 @@ export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardPro
           <Icon
             source={goal.isCompleted ? 'trophy' : 'flag-checkered'}
             size={28}
-            color={goal.isCompleted ? Colors.badgeGold : Colors.primary}
+            color={goal.isCompleted ? ChildColors.starGold : ChildColors.starGold}
           />
           <View style={styles.headerInfo}>
             <Text variant="titleMedium" style={styles.name}>
@@ -37,7 +38,7 @@ export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardPro
             )}
           </View>
           {onDelete && !goal.isCompleted && (
-            <Button mode="text" compact onPress={onDelete} textColor={Colors.error}>
+            <Button mode="text" compact onPress={onDelete} textColor={ChildColors.accentRed}>
               Delete
             </Button>
           )}
@@ -60,7 +61,7 @@ export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardPro
           </View>
           <ProgressBar
             progress={progress}
-            color={goal.isCompleted ? Colors.badgeGold : Colors.primary}
+            color={goal.isCompleted ? ChildColors.starGold : ChildColors.starGold}
             style={styles.progressBar}
           />
           {!goal.isCompleted && starsRemaining > 0 && (
@@ -71,7 +72,7 @@ export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardPro
         </View>
 
         <View style={styles.rewardRow}>
-          <Icon source="gift" size={16} color={Colors.reward} />
+          <Icon source="gift" size={16} color={ChildColors.accentGreen} />
           <Text variant="bodySmall" style={styles.rewardText}>
             {goal.rewardDescription}
           </Text>
@@ -79,7 +80,7 @@ export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardPro
 
         {goal.isCompleted && (
           <View style={styles.completedBanner}>
-            <Icon source="check-decagram" size={20} color={Colors.reward} />
+            <Icon source="check-decagram" size={20} color={ChildColors.accentGreen} />
             <Text variant="bodyMedium" style={styles.completedText}>
               Goal Achieved!
             </Text>
@@ -93,11 +94,11 @@ export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardPro
 const styles = StyleSheet.create({
   card: {
     marginVertical: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: Layout.elevation.low,
   },
   completedCard: {
-    backgroundColor: Colors.rewardContainer,
+    backgroundColor: ChildColors.accentGreenContainer,
   },
   content: {
     gap: Layout.padding.sm,
@@ -112,13 +113,13 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   deadline: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   description: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   progressSection: {
     gap: Layout.padding.xs,
@@ -128,10 +129,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   progressText: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   progressPercent: {
-    color: Colors.primary,
+    color: ChildColors.starGold,
     fontWeight: 'bold',
   },
   progressBar: {
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     height: 8,
   },
   remaining: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     fontStyle: 'italic',
   },
   rewardRow: {
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
     paddingVertical: Layout.padding.xs,
   },
   rewardText: {
-    color: Colors.reward,
+    color: ChildColors.accentGreen,
     flex: 1,
   },
   completedBanner: {
@@ -158,11 +159,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Layout.padding.sm,
     paddingVertical: Layout.padding.sm,
-    backgroundColor: Colors.rewardContainer,
+    backgroundColor: ChildColors.accentGreenContainer,
     borderRadius: Layout.radius.sm,
   },
   completedText: {
-    color: Colors.reward,
+    color: ChildColors.accentGreen,
     fontWeight: 'bold',
   },
 });

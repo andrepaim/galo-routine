@@ -10,6 +10,7 @@ import Animated, {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
@@ -49,7 +50,7 @@ export function StarCounter({ earned, budget, pending = 0, size = 'small' }: Sta
     <View style={styles.container}>
       <View style={styles.row}>
         <Animated.View style={starAnimatedStyle}>
-          <Icon source="star" size={iconSize} color={Colors.starFilled} />
+          <Icon source="star" size={iconSize} color={ChildColors.starGold} />
         </Animated.View>
         <AnimatedTextInput
           animatedProps={animatedTextProps}
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
   },
   earned: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
     padding: 0,
   },
   earnedLarge: {
@@ -108,21 +109,21 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   budget: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   pending: {
-    color: Colors.neutral,
+    color: ChildColors.starGold,
     marginTop: 2,
   },
   percent: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginTop: 2,
   },
   percentGood: {
-    color: Colors.reward,
+    color: ChildColors.accentGreen,
     fontWeight: 'bold',
   },
   percentBad: {
-    color: Colors.penalty,
+    color: ChildColors.accentRed,
   },
 });

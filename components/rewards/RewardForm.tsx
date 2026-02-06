@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, Text, Switch, IconButton, SegmentedButtons } from 'react-native-paper';
 import { Colors, Layout, REWARD_ICONS } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import type { RewardFormData } from '../../lib/types';
 
 interface RewardFormProps {
@@ -141,12 +142,12 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: Layout.padding.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
   },
   label: {
     marginTop: Layout.padding.sm,
     marginBottom: Layout.padding.sm,
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   iconGrid: {
     flexDirection: 'row',

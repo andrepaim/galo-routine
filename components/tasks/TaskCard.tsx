@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Card, Text, Icon, Chip } from 'react-native-paper';
 import { Colors, Layout, DAY_NAMES } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { StarDisplay } from '../stars/StarDisplay';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { formatTimeRange } from '../../lib/utils/time';
@@ -28,7 +29,7 @@ export function TaskCard({ task, onPress, onLongPress, showRecurrence = true }: 
           <Icon
             {...props}
             source={task.icon || 'star-circle'}
-            color={task.isActive ? Colors.primary : Colors.disabled}
+            color={task.isActive ? ChildColors.starGold : Colors.disabled}
           />
         )}
         right={() => <StarDisplay count={task.starValue} maxStars={5} size={16} />}
@@ -80,7 +81,7 @@ function getRecurrenceLabel(task: Task): string {
 const styles = StyleSheet.create({
   card: {
     marginVertical: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: Layout.elevation.low,
   },
   inactive: {

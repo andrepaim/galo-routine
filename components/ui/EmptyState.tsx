@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text, Icon, Button } from 'react-native-paper';
 import Animated, { BounceIn, FadeInUp } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 
 interface EmptyStateProps {
   icon: string;
@@ -16,7 +17,7 @@ export function EmptyState({ icon, title, description, actionLabel, onAction }: 
   return (
     <View style={styles.container}>
       <Animated.View entering={BounceIn.delay(100)} style={styles.iconBackdrop}>
-        <Icon source={icon} size={72} color={Colors.textLight} />
+        <Icon source={icon} size={72} color={ChildColors.textPrimaryLight} />
       </Animated.View>
       <Animated.View entering={FadeInUp.delay(300)}>
         <Text variant="titleMedium" style={styles.title}>
@@ -50,18 +51,18 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackgroundVariant,
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
     marginTop: Layout.padding.md,
-    color: Colors.text,
+    color: ChildColors.textPrimary,
     textAlign: 'center',
   },
   description: {
     marginTop: Layout.padding.sm,
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     textAlign: 'center',
   },
   button: {

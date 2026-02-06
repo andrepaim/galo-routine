@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, SegmentedButtons, Text, Chip, IconButton, Switch, Icon } from 'react-native-paper';
 import { Colors, Layout, DAY_NAMES, STAR_VALUES, TASK_ICONS, TASK_CATEGORIES } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { TimePicker } from '../ui/TimePicker';
 import type { TaskFormData, TaskCategoryId } from '../../lib/types';
 
@@ -81,12 +82,12 @@ export function TaskForm({
             key={cat.id}
             selected={category === cat.id}
             onPress={() => setCategory(category === cat.id ? undefined : cat.id)}
-            icon={() => <Icon source={cat.icon} size={16} color={category === cat.id ? Colors.white : cat.color} />}
+            icon={() => <Icon source={cat.icon} size={16} color={category === cat.id ? ChildColors.galoWhite : cat.color} />}
             style={[
               styles.categoryChip,
               category === cat.id && { backgroundColor: cat.color },
             ]}
-            textStyle={category === cat.id ? { color: Colors.white } : undefined}
+            textStyle={category === cat.id ? { color: ChildColors.galoWhite } : undefined}
           >
             {cat.name}
           </Chip>
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   label: {
     marginTop: Layout.padding.sm,
     marginBottom: Layout.padding.sm,
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   categoryGrid: {
     flexDirection: 'row',
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: Layout.padding.md,
   },
   categoryChip: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackgroundVariant,
   },
   starRow: {
     flexDirection: 'row',
@@ -213,13 +214,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   starChip: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackgroundVariant,
   },
   starChipSelected: {
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: ChildColors.starGoldContainer,
   },
   starChipTextSelected: {
-    color: Colors.primaryDark,
+    color: ChildColors.starGoldDark,
   },
   iconGrid: {
     flexDirection: 'row',

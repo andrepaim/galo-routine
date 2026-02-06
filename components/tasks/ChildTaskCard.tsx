@@ -10,6 +10,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { Colors, Layout, getCategoryColor } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { StarDisplay } from '../stars/StarDisplay';
 import { formatTimeRange } from '../../lib/utils/time';
 import type { TodayTask, CompletionStatus } from '../../lib/types';
@@ -116,20 +117,20 @@ function getStatusIcon(status?: CompletionStatus): string {
 function getStatusColor(status?: CompletionStatus): string {
   switch (status) {
     case 'approved':
-      return Colors.reward;
+      return ChildColors.accentGreen;
     case 'pending':
-      return Colors.pending;
+      return ChildColors.accentPurple;
     case 'rejected':
-      return Colors.penalty;
+      return ChildColors.accentRed;
     default:
-      return Colors.textLight;
+      return ChildColors.textPrimaryLight;
   }
 }
 
 const styles = StyleSheet.create({
   card: {
     marginVertical: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: 2,
     overflow: 'hidden',
   },
@@ -138,30 +139,30 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   approved: {
-    backgroundColor: Colors.rewardContainer,
+    backgroundColor: ChildColors.accentGreenContainer,
   },
   pending: {
-    backgroundColor: Colors.pendingContainer,
+    backgroundColor: ChildColors.accentPurpleContainer,
   },
   rejected: {
-    backgroundColor: Colors.penaltyContainer,
+    backgroundColor: ChildColors.accentRedContainer,
   },
   title: {
     fontSize: 18,
   },
   doneText: {
     textDecorationLine: 'line-through',
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   pendingSubtitle: {
     fontStyle: 'italic',
-    color: Colors.pending,
+    color: ChildColors.accentPurple,
   },
   rejectionContent: {
     paddingBottom: Layout.padding.sm,
   },
   rejectionText: {
-    color: Colors.penalty,
+    color: ChildColors.accentRed,
     fontStyle: 'italic',
   },
 });

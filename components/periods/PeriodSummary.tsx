@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Card, Text, Icon, Chip } from 'react-native-paper';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { StarCounter } from '../stars/StarCounter';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { formatPeriodRange, getRemainingDays } from '../../lib/utils/periodUtils';
@@ -96,10 +97,10 @@ function getStatusLabel(period: Period): string {
 }
 
 function getStatusColor(period: Period): string {
-  if (period.outcome === 'reward') return Colors.rewardLight;
-  if (period.outcome === 'penalty') return Colors.penaltyLight;
-  if (period.status === 'active') return Colors.neutralLight;
-  return Colors.surfaceVariant;
+  if (period.outcome === 'reward') return ChildColors.accentGreenLight;
+  if (period.outcome === 'penalty') return ChildColors.accentRedLight;
+  if (period.status === 'active') return ChildColors.starGoldLight;
+  return ChildColors.cardBackgroundVariant;
 }
 
 function getOutcomeIcon(outcome: string): string {
@@ -112,16 +113,16 @@ function getOutcomeIcon(outcome: string): string {
 
 function getOutcomeColor(outcome: string): string {
   switch (outcome) {
-    case 'reward': return Colors.reward;
-    case 'penalty': return Colors.penalty;
-    default: return Colors.neutral;
+    case 'reward': return ChildColors.accentGreen;
+    case 'penalty': return ChildColors.accentRed;
+    default: return ChildColors.starGold;
   }
 }
 
 const styles = StyleSheet.create({
   card: {
     marginVertical: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: Layout.elevation.low,
   },
   header: {
@@ -146,10 +147,10 @@ const styles = StyleSheet.create({
   },
   daysNumber: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   daysLabel: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   outcomeRow: {
     flexDirection: 'row',
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     marginTop: Layout.padding.md,
     padding: Layout.padding.sm,
     borderRadius: Layout.radius.sm,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackgroundVariant,
   },
   outcomeText: {
     flex: 1,

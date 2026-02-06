@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, Chip, Button, Icon, Checkbox } from 'react-native-paper';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Layout, TASK_TEMPLATES, getCategoryById } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { StarDisplay } from '../stars/StarDisplay';
 import { formatTimeRange } from '../../lib/utils/time';
 import type { TaskTemplate } from '../../lib/types';
@@ -67,7 +68,7 @@ export function TemplateSelector({ onSelect, onCancel }: TemplateSelectorProps) 
             <Card.Content>
               <View style={styles.categoryHeader}>
                 <View style={styles.categoryTitleRow}>
-                  <Icon source={cat.icon} size={24} color={Colors.primary} />
+                  <Icon source={cat.icon} size={24} color={ChildColors.starGold} />
                   <Text variant="titleMedium" style={styles.categoryTitle}>
                     {cat.name}
                   </Text>
@@ -145,7 +146,7 @@ export function TemplateSelector({ onSelect, onCancel }: TemplateSelectorProps) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   content: {
     padding: Layout.padding.md,
@@ -153,14 +154,14 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   subtitle: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginBottom: Layout.padding.lg,
   },
   categoryCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     marginBottom: Layout.padding.md,
     elevation: Layout.elevation.low,
   },
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   },
   categoryTitle: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   templateRow: {
     flexDirection: 'row',
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     marginLeft: Layout.padding.xs,
   },
   templateName: {
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   templateMeta: {
     flexDirection: 'row',
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   templateTime: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   miniCategoryChip: {
     height: 20,

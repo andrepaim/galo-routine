@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text, Icon, Button } from 'react-native-paper';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import type { Reward } from '../../lib/types';
 
 interface RewardCardProps {
@@ -20,7 +21,7 @@ export function RewardCard({ reward, starBalance, onRedeem, onPress, showRedeem 
     <Card style={[styles.card, !isAvailable && styles.unavailable]} onPress={onPress}>
       <Card.Content style={styles.content}>
         <View style={styles.iconContainer}>
-          <Icon source={reward.icon} size={40} color={isAvailable ? Colors.primary : Colors.disabled} />
+          <Icon source={reward.icon} size={40} color={isAvailable ? ChildColors.starGold : ChildColors.textMuted} />
         </View>
         <View style={styles.info}>
           <Text variant="titleMedium" style={[styles.name, !isAvailable && styles.disabledText]}>
@@ -32,7 +33,7 @@ export function RewardCard({ reward, starBalance, onRedeem, onPress, showRedeem 
             </Text>
           ) : null}
           <View style={styles.costRow}>
-            <Icon source="star" size={16} color={Colors.starFilled} />
+            <Icon source="star" size={16} color={ChildColors.starGold} />
             <Text variant="titleSmall" style={styles.cost}>
               {reward.starCost}
             </Text>
@@ -63,7 +64,7 @@ export function RewardCard({ reward, starBalance, onRedeem, onPress, showRedeem 
 const styles = StyleSheet.create({
   card: {
     marginVertical: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: Layout.elevation.low,
   },
   unavailable: {
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: Layout.radius.md,
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: ChildColors.starGoldContainer,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -87,13 +88,13 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   disabledText: {
-    color: Colors.disabled,
+    color: ChildColors.textMuted,
   },
   description: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginTop: 2,
   },
   costRow: {
@@ -103,11 +104,11 @@ const styles = StyleSheet.create({
     marginTop: Layout.padding.xs,
   },
   cost: {
-    color: Colors.primaryDark,
+    color: ChildColors.starGoldDark,
     fontWeight: 'bold',
   },
   quantity: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   redeemBtn: {
     minWidth: 80,

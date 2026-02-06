@@ -9,6 +9,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import type { StarProgress } from '../../lib/types';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -95,9 +96,9 @@ export function StarBudgetRing({
     strokeDashoffset: circumference - animatedPending.value,
   }));
 
-  let progressColor: string = Colors.neutral;
-  if (progress.isRewardZone) progressColor = Colors.reward;
-  if (progress.isPenaltyZone) progressColor = Colors.penalty;
+  let progressColor: string = ChildColors.starGold;
+  if (progress.isRewardZone) progressColor = ChildColors.accentGreen;
+  if (progress.isPenaltyZone) progressColor = ChildColors.accentRed;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -107,7 +108,7 @@ export function StarBudgetRing({
           cx={center}
           cy={center}
           r={radius}
-          stroke={Colors.surfaceVariant}
+          stroke={ChildColors.cardBackgroundVariant}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -117,7 +118,7 @@ export function StarBudgetRing({
             cx={center}
             cy={center}
             r={radius}
-            stroke={Colors.starPending}
+            stroke={ChildColors.accentPurple}
             strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={`${circumference} ${circumference}`}
@@ -146,7 +147,7 @@ export function StarBudgetRing({
             center={center}
             radius={radius}
             strokeWidth={strokeWidth}
-            color={Colors.reward}
+            color={ChildColors.accentGreen}
           />
         )}
         {penaltyPercent != null && (
@@ -155,7 +156,7 @@ export function StarBudgetRing({
             center={center}
             radius={radius}
             strokeWidth={strokeWidth}
-            color={Colors.penalty}
+            color={ChildColors.accentRed}
           />
         )}
       </Svg>
@@ -187,10 +188,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   budgetText: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   label: {
-    color: Colors.textLight,
+    color: ChildColors.textPrimaryLight,
     textTransform: 'uppercase',
   },
 });

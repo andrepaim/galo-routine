@@ -4,6 +4,7 @@ import { Card, Text, Button, Icon, TextInput } from 'react-native-paper';
 import { format } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { StarDisplay } from '../stars/StarDisplay';
 import type { TaskCompletion } from '../../lib/types';
 
@@ -37,7 +38,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
         titleVariant="titleMedium"
         subtitle={`Completed ${format(completion.completedAt.toDate(), 'MMM d, h:mm a')}`}
         left={(props) => (
-          <Icon {...props} source="check-circle-outline" color={Colors.pending} />
+          <Icon {...props} source="check-circle-outline" color={ChildColors.accentPurple} />
         )}
         right={() => (
           <StarDisplay count={completion.taskStarValue} maxStars={completion.taskStarValue} size={18} showEmpty={false} />
@@ -59,7 +60,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
             </Button>
             <Button
               mode="contained"
-              buttonColor={Colors.penalty}
+              buttonColor={ChildColors.accentRed}
               onPress={handleReject}
               loading={isLoading}
             >
@@ -71,7 +72,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
         <Card.Actions style={styles.actions}>
           <Button
             mode="outlined"
-            textColor={Colors.penalty}
+            textColor={ChildColors.accentRed}
             onPress={() => setShowReject(true)}
             disabled={isLoading}
           >
@@ -79,7 +80,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
           </Button>
           <Button
             mode="contained"
-            buttonColor={Colors.reward}
+            buttonColor={ChildColors.accentGreen}
             onPress={handleApprove}
             loading={isLoading}
             icon="check"
@@ -95,7 +96,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
 const styles = StyleSheet.create({
   card: {
     marginVertical: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: Layout.elevation.medium,
   },
   actions: {

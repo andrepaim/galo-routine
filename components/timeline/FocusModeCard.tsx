@@ -4,6 +4,7 @@ import { Card, Text, Icon, Button } from 'react-native-paper';
 import Animated, { FadeInUp, FadeOutDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Colors, Layout, getCategoryColor } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { StarDisplay } from '../stars/StarDisplay';
 import type { TodayTask } from '../../lib/types';
 
@@ -61,7 +62,7 @@ export function FocusModeCard({ task, nextTask, onComplete, onDismiss }: FocusMo
             <Text variant="labelMedium" style={styles.label}>
               CURRENT TASK
             </Text>
-            <Button mode="text" compact onPress={onDismiss} textColor={Colors.textSecondary}>
+            <Button mode="text" compact onPress={onDismiss} textColor={ChildColors.textPrimarySecondary}>
               Dismiss
             </Button>
           </View>
@@ -92,7 +93,7 @@ export function FocusModeCard({ task, nextTask, onComplete, onDismiss }: FocusMo
             </Button>
           ) : (
             <View style={styles.doneRow}>
-              <Icon source="check-circle" size={20} color={Colors.reward} />
+              <Icon source="check-circle" size={20} color={ChildColors.accentGreen} />
               <Text variant="bodyMedium" style={styles.doneText}>
                 {task.completion?.status === 'pending' ? 'Waiting for approval' : 'Completed!'}
               </Text>
@@ -105,7 +106,7 @@ export function FocusModeCard({ task, nextTask, onComplete, onDismiss }: FocusMo
                 UP NEXT
               </Text>
               <View style={styles.nextRow}>
-                <Icon source={nextTask.icon || 'star-circle'} size={20} color={Colors.textSecondary} />
+                <Icon source={nextTask.icon || 'star-circle'} size={20} color={ChildColors.textPrimarySecondary} />
                 <Text variant="bodyMedium" style={styles.nextName}>
                   {nextTask.name}
                 </Text>
@@ -126,10 +127,10 @@ export function FocusModeCard({ task, nextTask, onComplete, onDismiss }: FocusMo
 const styles = StyleSheet.create({
   card: {
     margin: Layout.padding.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: Layout.elevation.high,
     borderTopWidth: 4,
-    borderTopColor: Colors.primary,
+    borderTopColor: ChildColors.starGold,
   },
   content: {
     gap: Layout.padding.md,
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     letterSpacing: 1,
   },
   taskRow: {
@@ -153,10 +154,10 @@ const styles = StyleSheet.create({
   },
   taskName: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   countdown: {
-    color: Colors.neutral,
+    color: ChildColors.starGold,
     marginTop: 2,
   },
   completeBtn: {
@@ -170,16 +171,16 @@ const styles = StyleSheet.create({
     paddingVertical: Layout.padding.sm,
   },
   doneText: {
-    color: Colors.reward,
+    color: ChildColors.accentGreen,
     fontWeight: 'bold',
   },
   nextTask: {
     borderTopWidth: 1,
-    borderTopColor: Colors.divider,
+    borderTopColor: ChildColors.cardBorder,
     paddingTop: Layout.padding.sm,
   },
   nextLabel: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     letterSpacing: 1,
     marginBottom: Layout.padding.xs,
   },
@@ -190,9 +191,9 @@ const styles = StyleSheet.create({
   },
   nextName: {
     flex: 1,
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   nextTime: {
-    color: Colors.textLight,
+    color: ChildColors.textPrimaryLight,
   },
 });

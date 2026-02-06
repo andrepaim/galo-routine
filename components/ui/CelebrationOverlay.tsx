@@ -14,6 +14,7 @@ import Animated, {
 import { Text, Icon } from 'react-native-paper';
 import * as Haptics from 'expo-haptics';
 import { Colors, Layout } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 
 interface CelebrationOverlayProps {
   visible: boolean;
@@ -62,7 +63,7 @@ function ConfettiStar({ config }: { config: (typeof CONFETTI_STARS)[0] }) {
     opacity: opacity.value,
   }));
 
-  const starColors = [Colors.starFilled, Colors.primary, Colors.primaryLight, Colors.reward];
+  const starColors = [ChildColors.starGold, ChildColors.starGold, ChildColors.starGoldLight, ChildColors.accentGreen];
   const color = starColors[config.id % starColors.length];
 
   return (
@@ -91,11 +92,11 @@ export function CelebrationOverlay({ visible, onDismiss, message = 'Great job!' 
         ))}
 
         <Animated.View entering={BounceIn.delay(100).duration(600)} style={styles.centerContent}>
-          <Icon source="star" size={80} color={Colors.starFilled} />
+          <Icon source="star" size={80} color={ChildColors.starGold} />
         </Animated.View>
 
         <Animated.View entering={BounceIn.delay(400).duration(500)} style={styles.trophyContainer}>
-          <Icon source="trophy" size={48} color={Colors.primary} />
+          <Icon source="trophy" size={48} color={ChildColors.starGold} />
         </Animated.View>
 
         <Animated.View entering={BounceIn.delay(600).duration(400)}>
@@ -135,12 +136,12 @@ const styles = StyleSheet.create({
     marginBottom: Layout.padding.lg,
   },
   message: {
-    color: Colors.white,
+    color: ChildColors.galoWhite,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   dismiss: {
-    color: Colors.textLight,
+    color: ChildColors.textPrimaryLight,
     marginTop: Layout.padding.xl,
   },
 });

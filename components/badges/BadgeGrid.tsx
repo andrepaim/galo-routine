@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text, Icon } from 'react-native-paper';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Layout, ALL_BADGES } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import type { EarnedBadge, BadgeCategory } from '../../lib/types';
 
 interface BadgeGridProps {
@@ -48,7 +49,7 @@ export function BadgeGrid({ earnedBadges, filterCategory }: BadgeGridProps) {
                       <Icon
                         source={badge.icon}
                         size={32}
-                        color={isEarned ? Colors.badgeGold : Colors.badgeLocked}
+                        color={isEarned ? ChildColors.starGold : ChildColors.textMuted}
                       />
                     </View>
                     <Text
@@ -59,7 +60,7 @@ export function BadgeGrid({ earnedBadges, filterCategory }: BadgeGridProps) {
                       {badge.name}
                     </Text>
                     {!isEarned && (
-                      <Icon source="lock" size={12} color={Colors.badgeLocked} />
+                      <Icon source="lock" size={12} color={ChildColors.textMuted} />
                     )}
                   </Animated.View>
                 );
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
   section: {},
   sectionTitle: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
     marginBottom: Layout.padding.md,
   },
   grid: {
@@ -100,21 +101,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   earnedCircle: {
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: ChildColors.starGoldContainer,
     borderWidth: 2,
-    borderColor: Colors.badgeGold,
+    borderColor: ChildColors.starGold,
   },
   lockedCircle: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackgroundVariant,
     borderWidth: 2,
-    borderColor: Colors.divider,
+    borderColor: ChildColors.cardBorder,
   },
   badgeName: {
     textAlign: 'center',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
     fontSize: 11,
   },
   lockedText: {
-    color: Colors.textLight,
+    color: ChildColors.textPrimaryLight,
   },
 });

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { Colors } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { SkeletonList, SkeletonDashboard } from './SkeletonLoader';
 
 type LoadingVariant = 'spinner' | 'skeleton-list' | 'skeleton-dashboard';
@@ -30,7 +31,7 @@ export function LoadingScreen({ message = 'Loading...', variant = 'spinner' }: L
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color={Colors.primary} />
+      <ActivityIndicator size="large" color={ChildColors.starGold} />
       <Text style={styles.text}>{message}</Text>
     </View>
   );
@@ -41,14 +42,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   skeletonContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   text: {
     marginTop: 16,
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
 });

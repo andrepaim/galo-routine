@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { Colors } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 
 interface StarDisplayProps {
   count: number;
@@ -18,7 +19,7 @@ export function StarDisplay({ count, maxStars = 5, size = 20, showEmpty = true }
         key={i}
         source={i < count ? 'star' : 'star-outline'}
         size={size}
-        color={i < count ? Colors.starFilled : Colors.starEmpty}
+        color={i < count ? ChildColors.starGold : ChildColors.cardBorder}
       />,
     );
   }

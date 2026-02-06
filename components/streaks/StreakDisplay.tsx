@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text, Icon, Card, Button } from 'react-native-paper';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Colors, Layout, STREAK_MILESTONES } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants/childTheme';
 
 interface StreakDisplayProps {
   currentStreak: number;
@@ -25,7 +26,7 @@ export function StreakDisplay({
   if (compact) {
     return (
       <View style={styles.compactContainer}>
-        <Icon source="fire" size={20} color={currentStreak > 0 ? Colors.streak : Colors.textLight} />
+        <Icon source="fire" size={20} color={currentStreak > 0 ? ChildColors.accentRed : ChildColors.textPrimaryLight} />
         <Text variant="titleMedium" style={[styles.compactCount, currentStreak > 0 && styles.activeStreak]}>
           {currentStreak}
         </Text>
@@ -42,7 +43,7 @@ export function StreakDisplay({
         <Card.Content style={styles.content}>
           <View style={styles.mainRow}>
             <View style={styles.streakCircle}>
-              <Icon source="fire" size={40} color={currentStreak > 0 ? Colors.streak : Colors.textLight} />
+              <Icon source="fire" size={40} color={currentStreak > 0 ? ChildColors.accentRed : ChildColors.textPrimaryLight} />
               <Text variant="headlineLarge" style={styles.streakCount}>
                 {currentStreak}
               </Text>
@@ -53,14 +54,14 @@ export function StreakDisplay({
 
             <View style={styles.statsColumn}>
               <View style={styles.statRow}>
-                <Icon source="trophy" size={16} color={Colors.badgeGold} />
+                <Icon source="trophy" size={16} color={ChildColors.starGold} />
                 <Text variant="bodyMedium" style={styles.statText}>
                   Best: {bestStreak} days
                 </Text>
               </View>
               {nextMilestone && (
                 <View style={styles.statRow}>
-                  <Icon source="star" size={16} color={Colors.starFilled} />
+                  <Icon source="star" size={16} color={ChildColors.starGold} />
                   <Text variant="bodySmall" style={styles.statText}>
                     {daysToNext} {daysToNext === 1 ? 'day' : 'days'} to {nextMilestone.label}
                     {'\n'}(+{nextMilestone.bonusStars} bonus stars)
@@ -114,16 +115,16 @@ const styles = StyleSheet.create({
   },
   compactCount: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   activeStreak: {
-    color: Colors.streak,
+    color: ChildColors.accentRed,
   },
   compactLabel: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
     elevation: Layout.elevation.low,
   },
   content: {
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
   },
   streakCircle: {
     alignItems: 'center',
-    backgroundColor: Colors.streakContainer,
+    backgroundColor: ChildColors.accentRedContainer,
     borderRadius: Layout.radius.round,
     width: 100,
     height: 100,
@@ -144,11 +145,11 @@ const styles = StyleSheet.create({
   },
   streakCount: {
     fontWeight: 'bold',
-    color: Colors.streak,
+    color: ChildColors.accentRed,
     marginTop: -4,
   },
   streakLabel: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     fontSize: 10,
   },
   statsColumn: {
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     gap: Layout.padding.sm,
   },
   statText: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     flex: 1,
   },
   milestoneRow: {
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingTop: Layout.padding.sm,
     borderTopWidth: 1,
-    borderTopColor: Colors.divider,
+    borderTopColor: ChildColors.cardBorder,
   },
   milestoneItem: {
     alignItems: 'center',
@@ -179,27 +180,27 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: ChildColors.cardBackgroundVariant,
     justifyContent: 'center',
     alignItems: 'center',
   },
   milestoneAchieved: {
-    backgroundColor: Colors.streakContainer,
+    backgroundColor: ChildColors.accentRedContainer,
     borderWidth: 2,
-    borderColor: Colors.streak,
+    borderColor: ChildColors.accentRed,
   },
   milestoneText: {
     fontWeight: 'bold',
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     fontSize: 12,
   },
   milestoneTextAchieved: {
-    color: Colors.streak,
+    color: ChildColors.accentRed,
   },
   milestoneLabel: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
   },
   freezeBtn: {
-    borderColor: Colors.categoryHygiene,
+    borderColor: ChildColors.categoryHygiene,
   },
 });
