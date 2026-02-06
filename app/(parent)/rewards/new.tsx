@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { useAuthStore, useRewardStore } from '../../../lib/stores';
 import { RewardForm } from '../../../components/rewards/RewardForm';
 import type { RewardFormData } from '../../../lib/types';
@@ -38,6 +38,6 @@ export default function NewRewardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
 });

@@ -4,7 +4,8 @@ import { Card, Text, Icon, Button } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Colors, Layout } from '../../../constants';
+import { Layout } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { useAuthStore, useRewardStore } from '../../../lib/stores';
 import { EmptyState } from '../../../components/ui/EmptyState';
 
@@ -41,8 +42,8 @@ export default function RedemptionHistoryScreen() {
         keyExtractor={(item) => item.id!}
         renderItem={({ item, index }) => {
           const statusColor =
-            item.status === 'fulfilled' ? Colors.reward
-            : item.status === 'rejected' ? Colors.penalty
+            item.status === 'fulfilled' ? ChildColors.accentGreen
+            : item.status === 'rejected' ? ChildColors.accentRed
             : Colors.neutral;
 
           return (
@@ -103,14 +104,14 @@ export default function RedemptionHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   list: {
     padding: Layout.padding.md,
   },
   card: {
     marginVertical: Layout.padding.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: ChildColors.cardBackground,
   },
   content: {
     flexDirection: 'row',
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: 'bold',
-    color: Colors.text,
+    color: ChildColors.textPrimary,
   },
   metaRow: {
     flexDirection: 'row',
@@ -131,10 +132,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   cost: {
-    color: Colors.primaryDark,
+    color: ChildColors.starGoldDark,
   },
   date: {
-    color: Colors.textSecondary,
+    color: ChildColors.textPrimarySecondary,
     marginLeft: Layout.padding.sm,
   },
   status: {
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
     gap: Layout.padding.xs,
   },
   fulfillBtn: {
-    backgroundColor: Colors.reward,
+    backgroundColor: ChildColors.accentGreen,
   },
   rejectBtn: {
     borderColor: Colors.error,

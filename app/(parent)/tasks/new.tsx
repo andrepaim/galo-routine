@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { TaskForm } from '../../../components/tasks/TaskForm';
 import { useTaskStore, useAuthStore } from '../../../lib/stores';
 import type { TaskFormData } from '../../../lib/types';
@@ -41,6 +41,6 @@ export default function NewTaskScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
 });

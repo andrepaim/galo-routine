@@ -3,7 +3,8 @@ import { View, StyleSheet, Alert } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Layout } from '../../../constants';
+import { Layout } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { TaskForm } from '../../../components/tasks/TaskForm';
 import { useTaskStore, useAuthStore } from '../../../lib/stores';
 import type { TaskFormData } from '../../../lib/types';
@@ -105,7 +106,7 @@ export default function EditTaskScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   footer: {
     flexDirection: 'row',

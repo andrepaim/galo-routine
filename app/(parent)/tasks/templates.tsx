@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { useAuthStore, useTaskStore } from '../../../lib/stores';
 import { TemplateSelector } from '../../../components/tasks/TemplateSelector';
 import type { TaskTemplate, TaskFormData } from '../../../lib/types';
@@ -41,6 +41,6 @@ export default function TemplatesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
 });

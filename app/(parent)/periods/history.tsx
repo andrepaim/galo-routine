@@ -2,7 +2,8 @@ import React from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Colors, Layout } from '../../../constants';
+import { Layout } from '../../../constants';
+import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { usePeriodStore } from '../../../lib/stores';
 import { PeriodSummary } from '../../../components/periods/PeriodSummary';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -42,7 +43,7 @@ export default function PeriodHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: ChildColors.galoBlack,
   },
   list: {
     padding: Layout.padding.md,
