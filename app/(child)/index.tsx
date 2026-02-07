@@ -26,9 +26,16 @@ import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
 import { GaloTaskCard } from '../../components/tasks/GaloTaskCard';
 import { GaloStarCounter } from '../../components/stars/GaloStarCounter';
+import { GaloGoalCounter, LiveScoreboard } from '../../components/championship';
 import { StreakDisplay } from '../../components/streaks/StreakDisplay';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
+
+// Mock opponent for championship demo
+const mockOpponent = {
+  name: 'Palmeiras',
+  goals: 2,
+};
 
 export default function ChildTodayScreen() {
   const childName = useAuthStore((s) => s.childName);
@@ -75,8 +82,23 @@ export default function ChildTodayScreen() {
   ).length;
   const progress = todayTasks.length > 0 ? (completedCount / todayTasks.length) * 100 : 0;
 
+  // Calculate goals from completed tasks (using starValue which maps to goals)
+  const completedGoals = todayTasks
+    .filter(t => t.completion?.status === 'approved' || t.completion?.status === 'pending')
+    .reduce((sum, t) => sum + (t.starValue || 1), 0);
+  const totalGoals = todayTasks.reduce((sum, t) => sum + (t.starValue || 1), 0);
+
   return (
     <View style={styles.container}>
+      {/* Live Scoreboard at top */}
+      <LiveScoreboard
+        userName={childName || 'Vitor'}
+        userGoals={completedGoals}
+        opponentName={mockOpponent.name}
+        opponentGoals={mockOpponent.goals}
+        isLive={true}
+      />
+      
       <FlatList
         data={todayTasks}
         keyExtractor={(item) => item.id}
@@ -106,26 +128,26 @@ export default function ChildTodayScreen() {
               </View>
             </Animated.View>
 
-            {/* Star Summary Card */}
-            {starProgress && (
-              <Animated.View entering={FadeInUp.delay(200).duration(500)}>
-                <Surface style={styles.starCard} elevation={0}>
-                  <GaloStarCounter
-                    earned={starProgress.earned}
-                    budget={starProgress.budget}
-                    pending={starProgress.pending}
-                  />
-                </Surface>
-              </Animated.View>
-            )}
+            {/* Goal Summary Card (Championship Mode) */}
+            <Animated.View entering={FadeInUp.delay(200).duration(500)}>
+              <Surface style={styles.starCard} elevation={0}>
+                <GaloGoalCounter
+                  scored={completedGoals}
+                  possible={totalGoals}
+                  pending={starProgress?.pending || 0}
+                  opponentName={mockOpponent.name}
+                  opponentGoals={mockOpponent.goals}
+                />
+              </Surface>
+            </Animated.View>
 
             {/* Stats Row */}
             <Animated.View entering={FadeInUp.delay(300).duration(500)} style={styles.statsRow}>
-              {/* Star Balance */}
+              {/* Goals */}
               <Surface style={styles.statCard} elevation={0}>
-                <Text style={styles.statEmoji}>{STAR_EMOJI}</Text>
-                <Text style={styles.statNumber}>{family?.starBalance ?? 0}</Text>
-                <Text style={styles.statLabel}>Estrelas</Text>
+                <Text style={styles.statEmoji}>⚽</Text>
+                <Text style={styles.statNumber}>{completedGoals}</Text>
+                <Text style={styles.statLabel}>Gols Hoje</Text>
               </Surface>
               
               {/* Streak */}

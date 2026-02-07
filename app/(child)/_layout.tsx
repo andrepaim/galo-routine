@@ -83,13 +83,38 @@ export default function ChildLayout() {
         }}
       />
       <Tabs.Screen
-        name="badges"
+        name="table"
+        options={{
+          title: 'Tabela',
+          headerTitle: 'Classificação',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="format-list-numbered" size={ChildSizes.tabIconSize} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="trophies"
         options={{
           title: 'Troféus',
-          headerTitle: 'Meus Troféus',
+          headerTitle: 'Sala de Troféus',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
               <Icon source="trophy" size={ChildSizes.tabIconSize} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="badges"
+        options={{
+          href: null, // Hide from tab bar (replaced by trophies)
+          title: 'Conquistas',
+          headerTitle: 'Minhas Conquistas',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+              <Icon source="medal" size={ChildSizes.tabIconSize} color={color} />
             </View>
           ),
         }}

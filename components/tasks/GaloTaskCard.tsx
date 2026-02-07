@@ -11,7 +11,10 @@ import Animated, {
   withTiming,
   runOnJS,
 } from 'react-native-reanimated';
-import { ChildColors, ChildSizes, STAR_EMOJI } from '../../constants';
+import { ChildColors, ChildSizes } from '../../constants';
+
+// Soccer ball emoji for championship mode
+const BALL_EMOJI = '⚽';
 import { formatTimeRange } from '../../lib/utils/time';
 import type { TodayTask, CompletionStatus } from '../../lib/types';
 
@@ -186,12 +189,12 @@ export function GaloTaskCard({ task, onComplete, index = 0 }: GaloTaskCardProps)
                 )}
               </View>
 
-              {/* Right: Stars */}
-              <View style={styles.starsContainer}>
+              {/* Right: Goals */}
+              <View style={styles.goalsContainer}>
                 <Animated.View style={starAnimatedStyle}>
-                  <Text style={styles.starEmoji}>{STAR_EMOJI}</Text>
+                  <Text style={styles.ballEmoji}>{BALL_EMOJI}</Text>
                 </Animated.View>
-                <Text style={styles.starCount}>+{task.starValue}</Text>
+                <Text style={styles.goalCount}>+{task.starValue}</Text>
               </View>
             </View>
           </Surface>
@@ -255,7 +258,7 @@ const styles = StyleSheet.create({
     color: ChildColors.statusRejected,
     marginTop: 4,
   },
-  starsContainer: {
+  goalsContainer: {
     alignItems: 'center',
     backgroundColor: 'rgba(255, 215, 0, 0.2)',
     paddingHorizontal: 14,
@@ -264,10 +267,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 215, 0, 0.3)',
   },
-  starEmoji: {
+  ballEmoji: {
     fontSize: 26,
   },
-  starCount: {
+  goalCount: {
     fontSize: 16,
     fontWeight: '900',
     color: ChildColors.starGold,
