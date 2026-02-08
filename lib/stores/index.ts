@@ -5,3 +5,4 @@ export { useCompletionStore } from './completionStore';
 export { useRewardStore } from './rewardStore';
 export { useGoalStore } from './goalStore';
 export { useBadgeStore } from './badgeStore';
+export { useChampionshipStore } from './championshipStore';

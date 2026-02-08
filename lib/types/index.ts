@@ -1,5 +1,8 @@
 import { Timestamp } from 'firebase/firestore';
 
+// Re-export championship types
+export * from './championship';
+
 // ── Firestore Models ──────────────────────────────────────────────
 
 export interface Family {

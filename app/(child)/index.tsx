@@ -24,18 +24,13 @@ import { useAuthStore, useCompletionStore } from '../../lib/stores';
 import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
 import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
+import { useChampionship, useMatch } from '../../lib/hooks';
 import { GaloTaskCard } from '../../components/tasks/GaloTaskCard';
 import { GaloStarCounter } from '../../components/stars/GaloStarCounter';
 import { GaloGoalCounter, LiveScoreboard } from '../../components/championship';
 import { StreakDisplay } from '../../components/streaks/StreakDisplay';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
-
-// Mock opponent for championship demo
-const mockOpponent = {
-  name: 'Palmeiras',
-  goals: 2,
-};
 
 export default function ChildTodayScreen() {
   const childName = useAuthStore((s) => s.childName);
@@ -45,8 +40,37 @@ export default function ChildTodayScreen() {
   const starProgress = useStarBudget();
   const { todayTasks, isLoading } = useTodayTasks();
   const markTaskDone = useCompletionStore((s) => s.markTaskDone);
+  
+  // Championship hooks
+  const { 
+    championship, 
+    isLoading: isChampionshipLoading,
+    initializeIfNeeded 
+  } = useChampionship();
+  
+  const { 
+    match, 
+    opponentName, 
+    opponentGoals,
+    isOpen: isMatchOpen,
+  } = useMatch();
 
   const today = new Date();
+  
+  // Dev mode detection for mock data
+  const isDevMode = typeof window !== 'undefined' && window.location.search.includes('dev=');
+  
+  // Mock opponent for dev mode when no real data
+  const displayOpponentName = opponentName !== 'Adversário' ? opponentName : (isDevMode ? 'Palmeiras' : opponentName);
+  const displayOpponentGoals = match ? opponentGoals : (isDevMode ? 2 : 0);
+  const displayIsLive = match ? isMatchOpen : (isDevMode ? true : false);
+  
+  // Initialize championship on first load if needed
+  React.useEffect(() => {
+    if (!isChampionshipLoading && !championship && familyId) {
+      initializeIfNeeded();
+    }
+  }, [isChampionshipLoading, championship, familyId]);
 
   // Animated rooster bounce
   const roosterBounce = useSharedValue(0);
@@ -72,7 +96,6 @@ export default function ChildTodayScreen() {
   };
 
   // Skip loading screen in dev mode
-  const isDevMode = typeof window !== 'undefined' && window.location.search.includes('dev=');
   if (isLoading && !isDevMode) {
     return <LoadingScreen variant="skeleton-list" />;
   }
@@ -94,9 +117,9 @@ export default function ChildTodayScreen() {
       <LiveScoreboard
         userName={childName || 'Vitor'}
         userGoals={completedGoals}
-        opponentName={mockOpponent.name}
-        opponentGoals={mockOpponent.goals}
-        isLive={true}
+        opponentName={displayOpponentName}
+        opponentGoals={displayOpponentGoals}
+        isLive={displayIsLive}
       />
       
       <FlatList
@@ -135,8 +158,8 @@ export default function ChildTodayScreen() {
                   scored={completedGoals}
                   possible={totalGoals}
                   pending={starProgress?.pending || 0}
-                  opponentName={mockOpponent.name}
-                  opponentGoals={mockOpponent.goals}
+                  opponentName={displayOpponentName}
+                  opponentGoals={displayOpponentGoals}
                 />
               </Surface>
             </Animated.View>

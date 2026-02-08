@@ -1,8 +1,12 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { Text } from 'react-native-paper';
 import { StandingsTable } from '../../components/championship';
 import { ChildColors } from '../../constants';
 import { Standing } from '../../lib/types/championship';
+import { useChampionship } from '../../lib/hooks';
+import { useAuthStore } from '../../lib/stores';
+import { LeagueId } from '../../constants/leagueConfig';
 
 // Mock standings for dev mode
 const mockStandings: Standing[] = [
@@ -17,18 +21,40 @@ const mockStandings: Standing[] = [
 ];
 
 export default function TableScreen() {
-  // In real implementation, this would come from useChampionship hook
+  const { championship, standings, isLoading } = useChampionship();
+  const familyId = useAuthStore((s) => s.familyId);
+  
+  // Check if in dev mode
   const isDevMode = typeof window !== 'undefined' && window.location.search.includes('dev=');
   
-  const standings = isDevMode ? mockStandings : mockStandings; // TODO: real data
-  const league = 'D' as const;
-  const userId = 'vitor';
-  const currentRound = 2;
+  // Use real data if available, otherwise fall back to mock in dev mode
+  const displayStandings = standings.length > 0 ? standings : (isDevMode ? mockStandings : []);
+  const league: LeagueId = championship?.league || 'D';
+  const userId = championship?.childId || (isDevMode ? 'vitor' : familyId || '');
+  const currentRound = championship?.currentRound || (isDevMode ? 2 : 1);
+  
+  if (!isDevMode && isLoading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.loadingText}>Carregando tabela...</Text>
+      </View>
+    );
+  }
+  
+  if (!isDevMode && displayStandings.length === 0) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.emptyEmoji}>🏆</Text>
+        <Text style={styles.emptyText}>Nenhum campeonato ativo</Text>
+        <Text style={styles.emptySubtext}>O campeonato começará em breve!</Text>
+      </View>
+    );
+  }
   
   return (
     <View style={styles.container}>
       <StandingsTable
-        standings={standings}
+        standings={displayStandings}
         league={league}
         userId={userId}
         currentRound={currentRound}
@@ -41,5 +67,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: ChildColors.galoBlack,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    color: ChildColors.textSecondary,
+    fontSize: 16,
+  },
+  emptyEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyText: {
+    color: ChildColors.textPrimary,
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    color: ChildColors.textSecondary,
+    fontSize: 14,
+    textAlign: 'center',
   },
 });

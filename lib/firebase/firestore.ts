@@ -275,3 +275,164 @@ export function subscribeStreakFreezes(familyId: string, callback: (freezes: Str
     callback(freezes);
   });
 }
+
+// ── Championships ────────────────────────────────────────────────
+
+import type { Championship, Match, Trophy } from '../types/championship';
+
+function championshipsRef(familyId: string) {
+  return collection(db, 'families', familyId, 'championships');
+}
+
+export async function createChampionship(
+  familyId: string,
+  championship: Omit<Championship, 'id'>
+): Promise<string> {
+  const ref = await addDoc(championshipsRef(familyId), {
+    ...championship,
+    createdAt: Timestamp.now(),
+  });
+  return ref.id;
+}
+
+export async function updateChampionship(
+  familyId: string,
+  championshipId: string,
+  data: Partial<Championship>
+) {
+  await updateDoc(doc(db, 'families', familyId, 'championships', championshipId), data);
+}
+
+export async function getChampionship(
+  familyId: string,
+  championshipId: string
+): Promise<Championship | null> {
+  const snap = await getDoc(doc(db, 'families', familyId, 'championships', championshipId));
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() } as Championship;
+}
+
+export async function getActiveChampionship(familyId: string): Promise<Championship | null> {
+  const q = query(championshipsRef(familyId), where('status', '==', 'active'));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() } as Championship;
+}
+
+export function subscribeChampionship(
+  familyId: string,
+  championshipId: string,
+  callback: (championship: Championship | null) => void
+): Unsubscribe {
+  return onSnapshot(doc(db, 'families', familyId, 'championships', championshipId), (snap) => {
+    callback(snap.exists() ? { id: snap.id, ...snap.data() } as Championship : null);
+  });
+}
+
+export function subscribeActiveChampionship(
+  familyId: string,
+  callback: (championship: Championship | null) => void
+): Unsubscribe {
+  const q = query(championshipsRef(familyId), where('status', '==', 'active'));
+  return onSnapshot(q, (snap) => {
+    if (snap.empty) {
+      callback(null);
+    } else {
+      const d = snap.docs[0];
+      callback({ id: d.id, ...d.data() } as Championship);
+    }
+  });
+}
+
+// ── Matches ──────────────────────────────────────────────────────
+
+function matchesRef(familyId: string, championshipId: string) {
+  return collection(db, 'families', familyId, 'championships', championshipId, 'matches');
+}
+
+export async function createMatch(
+  familyId: string,
+  championshipId: string,
+  match: Omit<Match, 'id'>
+): Promise<string> {
+  const ref = await addDoc(matchesRef(familyId, championshipId), match);
+  return ref.id;
+}
+
+export async function updateMatch(
+  familyId: string,
+  championshipId: string,
+  matchId: string,
+  data: Partial<Match>
+) {
+  await updateDoc(
+    doc(db, 'families', familyId, 'championships', championshipId, 'matches', matchId),
+    data
+  );
+}
+
+export async function getMatchForDate(
+  familyId: string,
+  championshipId: string,
+  dateStr: string
+): Promise<Match | null> {
+  const q = query(matchesRef(familyId, championshipId), where('date', '==', dateStr));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() } as Match;
+}
+
+export function subscribeMatch(
+  familyId: string,
+  championshipId: string,
+  matchId: string,
+  callback: (match: Match | null) => void
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, 'families', familyId, 'championships', championshipId, 'matches', matchId),
+    (snap) => {
+      callback(snap.exists() ? { id: snap.id, ...snap.data() } as Match : null);
+    }
+  );
+}
+
+export function subscribeTodayMatch(
+  familyId: string,
+  championshipId: string,
+  dateStr: string,
+  callback: (match: Match | null) => void
+): Unsubscribe {
+  const q = query(matchesRef(familyId, championshipId), where('date', '==', dateStr));
+  return onSnapshot(q, (snap) => {
+    if (snap.empty) {
+      callback(null);
+    } else {
+      const d = snap.docs[0];
+      callback({ id: d.id, ...d.data() } as Match);
+    }
+  });
+}
+
+// ── Trophies ─────────────────────────────────────────────────────
+
+function trophiesRef(familyId: string) {
+  return collection(db, 'families', familyId, 'trophies');
+}
+
+export async function createTrophy(familyId: string, trophy: Omit<Trophy, 'id'>): Promise<string> {
+  const ref = await addDoc(trophiesRef(familyId), trophy);
+  return ref.id;
+}
+
+export function subscribeTrophies(
+  familyId: string,
+  callback: (trophies: Trophy[]) => void
+): Unsubscribe {
+  const q = query(trophiesRef(familyId), orderBy('earnedAt', 'desc'));
+  return onSnapshot(q, (snap) => {
+    const trophies = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Trophy));
+    callback(trophies);
+  });
+}

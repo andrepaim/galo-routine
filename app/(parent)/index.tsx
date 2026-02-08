@@ -1,18 +1,23 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, Image } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, Image, Alert } from 'react-native';
 import { Text, Card, Button, Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInLeft, FadeInUp } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { Layout } from '../../constants';
 import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore, usePeriodStore, useCompletionStore, useRewardStore } from '../../lib/stores';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
 import { useStarBudget } from '../../lib/hooks/useStarBudget';
+import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
+import { useChampionship, useMatch } from '../../lib/hooks';
 import { StarCounter } from '../../components/stars/StarCounter';
 import { PeriodSummary } from '../../components/periods/PeriodSummary';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
+import { DayClosureModal } from '../../components/championship/DayClosureModal';
+import type { ChampionshipTask, MatchResult } from '../../lib/types/championship';
 
 // Galo mascot
 const GaloVolpi = require('../../assets/images/mascot/galo-volpi-white.png');
@@ -26,6 +31,97 @@ export default function ParentHomeScreen() {
   const starProgress = useStarBudget();
   const pendingCount = useCompletionStore((s) => s.getPendingCompletions().length);
   const pendingRedemptions = useRewardStore((s) => s.redemptions.filter((r) => r.status === 'pending').length);
+  
+  // Championship hooks
+  const { championship, isLoading: champLoading } = useChampionship();
+  const { match, opponentName, isOpen: isMatchOpen, closeDay } = useMatch();
+  const { todayTasks } = useTodayTasks();
+  
+  // Day closure modal state
+  const [showClosureModal, setShowClosureModal] = useState(false);
+  const [closureResult, setClosureResult] = useState<MatchResult | null>(null);
+  const [isClosingDay, setIsClosingDay] = useState(false);
+
+  // Convert today tasks to championship format
+  const convertToChampionshipTasks = useCallback((): ChampionshipTask[] => {
+    return todayTasks.map(task => ({
+      id: task.id,
+      name: task.name,
+      goals: task.starValue || 1,
+      taskType: (task.isBonus ? 'bonus' : 'routine') as 'routine' | 'bonus',
+      completed: task.completion?.status === 'approved',
+      completedAt: task.completion?.completedAt,
+      scheduledDate: task.completion?.scheduledDate || new Date().toISOString().split('T')[0],
+    }));
+  }, [todayTasks]);
+
+  // Handle day closure
+  const handleCloseDay = useCallback(async () => {
+    // Confirm before closing
+    Alert.alert(
+      '⚽ Encerrar Partida',
+      `Tem certeza que deseja encerrar a partida de hoje contra ${opponentName}?\n\nEsta ação não pode ser desfeita.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Encerrar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsClosingDay(true);
+              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+              
+              const tasks = convertToChampionshipTasks();
+              const result = await closeDay(tasks);
+              
+              // Calculate user goals from tasks
+              const userGoals = tasks.filter(t => t.completed).reduce((sum, t) => sum + t.goals, 0);
+              const routineMissed = tasks.filter(t => !t.completed && t.taskType === 'routine').reduce((sum, t) => sum + t.goals, 0);
+              
+              // Get standing info
+              const previousPosition = match?.result ? 1 : 1; // Will be updated by closeDay
+              
+              const matchResult: MatchResult = {
+                userGoals,
+                opponentGoals: routineMissed + Math.floor(Math.random() * 3), // Simulated
+                opponentName,
+                result: result.result,
+                points: result.result === 'W' ? 3 : result.result === 'D' ? 1 : 0,
+                previousPosition,
+                newPosition: result.newPosition,
+                positionChange: previousPosition - result.newPosition,
+              };
+              
+              setClosureResult(matchResult);
+              setShowClosureModal(true);
+              
+              await Haptics.notificationAsync(
+                result.result === 'W' 
+                  ? Haptics.NotificationFeedbackType.Success 
+                  : Haptics.NotificationFeedbackType.Warning
+              );
+            } catch (error) {
+              console.error('Error closing day:', error);
+              Alert.alert('Erro', 'Não foi possível encerrar a partida. Tente novamente.');
+            } finally {
+              setIsClosingDay(false);
+            }
+          },
+        },
+      ]
+    );
+  }, [opponentName, closeDay, convertToChampionshipTasks, match]);
+
+  // Handle view table after closure
+  const handleViewTable = useCallback(() => {
+    setShowClosureModal(false);
+    router.push('/(child)/table');
+  }, [router]);
+
+  // Handle modal dismiss
+  const handleDismissModal = useCallback(() => {
+    setShowClosureModal(false);
+  }, []);
 
   if (periodLoading) {
     return <LoadingScreen variant="skeleton-dashboard" />;
@@ -137,6 +233,48 @@ export default function ParentHomeScreen() {
           </Animated.View>
         )}
 
+        {/* Championship Day Closure */}
+        {championship && isMatchOpen && (
+          <Animated.View entering={FadeInUp.delay(250).duration(400)} style={styles.section}>
+            <Card style={styles.matchCard}>
+              <Card.Content style={styles.matchContent}>
+                <View style={styles.matchHeader}>
+                  <Text style={styles.matchEmoji}>⚽</Text>
+                  <View style={styles.matchInfo}>
+                    <Text variant="titleMedium" style={styles.matchTitle}>
+                      Partida de Hoje
+                    </Text>
+                    <Text variant="bodyMedium" style={styles.matchOpponent}>
+                      vs {opponentName}
+                    </Text>
+                  </View>
+                  <View style={styles.matchStatusBadge}>
+                    <Text style={styles.matchStatusText}>AO VIVO</Text>
+                  </View>
+                </View>
+                <View style={styles.matchScorePreview}>
+                  <Text style={styles.matchScoreLabel}>Placar atual:</Text>
+                  <Text style={styles.matchScore}>
+                    {todayTasks.filter(t => t.completion?.status === 'approved').reduce((sum, t) => sum + (t.starValue || 1), 0)} ⚽ ? 
+                  </Text>
+                </View>
+                <Button
+                  mode="contained"
+                  icon="whistle"
+                  onPress={handleCloseDay}
+                  loading={isClosingDay}
+                  disabled={isClosingDay}
+                  style={styles.closeDayButton}
+                  buttonColor="#E74C3C"
+                  textColor="#FFFFFF"
+                >
+                  {isClosingDay ? 'Encerrando...' : 'Encerrar Partida'}
+                </Button>
+              </Card.Content>
+            </Card>
+          </Animated.View>
+        )}
+
         {/* Quick Actions */}
         <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -185,6 +323,14 @@ export default function ParentHomeScreen() {
           </View>
         </Animated.View>
       </ScrollView>
+      {/* Day Closure Modal */}
+      <DayClosureModal
+        visible={showClosureModal}
+        result={closureResult}
+        userName={childName || 'Jogador'}
+        onViewTable={handleViewTable}
+        onDismiss={handleDismissModal}
+      />
     </SafeAreaView>
   );
 }
@@ -276,5 +422,67 @@ const styles = StyleSheet.create({
   },
   outlinedButton: {
     borderColor: ChildColors.starGold,
+  },
+  // Match/Championship styles
+  matchCard: {
+    backgroundColor: ChildColors.cardBackground,
+    borderWidth: 2,
+    borderColor: '#E74C3C',
+    borderRadius: ChildSizes.cardRadius,
+  },
+  matchContent: {
+    padding: 16,
+  },
+  matchHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  matchEmoji: {
+    fontSize: 32,
+    marginRight: 12,
+  },
+  matchInfo: {
+    flex: 1,
+  },
+  matchTitle: {
+    fontWeight: 'bold',
+    color: ChildColors.textPrimary,
+  },
+  matchOpponent: {
+    color: ChildColors.textSecondary,
+  },
+  matchStatusBadge: {
+    backgroundColor: '#E74C3C',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  matchStatusText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  matchScorePreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    padding: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+  },
+  matchScoreLabel: {
+    color: ChildColors.textSecondary,
+    marginRight: 8,
+  },
+  matchScore: {
+    color: ChildColors.starGold,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  closeDayButton: {
+    borderRadius: 12,
   },
 });

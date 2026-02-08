@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-import { LeagueId, TeamProfile } from '@/constants/leagueConfig';
+import { LeagueId, TeamProfile } from '../../constants/leagueConfig';
 
 // Championship team (simulated or user)
 export interface ChampionshipTeam {
