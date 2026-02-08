@@ -1,16 +1,4 @@
-import { Redirect } from 'expo-router';
-import { useAuthStore } from '../lib/stores';
-
+// Placeholder — AuthGate in _layout.tsx handles all routing
 export default function Index() {
-  const { isAuthenticated, role } = useAuthStore();
-
-  if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
-  }
-
-  if (role === 'child') {
-    return <Redirect href="/(child)" />;
-  }
-
-  return <Redirect href="/(parent)" />;
+  return null;
 }

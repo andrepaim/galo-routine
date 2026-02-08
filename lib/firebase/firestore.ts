@@ -16,6 +16,13 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './config';
+
+function onSnapshotError(name: string) {
+  return (error: Error) => {
+    console.warn(`[Firestore] ${name} subscription error:`, error.message);
+  };
+}
+
 import type {
   Task,
   Period,
@@ -47,7 +54,7 @@ export async function updateFamily(familyId: string, data: Partial<Family>) {
 export function subscribeToFamily(familyId: string, callback: (family: Family | null) => void): Unsubscribe {
   return onSnapshot(doc(db, 'families', familyId), (snap) => {
     callback(snap.exists() ? (snap.data() as Family) : null);
-  });
+  }, onSnapshotError('family'));
 }
 
 export async function incrementFamilyField(familyId: string, field: string, amount: number) {
@@ -77,7 +84,7 @@ export function subscribeTasks(familyId: string, callback: (tasks: Task[]) => vo
   return onSnapshot(tasksRef(familyId), (snap) => {
     const tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Task));
     callback(tasks);
-  });
+  }, onSnapshotError('tasks'));
 }
 
 // ── Periods ───────────────────────────────────────────────────────
@@ -100,7 +107,7 @@ export function subscribePeriods(familyId: string, callback: (periods: Period[])
   return onSnapshot(q, (snap) => {
     const periods = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Period));
     callback(periods);
-  });
+  }, onSnapshotError('periods'));
 }
 
 export async function getActivePeriod(familyId: string): Promise<Period | null> {
@@ -143,7 +150,7 @@ export function subscribeCompletions(
   return onSnapshot(completionsRef(familyId, periodId), (snap) => {
     const completions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as TaskCompletion));
     callback(completions);
-  });
+  }, onSnapshotError('completions'));
 }
 
 export async function getCompletionsForDate(
@@ -188,7 +195,7 @@ export function subscribeRewards(familyId: string, callback: (rewards: Reward[])
   return onSnapshot(rewardsRef(familyId), (snap) => {
     const rewards = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Reward));
     callback(rewards);
-  });
+  }, onSnapshotError('rewards'));
 }
 
 // ── Redemptions (Feature 1) ──────────────────────────────────────
@@ -211,7 +218,7 @@ export function subscribeRedemptions(familyId: string, callback: (redemptions: R
   return onSnapshot(q, (snap) => {
     const redemptions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Redemption));
     callback(redemptions);
-  });
+  }, onSnapshotError('redemptions'));
 }
 
 // ── Long-Term Goals (Feature 3) ──────────────────────────────────
@@ -237,7 +244,7 @@ export function subscribeGoals(familyId: string, callback: (goals: LongTermGoal[
   return onSnapshot(goalsRef(familyId), (snap) => {
     const goals = snap.docs.map((d) => ({ id: d.id, ...d.data() } as LongTermGoal));
     callback(goals);
-  });
+  }, onSnapshotError('goals'));
 }
 
 // ── Earned Badges (Feature 7) ────────────────────────────────────
@@ -255,7 +262,7 @@ export function subscribeEarnedBadges(familyId: string, callback: (badges: Earne
   return onSnapshot(badgesRef(familyId), (snap) => {
     const badges = snap.docs.map((d) => ({ id: d.id, ...d.data() } as EarnedBadge));
     callback(badges);
-  });
+  }, onSnapshotError('earnedBadges'));
 }
 
 // ── Streak Freezes (Feature 6) ───────────────────────────────────
@@ -273,7 +280,7 @@ export function subscribeStreakFreezes(familyId: string, callback: (freezes: Str
   return onSnapshot(streakFreezesRef(familyId), (snap) => {
     const freezes = snap.docs.map((d) => ({ id: d.id, ...d.data() } as StreakFreeze));
     callback(freezes);
-  });
+  }, onSnapshotError('streakFreezes'));
 }
 
 // ── Championships ────────────────────────────────────────────────
@@ -327,7 +334,7 @@ export function subscribeChampionship(
 ): Unsubscribe {
   return onSnapshot(doc(db, 'families', familyId, 'championships', championshipId), (snap) => {
     callback(snap.exists() ? { id: snap.id, ...snap.data() } as Championship : null);
-  });
+  }, onSnapshotError('championship'));
 }
 
 export function subscribeActiveChampionship(
@@ -342,7 +349,7 @@ export function subscribeActiveChampionship(
       const d = snap.docs[0];
       callback({ id: d.id, ...d.data() } as Championship);
     }
-  });
+  }, onSnapshotError('activeChampionship'));
 }
 
 // ── Matches ──────────────────────────────────────────────────────
@@ -394,7 +401,8 @@ export function subscribeMatch(
     doc(db, 'families', familyId, 'championships', championshipId, 'matches', matchId),
     (snap) => {
       callback(snap.exists() ? { id: snap.id, ...snap.data() } as Match : null);
-    }
+    },
+    onSnapshotError('match'),
   );
 }
 
@@ -412,7 +420,7 @@ export function subscribeTodayMatch(
       const d = snap.docs[0];
       callback({ id: d.id, ...d.data() } as Match);
     }
-  });
+  }, onSnapshotError('todayMatch'));
 }
 
 // ── Trophies ─────────────────────────────────────────────────────
@@ -434,5 +442,5 @@ export function subscribeTrophies(
   return onSnapshot(q, (snap) => {
     const trophies = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Trophy));
     callback(trophies);
-  });
+  }, onSnapshotError('trophies'));
 }
