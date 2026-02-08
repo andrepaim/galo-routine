@@ -33,9 +33,9 @@ export function useMatch(): UseMatchReturn {
 
   const today = format(new Date(), 'yyyy-MM-dd');
 
-  // Subscribe to today's match
+  // Subscribe to today's match (skip in dev mode — handled by useSubscriptions)
   useEffect(() => {
-    if (!familyId || !championship?.id) return;
+    if (!familyId || !championship?.id || familyId === 'dev-family-123') return;
     const unsubscribe = subscribeTodayMatch(familyId, championship.id, today);
     return unsubscribe;
   }, [familyId, championship?.id, today]);

@@ -10,7 +10,7 @@ export function useGoalBudgetSync() {
   const lastBudgetRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!familyId || !activePeriod?.id) return;
+    if (!familyId || !activePeriod?.id || familyId === 'dev-family-123') return;
 
     const startDate = activePeriod.startDate.toDate();
     const endDate = activePeriod.endDate.toDate();

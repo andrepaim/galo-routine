@@ -7,7 +7,33 @@ A parent-child task & reward app built with Expo (SDK 54), React Native, Firebas
 - `npx expo start --web` — start Expo web dev server
 - `npx tsc --noEmit` — type-check
 - `npx jest` — run unit tests (Jest + jest-expo)
+- `node scripts/e2e-tests.mjs` — run E2E tests (requires Expo web running on port 8081)
 - Cloud functions: `cd functions && npm run build && npm run deploy`
+
+## Testing
+
+### Unit Tests
+- `npx jest` — run all unit tests
+- `npx jest --coverage` — with coverage report
+
+### E2E Tests
+- Start Expo web first: `npx expo start --web --port 8081`
+- Run E2E suite: `node scripts/e2e-tests.mjs`
+- Screenshots saved to `test-screenshots/e2e/`
+- Uses Playwright headless browser against dev mode URLs (`?dev=parent`, `?dev=child`)
+
+### Before Pushing a Feature Branch
+1. `npx tsc --noEmit` — type-check passes
+2. `npx jest` — unit tests pass
+3. `node scripts/e2e-tests.mjs` — E2E tests pass (with Expo web running)
+
+### When Adding New Features
+- Add unit tests in `__tests__/` directories alongside the code
+- **Update `scripts/e2e-tests.mjs`** to cover the new screen/feature:
+  - Add navigation to the new route
+  - Add text assertions for key labels
+  - Add screenshot capture
+  - Verify no regressions in existing features
 
 ## Architecture
 
@@ -136,7 +162,8 @@ Football-themed gamification where task completion translates into "goals" in a 
 
 ### Web Testing Setup
 - **Expo Web** running at localhost:8081 (`npx expo start --web`)
-- **Puppeteer** for automated browser testing (scripts in `scripts/`)
+- **Playwright** for E2E tests (`scripts/e2e-tests.mjs`) — primary test runner
+- **Puppeteer** for legacy screenshot scripts (`scripts/screenshot-*.mjs`)
 - **Test screenshots** saved to `test-screenshots/`
 - Start expo in screen: `screen -dmS expo bash -c 'cd /home/andrepaim/src/star-routine && npx expo start --web --port 8081'`
 

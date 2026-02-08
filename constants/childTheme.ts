@@ -21,6 +21,11 @@ export const ChildColors = {
   accentPurple: '#9B59B6',   // DEPRECATED - use pendingGold
   accentBlue: '#3498DB',     // For info (sparingly)
   
+  // Container (background) variants
+  accentGreenContainer: 'rgba(46, 204, 113, 0.15)',  // Subtle green background
+  accentRedContainer: 'rgba(230, 57, 70, 0.15)',     // Subtle red background
+  pendingGoldContainer: 'rgba(184, 150, 11, 0.15)',  // Subtle gold background
+
   // Pending state - muted gold instead of purple
   pendingGold: '#B8960B',    // Darker gold for pending items
   pendingGoldLight: '#D4AF37', // Lighter pending gold

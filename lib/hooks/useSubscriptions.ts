@@ -111,7 +111,7 @@ export function useSubscriptions() {
       // Mock goals
       useGoalStore.setState({
         goals: [
-          { id: 'goal-1', name: 'Bicicleta nova', targetGoals: 500, currentGoals: 150, deadline: '2026-06-01' },
+          { id: 'goal-1', name: 'Bicicleta nova', description: 'Mountain bike azul', targetGoals: 500, currentGoals: 150, rewardDescription: 'Bicicleta nova!', isCompleted: false, deadline: mockTimestamp(new Date('2026-06-01')) },
         ] as any,
         isLoading: false,
       });
@@ -159,7 +159,7 @@ export function useSubscriptions() {
 
   // Subscribe to completions when we have an active period
   useEffect(() => {
-    if (!familyId || !activePeriod?.id) return;
+    if (!familyId || !activePeriod?.id || familyId === 'dev-family-123') return;
 
     const unsub = useCompletionStore.getState().subscribe(familyId, activePeriod.id);
     return () => unsub();
@@ -167,7 +167,7 @@ export function useSubscriptions() {
 
   // Subscribe to today's match when we have a championship
   useEffect(() => {
-    if (!familyId || !championship?.id) return;
+    if (!familyId || !championship?.id || familyId === 'dev-family-123') return;
     const today = format(new Date(), 'yyyy-MM-dd');
     const unsub = useChampionshipStore.getState().subscribeTodayMatch(familyId, championship.id, today);
     return () => unsub();

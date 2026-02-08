@@ -16,7 +16,16 @@ interface GoalCardProps {
 export function GoalCard({ goal, lifetimeGoals, onPress, onDelete }: GoalCardProps) {
   const progress = Math.min(lifetimeGoals / goal.targetGoals, 1);
   const goalsRemaining = Math.max(0, goal.targetGoals - lifetimeGoals);
-  const deadlineStr = goal.deadline ? format(goal.deadline.toDate(), 'MMM d, yyyy') : undefined;
+  const deadlineStr = goal.deadline
+    ? format(
+        typeof goal.deadline === 'string'
+          ? new Date(goal.deadline)
+          : typeof goal.deadline.toDate === 'function'
+            ? goal.deadline.toDate()
+            : new Date(goal.deadline as any),
+        'MMM d, yyyy',
+      )
+    : undefined;
 
   return (
     <Card style={[styles.card, goal.isCompleted && styles.completedCard]} onPress={onPress}>
