@@ -8,7 +8,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import { TASK_CATEGORIES, getCategoryById } from '../../constants';
 import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore, useCompletionStore, usePeriodStore, useTaskStore } from '../../lib/stores';
-import { useStarBudget } from '../../lib/hooks/useStarBudget';
+import { useGoalBudget } from '../../lib/hooks/useGoalBudget';
 import { StreakDisplay } from '../../components/streaks/StreakDisplay';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 
@@ -17,7 +17,7 @@ export default function AnalyticsScreen() {
   const { tasks } = useTaskStore();
   const { completions } = useCompletionStore();
   const { periods } = usePeriodStore();
-  const starProgress = useStarBudget();
+  const starProgress = useGoalBudget();
 
   const completedPeriods = periods.filter((p) => p.status === 'completed');
 
@@ -83,7 +83,7 @@ export default function AnalyticsScreen() {
                     {Math.round(starProgress.earnedPercent)}%
                   </Text>
                   <Text variant="bodySmall" style={styles.overviewLabel}>
-                    Estrelas Ganhas
+                    Gols Marcados
                   </Text>
                 </View>
               )}
@@ -173,8 +173,8 @@ export default function AnalyticsScreen() {
             Histórico de Períodos
           </Text>
           {completedPeriods.slice(0, 5).map((period) => {
-            const starPercent = period.starBudget > 0
-              ? Math.round((period.starsEarned / period.starBudget) * 100)
+            const goalPercent = period.goalBudget > 0
+              ? Math.round((period.goalsEarned / period.goalBudget) * 100)
               : 0;
             const outcomeColor =
               period.outcome === 'reward' ? ChildColors.accentGreen
@@ -189,7 +189,7 @@ export default function AnalyticsScreen() {
                       {format(period.startDate.toDate(), "d 'de' MMM", { locale: ptBR })} - {format(period.endDate.toDate(), "d 'de' MMM", { locale: ptBR })}
                     </Text>
                     <Text variant="bodySmall" style={styles.periodStars}>
-                      {period.starsEarned}/{period.starBudget} estrelas ({starPercent}%)
+                      {period.goalsEarned}/{period.goalBudget} gols ({goalPercent}%)
                     </Text>
                   </View>
                   <View style={[styles.outcomeBadge, { backgroundColor: outcomeColor + '20' }]}>

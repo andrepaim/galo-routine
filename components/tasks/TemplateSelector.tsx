@@ -117,7 +117,7 @@ export function TemplateSelector({ onSelect, onCancel }: TemplateSelectorProps) 
                         )}
                       </View>
                     </View>
-                    <StarDisplay count={tmpl.starValue} maxStars={tmpl.starValue} size={16} showEmpty={false} />
+                    <StarDisplay count={tmpl.goals} maxStars={tmpl.goals} size={16} showEmpty={false} />
                   </View>
                 );
               })}

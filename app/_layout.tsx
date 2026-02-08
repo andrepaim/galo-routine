@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { theme } from '../constants/theme';
 import { useAuthStore } from '../lib/stores';
-import { useSubscriptions, useStarBudgetSync } from '../lib/hooks';
+import { useSubscriptions, useGoalBudgetSync } from '../lib/hooks';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
 
 function AuthGate() {
@@ -18,17 +18,23 @@ function AuthGate() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const firstSegment = segments[0];
+    const inAuthGroup = firstSegment === '(auth)';
+    const inParentGroup = firstSegment === '(parent)';
+    const inChildGroup = firstSegment === '(child)';
     const onChildPin = (segments as string[]).includes('child-pin');
 
     if (!isAuthenticated && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } else if (isAuthenticated && inAuthGroup && !onChildPin) {
-      // Don't redirect away from child-pin — user is entering their PIN
-      if (role === 'child') {
-        router.replace('/(child)');
-      } else {
-        router.replace('/(parent)');
+      router.navigate('/(auth)/login');
+    } else if (isAuthenticated) {
+      const target = role === 'child' ? '/(child)' : '/(parent)';
+
+      if (inAuthGroup && !onChildPin) {
+        // Redirect away from auth group (except child-pin)
+        router.navigate(target);
+      } else if (!inParentGroup && !inChildGroup && !inAuthGroup) {
+        // At root index or unknown route — redirect to correct group
+        router.navigate(target);
       }
     }
   }, [isAuthenticated, isLoading, role, segments]);
@@ -38,7 +44,7 @@ function AuthGate() {
 
 function DataSubscriptions() {
   useSubscriptions();
-  useStarBudgetSync();
+  useGoalBudgetSync();
   return null;
 }
 
@@ -56,7 +62,7 @@ export default function RootLayout() {
     return (
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
-          <LoadingScreen message="Starting Star Routine..." />
+          <LoadingScreen message="Starting Galo Routine..." />
         </PaperProvider>
       </SafeAreaProvider>
     );

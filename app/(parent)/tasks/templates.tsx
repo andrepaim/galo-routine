@@ -18,13 +18,14 @@ export default function TemplatesScreen() {
     const formDataList: TaskFormData[] = templates.map((t) => ({
       name: t.name,
       description: t.description,
-      starValue: t.starValue,
+      goals: t.goals,
       icon: t.icon,
       recurrenceType: t.recurrence.type,
       days: t.recurrence.days ?? [],
       startTime: t.startTime,
       endTime: t.endTime,
       category: t.category,
+      taskType: 'routine',
     }));
     await addTasksBatch(familyId, formDataList);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

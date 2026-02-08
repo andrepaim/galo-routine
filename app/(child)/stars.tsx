@@ -1,204 +1,184 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, Surface, ProgressBar } from 'react-native-paper';
-import Animated, { 
-  FadeInUp, 
+import { Text, Surface } from 'react-native-paper';
+import Animated, {
+  FadeInUp,
   FadeInLeft,
   ZoomIn,
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
 } from 'react-native-reanimated';
-import { ChildColors, ChildSizes, STAR_EMOJI, TROPHY_EMOJI, GALO_EMOJI } from '../../constants';
-import { useAuthStore, usePeriodStore } from '../../lib/stores';
-import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
-import { useStarBudget } from '../../lib/hooks/useStarBudget';
-import { getRemainingDays } from '../../lib/utils/periodUtils';
+import { ChildColors, ChildSizes, GALO_EMOJI } from '../../constants';
+import { useAuthStore } from '../../lib/stores';
+import { useChampionship } from '../../lib/hooks/useChampionship';
+import { StandingsTable } from '../../components/championship/StandingsTable';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
+import type { LeagueId } from '../../constants/leagueConfig';
+import { LEAGUE_CONFIG } from '../../constants/leagueConfig';
 
-export default function ChildStarsScreen() {
-  const family = useAuthStore((s) => s.family);
-  const { activePeriod, isLoading } = useCurrentPeriod();
-  const starProgress = useStarBudget();
+export default function ChildChampionshipScreen() {
+  const familyId = useAuthStore((s) => s.familyId);
+  const {
+    championship,
+    isLoading,
+    standings,
+    userStanding,
+    userPosition,
+    leagueName,
+    totalTeams,
+    initializeIfNeeded,
+  } = useChampionship();
 
-  // Animated star pulse
-  const starPulse = useSharedValue(1);
+  // Initialize championship on first load if needed
   React.useEffect(() => {
-    starPulse.value = withRepeat(
-      withSequence(
-        withTiming(1.1, { duration: 800 }),
-        withTiming(1, { duration: 800 })
-      ),
-      -1,
-      true
-    );
-  }, []);
-
-  const starStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: starPulse.value }],
-  }));
+    if (!isLoading && !championship && familyId) {
+      initializeIfNeeded();
+    }
+  }, [isLoading, championship, familyId]);
 
   // Skip loading in dev mode
   const isDevMode = typeof window !== 'undefined' && window.location.search.includes('dev=');
   if (isLoading && !isDevMode) {
-    return <LoadingScreen message="Carregando estrelas..." />;
+    return <LoadingScreen message="Carregando campeonato..." />;
   }
 
-  const lifetimeStars = family?.lifetimeStarsEarned ?? 0;
-  const starBalance = family?.starBalance ?? 0;
-  const currentStreak = family?.currentStreak ?? 0;
-  const bestStreak = family?.bestStreak ?? 0;
-
-  if (!activePeriod || !starProgress) {
+  if (!championship) {
     return (
       <View style={styles.container}>
-        <Surface style={styles.emptyCard} elevation={0}>
-          <Text style={styles.emptyEmoji}>⭐</Text>
-          <Text style={styles.emptyTitle}>Sem Estrelas Ainda</Text>
-          <Text style={styles.emptySubtitle}>
-            Complete tarefas para ganhar estrelas!
-          </Text>
-        </Surface>
+        <EmptyState
+          icon="trophy-variant"
+          title="Sem Campeonato Ativo"
+          description="Nenhum campeonato em andamento. Complete tarefas para iniciar um novo campeonato!"
+        />
       </View>
     );
   }
 
-  const remaining = getRemainingDays(activePeriod);
-  const rewardStars = Math.ceil(
-    (activePeriod.thresholds.rewardPercent / 100) * activePeriod.starBudget,
-  );
-  const starsToReward = Math.max(0, rewardStars - starProgress.earned);
-  const progressPercent = Math.min(starProgress.earnedPercent, 100);
+  const league = championship.league as LeagueId;
+  const leagueConfig = LEAGUE_CONFIG[league];
+  const promotionSpots = leagueConfig.promotionSpots;
+  const inPromotionZone = userPosition > 0 && userPosition <= promotionSpots && league !== 'A';
+  const totalRounds = championship.fixtures.length > 0
+    ? Math.max(...championship.fixtures.map(f => f.round))
+    : 4;
 
   return (
     <View style={styles.container}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Star Display */}
-        <Animated.View entering={ZoomIn.duration(500)} style={styles.heroSection}>
-          <Text style={styles.heroLabel}>Estrelas Esta Semana</Text>
-          <View style={styles.heroRow}>
-            <Animated.Text style={[styles.heroEmoji, starStyle]}>
-              {STAR_EMOJI}
-            </Animated.Text>
-            <Text style={styles.heroNumber}>{starProgress.earned}</Text>
-            <Text style={styles.heroTotal}>/ {activePeriod.starBudget}</Text>
-          </View>
-          <Text style={styles.heroSubtext}>
-            {remaining} {remaining === 1 ? 'dia restante' : 'dias restantes'}
-          </Text>
-        </Animated.View>
-
-        {/* Progress Ring */}
-        <Animated.View entering={FadeInUp.delay(200).duration(400)}>
-          <Surface style={styles.progressCard} elevation={0}>
-            <View style={styles.progressHeader}>
-              <Text style={styles.progressTitle}>Progresso</Text>
-              <Text style={[
-                styles.progressPercent,
-                progressPercent >= 80 ? styles.percentGood : 
-                progressPercent >= 50 ? styles.percentOk : styles.percentLow
-              ]}>
-                {Math.round(progressPercent)}%
-              </Text>
-            </View>
-            <ProgressBar
-              progress={progressPercent / 100}
-              color={
-                progressPercent >= 80 ? ChildColors.statusApproved :
-                progressPercent >= 50 ? ChildColors.starGold : ChildColors.statusRejected
-              }
-              style={styles.progressBarBig}
-            />
-            <View style={styles.progressLabels}>
-              <Text style={styles.progressLabelLeft}>0%</Text>
-              <View style={styles.progressThreshold}>
-                <Text style={styles.progressThresholdText}>
-                  {activePeriod.thresholds.rewardPercent}% 🏆
-                </Text>
-              </View>
-              <Text style={styles.progressLabelRight}>100%</Text>
-            </View>
+        {/* League Info Card */}
+        <Animated.View entering={ZoomIn.duration(500)}>
+          <Surface style={styles.leagueCard} elevation={0}>
+            <Text style={styles.leagueEmoji}>🏟️</Text>
+            <Text style={styles.leagueName}>{leagueName}</Text>
+            <Text style={styles.leagueSubtitle}>
+              Rodada {championship.currentRound} de {totalRounds}
+            </Text>
           </Surface>
         </Animated.View>
+
+        {/* User Position Card */}
+        {userStanding && (
+          <Animated.View entering={FadeInUp.delay(200).duration(400)}>
+            <Surface style={[
+              styles.positionCard,
+              inPromotionZone && styles.positionCardPromotion,
+            ]} elevation={0}>
+              <View style={styles.positionHeader}>
+                <Text style={styles.positionLabel}>Sua Posição</Text>
+                {inPromotionZone && (
+                  <View style={styles.promotionBadge}>
+                    <Text style={styles.promotionBadgeText}>Zona de Promoção</Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.positionRow}>
+                <Text style={styles.positionNumber}>{userPosition}º</Text>
+                <Text style={styles.positionTotal}>de {totalTeams}</Text>
+              </View>
+            </Surface>
+          </Animated.View>
+        )}
 
         {/* Stats Grid */}
-        <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.statsGrid}>
-          <Surface style={styles.statCard} elevation={0}>
-            <Text style={styles.statEmoji}>{STAR_EMOJI}</Text>
-            <Text style={styles.statNumber}>{starBalance}</Text>
-            <Text style={styles.statLabel}>Para Gastar</Text>
-          </Surface>
-          
-          <Surface style={styles.statCard} elevation={0}>
-            <Text style={styles.statEmoji}>💎</Text>
-            <Text style={styles.statNumber}>{lifetimeStars}</Text>
-            <Text style={styles.statLabel}>Total Ganhas</Text>
-          </Surface>
-        </Animated.View>
+        {userStanding && (
+          <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.statsGrid}>
+            <Surface style={styles.statCard} elevation={0}>
+              <Text style={styles.statEmoji}>✅</Text>
+              <Text style={styles.statNumber}>{userStanding.won}</Text>
+              <Text style={styles.statLabel}>Vitórias</Text>
+            </Surface>
 
-        <Animated.View entering={FadeInUp.delay(400).duration(400)} style={styles.statsGrid}>
-          <Surface style={styles.statCard} elevation={0}>
-            <Text style={styles.statEmoji}>🔥</Text>
-            <Text style={styles.statNumber}>{currentStreak}</Text>
-            <Text style={styles.statLabel}>Dias Seguidos</Text>
-          </Surface>
-          
-          <Surface style={styles.statCard} elevation={0}>
-            <Text style={styles.statEmoji}>{TROPHY_EMOJI}</Text>
-            <Text style={styles.statNumber}>{bestStreak}</Text>
-            <Text style={styles.statLabel}>Recorde</Text>
-          </Surface>
-        </Animated.View>
+            <Surface style={styles.statCard} elevation={0}>
+              <Text style={styles.statEmoji}>🤝</Text>
+              <Text style={styles.statNumber}>{userStanding.drawn}</Text>
+              <Text style={styles.statLabel}>Empates</Text>
+            </Surface>
 
-        {/* Zones */}
+            <Surface style={styles.statCard} elevation={0}>
+              <Text style={styles.statEmoji}>❌</Text>
+              <Text style={styles.statNumber}>{userStanding.lost}</Text>
+              <Text style={styles.statLabel}>Derrotas</Text>
+            </Surface>
+          </Animated.View>
+        )}
+
+        {/* Goals & Points Row */}
+        {userStanding && (
+          <Animated.View entering={FadeInUp.delay(400).duration(400)} style={styles.statsGrid}>
+            <Surface style={styles.statCard} elevation={0}>
+              <Text style={styles.statEmoji}>⚽</Text>
+              <Text style={styles.statNumber}>{userStanding.goalsFor}</Text>
+              <Text style={styles.statLabel}>Gols Marcados</Text>
+            </Surface>
+
+            <Surface style={styles.statCard} elevation={0}>
+              <Text style={styles.statEmoji}>🏆</Text>
+              <Text style={styles.statNumber}>{userStanding.points}</Text>
+              <Text style={styles.statLabel}>Pontos</Text>
+            </Surface>
+
+            <Surface style={styles.statCard} elevation={0}>
+              <Text style={styles.statEmoji}>📊</Text>
+              <Text style={[
+                styles.statNumber,
+                userStanding.goalDifference > 0 && styles.positiveGD,
+                userStanding.goalDifference < 0 && styles.negativeGD,
+              ]}>
+                {userStanding.goalDifference > 0 ? '+' : ''}{userStanding.goalDifference}
+              </Text>
+              <Text style={styles.statLabel}>Saldo de Gols</Text>
+            </Surface>
+          </Animated.View>
+        )}
+
+        {/* Mini Standings Table */}
         <Animated.View entering={FadeInLeft.delay(500).duration(400)}>
-          <Text style={styles.zonesTitle}>Zonas de Meta</Text>
-          
-          {/* Reward Zone */}
-          <Surface style={[styles.zoneCard, styles.zoneReward]} elevation={0}>
-            <View style={styles.zoneHeader}>
-              <Text style={styles.zoneEmoji}>🏆</Text>
-              <Text style={styles.zoneTitle}>Zona de Prêmio</Text>
-              <Text style={styles.zonePercent}>{activePeriod.thresholds.rewardPercent}%+</Text>
+          <View style={styles.tableSection}>
+            <Text style={styles.sectionTitle}>Classificação</Text>
+            <View style={styles.tableContainer}>
+              <StandingsTable
+                standings={standings}
+                league={league}
+                userId={familyId || ''}
+                currentRound={championship.currentRound}
+                totalRounds={totalRounds}
+              />
             </View>
-            <Text style={styles.zoneDescription}>
-              {starProgress.isRewardZone
-                ? `Você conseguiu! ${activePeriod.thresholds.rewardDescription}`
-                : `Faltam ${starsToReward} estrelas`}
-            </Text>
-          </Surface>
-
-          {/* Penalty Zone */}
-          <Surface style={[styles.zoneCard, styles.zonePenalty]} elevation={0}>
-            <View style={styles.zoneHeader}>
-              <Text style={styles.zoneEmoji}>⚠️</Text>
-              <Text style={styles.zoneTitle}>Zona de Atenção</Text>
-              <Text style={styles.zonePercent}>&lt;{activePeriod.thresholds.penaltyPercent}%</Text>
-            </View>
-            <Text style={styles.zoneDescription}>
-              {starProgress.isPenaltyZone
-                ? activePeriod.thresholds.penaltyDescription
-                : 'Continue assim para ficar longe dessa zona!'}
-            </Text>
-          </Surface>
+          </View>
         </Animated.View>
 
-        {/* Mascot encouragement */}
+        {/* Mascot Encouragement */}
         <Animated.View entering={FadeInUp.delay(600).duration(400)}>
           <Surface style={styles.mascotCard} elevation={0}>
             <Text style={styles.mascotEmoji}>{GALO_EMOJI}</Text>
             <Text style={styles.mascotText}>
-              {starProgress.isRewardZone 
-                ? 'Você é craque! Continue assim, Campeão!' 
-                : starProgress.earnedPercent >= 50
-                  ? 'Tá indo bem! Falta pouco pro prêmio!'
-                  : 'Vamos lá! Você consegue!'}
+              {inPromotionZone
+                ? 'Você está na zona de promoção! Continue assim, Campeão!'
+                : userPosition <= Math.ceil(totalTeams / 2)
+                  ? 'Boa posição! Falta pouco para a zona de promoção!'
+                  : 'Vamos subir na tabela! Complete suas tarefas!'}
             </Text>
           </Surface>
         </Animated.View>
@@ -216,42 +196,32 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
   },
-  // Hero Section
-  heroSection: {
+  // League Card
+  leagueCard: {
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    padding: ChildSizes.cardPadding,
     alignItems: 'center',
     marginBottom: ChildSizes.sectionGap,
+    borderWidth: 2,
+    borderColor: ChildColors.starGold,
   },
-  heroLabel: {
-    fontSize: 16,
-    color: ChildColors.textSecondary,
+  leagueEmoji: {
+    fontSize: 48,
     marginBottom: 8,
   },
-  heroRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  heroEmoji: {
-    fontSize: 48,
-    marginRight: 8,
-  },
-  heroNumber: {
-    fontSize: 72,
+  leagueName: {
+    fontSize: 28,
     fontWeight: '900',
     color: ChildColors.starGold,
   },
-  heroTotal: {
-    fontSize: 32,
-    fontWeight: '600',
-    color: ChildColors.textSecondary,
-    marginLeft: 8,
-  },
-  heroSubtext: {
+  leagueSubtitle: {
     fontSize: 16,
     color: ChildColors.textSecondary,
-    marginTop: 8,
+    marginTop: 4,
   },
-  // Progress Card
-  progressCard: {
+  // Position Card
+  positionCard: {
     backgroundColor: ChildColors.cardBackground,
     borderRadius: ChildSizes.cardRadius,
     padding: ChildSizes.cardPadding,
@@ -259,53 +229,46 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: ChildColors.cardBorder,
   },
-  progressHeader: {
+  positionCardPromotion: {
+    borderColor: '#2ECC71',
+    borderWidth: 2,
+  },
+  positionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  progressTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: ChildColors.textPrimary,
-  },
-  progressPercent: {
-    fontSize: 24,
-    fontWeight: '800',
-  },
-  percentGood: { color: ChildColors.statusApproved },
-  percentOk: { color: ChildColors.starGold },
-  percentLow: { color: ChildColors.statusRejected },
-  progressBarBig: {
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: ChildColors.cardBorder,
-  },
-  progressLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  progressLabelLeft: {
-    fontSize: 12,
-    color: ChildColors.textMuted,
-  },
-  progressLabelRight: {
-    fontSize: 12,
-    color: ChildColors.textMuted,
-  },
-  progressThreshold: {
-    backgroundColor: 'rgba(46, 204, 113, 0.2)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  progressThresholdText: {
-    fontSize: 12,
-    color: ChildColors.statusApproved,
+  positionLabel: {
+    fontSize: 16,
+    color: ChildColors.textSecondary,
     fontWeight: '600',
+  },
+  promotionBadge: {
+    backgroundColor: 'rgba(46, 204, 113, 0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  promotionBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2ECC71',
+  },
+  positionRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  positionNumber: {
+    fontSize: 56,
+    fontWeight: '900',
+    color: ChildColors.starGold,
+  },
+  positionTotal: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: ChildColors.textSecondary,
+    marginLeft: 8,
   },
   // Stats Grid
   statsGrid: {
@@ -323,65 +286,41 @@ const styles = StyleSheet.create({
     borderColor: ChildColors.cardBorder,
   },
   statEmoji: {
-    fontSize: 28,
+    fontSize: 24,
     marginBottom: 8,
   },
   statNumber: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '800',
     color: ChildColors.textPrimary,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: ChildColors.textSecondary,
     marginTop: 4,
+    textAlign: 'center',
   },
-  // Zones
-  zonesTitle: {
+  positiveGD: {
+    color: '#2ECC71',
+  },
+  negativeGD: {
+    color: '#E74C3C',
+  },
+  // Table Section
+  tableSection: {
+    marginBottom: ChildSizes.sectionGap,
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: ChildColors.textPrimary,
     marginBottom: 12,
-    marginTop: 8,
   },
-  zoneCard: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 2,
-  },
-  zoneReward: {
-    backgroundColor: 'rgba(46, 204, 113, 0.1)',
-    borderColor: ChildColors.statusApproved,
-  },
-  zonePenalty: {
-    backgroundColor: 'rgba(230, 57, 70, 0.1)',
-    borderColor: ChildColors.statusRejected,
-  },
-  zoneHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  zoneEmoji: {
-    fontSize: 24,
-    marginRight: 8,
-  },
-  zoneTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: ChildColors.textPrimary,
-    flex: 1,
-  },
-  zonePercent: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: ChildColors.textSecondary,
-  },
-  zoneDescription: {
-    fontSize: 14,
-    color: ChildColors.textSecondary,
-    lineHeight: 20,
+  tableContainer: {
+    borderRadius: ChildSizes.cardRadius,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
   },
   // Mascot Card
   mascotCard: {
@@ -404,30 +343,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: ChildColors.starGold,
     lineHeight: 22,
-  },
-  // Empty State
-  emptyCard: {
-    backgroundColor: ChildColors.cardBackground,
-    borderRadius: ChildSizes.cardRadius,
-    padding: 40,
-    margin: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: ChildColors.cardBorder,
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: ChildColors.starGold,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    color: ChildColors.textSecondary,
-    textAlign: 'center',
   },
 });

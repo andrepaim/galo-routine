@@ -12,9 +12,9 @@ import { useAuthStore } from '../../lib/stores';
 import { updateFamilySettings, updateFamily } from '../../lib/firebase/firestore';
 import { hashPin } from '../../lib/utils/pin';
 import { StarBudgetRing } from '../../components/stars/StarBudgetRing';
-import type { PeriodType, StarProgress } from '../../lib/types';
+import type { PeriodType, GoalProgress } from '../../lib/types';
 
-const MOCK_PROGRESS: StarProgress = {
+const MOCK_PROGRESS: GoalProgress = {
   earned: 65,
   pending: 5,
   budget: 100,
@@ -41,13 +41,13 @@ export default function SettingsScreen() {
   const [newPin, setNewPin] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Bonus star settings
+  // Bonus goal settings
   const [onTimeBonusEnabled, setOnTimeBonusEnabled] = useState(true);
-  const [onTimeBonusStars, setOnTimeBonusStars] = useState(1);
+  const [onTimeBonusGoals, setOnTimeBonusGoals] = useState(1);
   const [perfectDayBonusEnabled, setPerfectDayBonusEnabled] = useState(true);
-  const [perfectDayBonusStars, setPerfectDayBonusStars] = useState(3);
+  const [perfectDayBonusGoals, setPerfectDayBonusGoals] = useState(3);
   const [earlyFinishBonusEnabled, setEarlyFinishBonusEnabled] = useState(false);
-  const [earlyFinishBonusStars, setEarlyFinishBonusStars] = useState(2);
+  const [earlyFinishBonusGoals, setEarlyFinishBonusGoals] = useState(2);
   const [earlyFinishCutoff, setEarlyFinishCutoff] = useState('20:00');
 
   // Streak settings
@@ -70,11 +70,11 @@ export default function SettingsScreen() {
       }
       // Bonus settings
       if (family.settings.onTimeBonusEnabled !== undefined) setOnTimeBonusEnabled(family.settings.onTimeBonusEnabled);
-      if (family.settings.onTimeBonusStars !== undefined) setOnTimeBonusStars(family.settings.onTimeBonusStars);
+      if (family.settings.onTimeBonusGoals !== undefined) setOnTimeBonusGoals(family.settings.onTimeBonusGoals);
       if (family.settings.perfectDayBonusEnabled !== undefined) setPerfectDayBonusEnabled(family.settings.perfectDayBonusEnabled);
-      if (family.settings.perfectDayBonusStars !== undefined) setPerfectDayBonusStars(family.settings.perfectDayBonusStars);
+      if (family.settings.perfectDayBonusGoals !== undefined) setPerfectDayBonusGoals(family.settings.perfectDayBonusGoals);
       if (family.settings.earlyFinishBonusEnabled !== undefined) setEarlyFinishBonusEnabled(family.settings.earlyFinishBonusEnabled);
-      if (family.settings.earlyFinishBonusStars !== undefined) setEarlyFinishBonusStars(family.settings.earlyFinishBonusStars);
+      if (family.settings.earlyFinishBonusGoals !== undefined) setEarlyFinishBonusGoals(family.settings.earlyFinishBonusGoals);
       if (family.settings.earlyFinishCutoff) setEarlyFinishCutoff(family.settings.earlyFinishCutoff);
       // Streak settings
       if (family.settings.streakFreezeCost !== undefined) setStreakFreezeCost(family.settings.streakFreezeCost);
@@ -97,11 +97,11 @@ export default function SettingsScreen() {
         customPeriodDays: periodType === 'custom' ? parseInt(customDays, 10) || 7 : undefined,
         // Bonus settings
         onTimeBonusEnabled,
-        onTimeBonusStars,
+        onTimeBonusGoals,
         perfectDayBonusEnabled,
-        perfectDayBonusStars,
+        perfectDayBonusGoals,
         earlyFinishBonusEnabled,
-        earlyFinishBonusStars,
+        earlyFinishBonusGoals,
         earlyFinishCutoff,
         // Streak settings
         streakFreezeCost,
@@ -281,14 +281,14 @@ export default function SettingsScreen() {
           <Card style={styles.sectionCard}>
             <Card.Content>
               <Text variant="titleMedium" style={styles.sectionTitle}>
-                Bonus Stars
+                Bonus Goals
               </Text>
 
               <View style={styles.switchRow}>
                 <View style={styles.switchLabel}>
                   <Text variant="bodyMedium">On-Time Bonus</Text>
                   <Text variant="bodySmall" style={styles.switchDescription}>
-                    +{onTimeBonusStars} star when task completed within scheduled time
+                    +{onTimeBonusGoals} goal when task completed within scheduled time
                   </Text>
                 </View>
                 <Switch value={onTimeBonusEnabled} onValueChange={setOnTimeBonusEnabled} />
@@ -296,11 +296,11 @@ export default function SettingsScreen() {
               {onTimeBonusEnabled && (
                 <View style={styles.bonusValueRow}>
                   <Text variant="bodySmall" style={styles.sliderLabel}>
-                    Bonus: {onTimeBonusStars} {onTimeBonusStars === 1 ? 'star' : 'stars'}
+                    Bonus: {onTimeBonusGoals} {onTimeBonusGoals === 1 ? 'goal' : 'goals'}
                   </Text>
                   <Slider
-                    value={onTimeBonusStars}
-                    onValueChange={(v) => setOnTimeBonusStars(Math.round(v))}
+                    value={onTimeBonusGoals}
+                    onValueChange={(v) => setOnTimeBonusGoals(Math.round(v))}
                     minimumValue={1}
                     maximumValue={5}
                     step={1}
@@ -316,7 +316,7 @@ export default function SettingsScreen() {
                 <View style={styles.switchLabel}>
                   <Text variant="bodyMedium">Perfect Day Bonus</Text>
                   <Text variant="bodySmall" style={styles.switchDescription}>
-                    +{perfectDayBonusStars} stars when all daily tasks approved
+                    +{perfectDayBonusGoals} goals when all daily tasks approved
                   </Text>
                 </View>
                 <Switch value={perfectDayBonusEnabled} onValueChange={setPerfectDayBonusEnabled} />
@@ -324,11 +324,11 @@ export default function SettingsScreen() {
               {perfectDayBonusEnabled && (
                 <View style={styles.bonusValueRow}>
                   <Text variant="bodySmall" style={styles.sliderLabel}>
-                    Bonus: {perfectDayBonusStars} stars
+                    Bonus: {perfectDayBonusGoals} goals
                   </Text>
                   <Slider
-                    value={perfectDayBonusStars}
-                    onValueChange={(v) => setPerfectDayBonusStars(Math.round(v))}
+                    value={perfectDayBonusGoals}
+                    onValueChange={(v) => setPerfectDayBonusGoals(Math.round(v))}
                     minimumValue={1}
                     maximumValue={10}
                     step={1}
@@ -344,7 +344,7 @@ export default function SettingsScreen() {
                 <View style={styles.switchLabel}>
                   <Text variant="bodyMedium">Early Finish Bonus</Text>
                   <Text variant="bodySmall" style={styles.switchDescription}>
-                    +{earlyFinishBonusStars} stars when all tasks done before {earlyFinishCutoff}
+                    +{earlyFinishBonusGoals} goals when all tasks done before {earlyFinishCutoff}
                   </Text>
                 </View>
                 <Switch value={earlyFinishBonusEnabled} onValueChange={setEarlyFinishBonusEnabled} />
@@ -352,11 +352,11 @@ export default function SettingsScreen() {
               {earlyFinishBonusEnabled && (
                 <View style={styles.bonusValueRow}>
                   <Text variant="bodySmall" style={styles.sliderLabel}>
-                    Bonus: {earlyFinishBonusStars} stars
+                    Bonus: {earlyFinishBonusGoals} goals
                   </Text>
                   <Slider
-                    value={earlyFinishBonusStars}
-                    onValueChange={(v) => setEarlyFinishBonusStars(Math.round(v))}
+                    value={earlyFinishBonusGoals}
+                    onValueChange={(v) => setEarlyFinishBonusGoals(Math.round(v))}
                     minimumValue={1}
                     maximumValue={10}
                     step={1}
@@ -386,7 +386,7 @@ export default function SettingsScreen() {
                 Streak Settings
               </Text>
               <Text variant="bodySmall" style={styles.sliderLabel}>
-                Streak Freeze Cost: {streakFreezeCost} stars
+                Streak Freeze Cost: {streakFreezeCost} goals
               </Text>
               <Slider
                 value={streakFreezeCost}

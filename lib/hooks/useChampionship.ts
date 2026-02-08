@@ -26,17 +26,17 @@ export function useChampionship(): UseChampionshipReturn {
     getUserStanding,
   } = useChampionshipStore();
 
-  // Subscribe to active championship
+  // Subscribe to active championship (skip in dev mode — handled by useSubscriptions)
   useEffect(() => {
-    if (!familyId) return;
+    if (!familyId || familyId === 'dev-family-123') return;
     const unsubscribe = subscribeChampionship(familyId);
     return unsubscribe;
   }, [familyId]);
 
   // Initialize championship if none exists
   const initializeIfNeeded = async () => {
-    if (!familyId || !childName || championship) return;
-    
+    if (!familyId || !childName || championship || familyId === 'dev-family-123') return;
+
     // Use familyId as childId since we only have one child per family
     await initializeChampionship(familyId, familyId, childName, 'D');
   };

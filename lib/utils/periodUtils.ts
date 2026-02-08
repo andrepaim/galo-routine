@@ -13,7 +13,7 @@ import {
 } from 'date-fns';
 import { Timestamp } from 'firebase/firestore';
 import type { FamilySettings, Period, PeriodThresholds, Task } from '../types';
-import { calculateStarBudget } from './starCalculations';
+import { calculateGoalBudget } from './goalCalculations';
 
 /**
  * Calculate the start and end dates for a new period based on settings.
@@ -63,7 +63,7 @@ export function buildPeriod(
   referenceDate?: Date,
 ): Omit<Period, 'id'> {
   const { start, end } = calculatePeriodDates(settings, referenceDate);
-  const starBudget = calculateStarBudget(tasks, start, end);
+  const goalBudget = calculateGoalBudget(tasks, start, end);
 
   const thresholds: PeriodThresholds = {
     rewardPercent: settings.rewardThresholdPercent,
@@ -76,9 +76,9 @@ export function buildPeriod(
     startDate: Timestamp.fromDate(start),
     endDate: Timestamp.fromDate(end),
     status: 'active',
-    starBudget,
-    starsEarned: 0,
-    starsPending: 0,
+    goalBudget,
+    goalsEarned: 0,
+    goalsPending: 0,
     thresholds,
   };
 }

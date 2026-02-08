@@ -8,7 +8,7 @@ import * as Haptics from 'expo-haptics';
 import { ChildColors, ChildSizes } from '../../../constants/childTheme';
 import { useAuthStore, usePeriodStore, useTaskStore } from '../../../lib/stores';
 import { useCurrentPeriod } from '../../../lib/hooks/useCurrentPeriod';
-import { useStarBudget } from '../../../lib/hooks/useStarBudget';
+import { useGoalBudget } from '../../../lib/hooks/useGoalBudget';
 import { StarBudgetRing } from '../../../components/stars/StarBudgetRing';
 import { PeriodSummary } from '../../../components/periods/PeriodSummary';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -23,7 +23,7 @@ export default function PeriodScreen() {
   const family = useAuthStore((s) => s.family);
   const tasks = useTaskStore((s) => s.tasks);
   const { activePeriod, isLoading } = useCurrentPeriod();
-  const starProgress = useStarBudget();
+  const starProgress = useGoalBudget();
   const completePeriod = usePeriodStore((s) => s.completePeriod);
   const [showCelebration, setShowCelebration] = useState(false);
 
@@ -36,7 +36,7 @@ export default function PeriodScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     Alert.alert(
       'Encerrar Período',
-      'Tem certeza que quer encerrar o período atual? O resultado será calculado com base nas estrelas ganhas.',
+      'Tem certeza que quer encerrar o período atual? O resultado será calculado com base nos gols marcados.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -64,7 +64,7 @@ export default function PeriodScreen() {
         <EmptyState
           icon="calendar-plus"
           title="Sem Período Ativo"
-          description="Inicie um novo período para começar a acompanhar as estrelas."
+          description="Inicie um novo período para começar a acompanhar os gols."
           actionLabel="Iniciar Período"
           onAction={handleNewPeriod}
         />

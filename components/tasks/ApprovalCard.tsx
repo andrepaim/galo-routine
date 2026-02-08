@@ -46,7 +46,7 @@ export function ApprovalCard({ completion, onApprove, onReject, isLoading }: App
           </View>
         )}
         right={() => (
-          <StarDisplay count={completion.taskStarValue} maxStars={completion.taskStarValue} size={18} showEmpty={false} />
+          <StarDisplay count={completion.taskGoalValue} maxStars={completion.taskGoalValue} size={18} showEmpty={false} />
         )}
       />
       {showReject ? (

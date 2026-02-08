@@ -61,11 +61,11 @@ export default function ChildLayout() {
       <Tabs.Screen
         name="stars"
         options={{
-          title: 'Estrelas',
-          headerTitle: 'Minhas Estrelas',
+          title: 'Campeonato',
+          headerTitle: 'Meu Campeonato',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="star-shooting" size={ChildSizes.tabIconSize} color={color} />
+              <Icon source="trophy-variant" size={ChildSizes.tabIconSize} color={color} />
             </View>
           ),
         }}

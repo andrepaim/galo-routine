@@ -194,7 +194,7 @@ export function GaloTaskCard({ task, onComplete, index = 0 }: GaloTaskCardProps)
                 <Animated.View style={starAnimatedStyle}>
                   <Text style={styles.ballEmoji}>{BALL_EMOJI}</Text>
                 </Animated.View>
-                <Text style={styles.goalCount}>+{task.starValue}</Text>
+                <Text style={styles.goalCount}>+{task.goals}</Text>
               </View>
             </View>
           </Surface>

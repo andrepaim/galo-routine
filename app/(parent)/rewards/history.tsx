@@ -57,7 +57,7 @@ export default function RedemptionHistoryScreen() {
                     <View style={styles.metaRow}>
                       <Icon source="star" size={14} color={ChildColors.starGold} />
                       <Text variant="bodySmall" style={styles.cost}>
-                        {item.starCost} stars
+                        {item.goalCost} goals
                       </Text>
                       <Text variant="bodySmall" style={styles.date}>
                         {format(item.redeemedAt.toDate(), 'MMM d, h:mm a')}

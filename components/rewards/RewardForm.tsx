@@ -22,7 +22,7 @@ export function RewardForm({
 }: RewardFormProps) {
   const [name, setName] = useState(initialData?.name ?? '');
   const [description, setDescription] = useState(initialData?.description ?? '');
-  const [starCost, setStarCost] = useState(String(initialData?.starCost ?? 10));
+  const [goalCost, setGoalCost] = useState(String(initialData?.goalCost ?? 10));
   const [icon, setIcon] = useState(initialData?.icon ?? 'gift');
   const [availability, setAvailability] = useState<'unlimited' | 'limited'>(initialData?.availability ?? 'unlimited');
   const [quantity, setQuantity] = useState(String(initialData?.quantity ?? 1));
@@ -30,12 +30,12 @@ export function RewardForm({
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    const cost = parseInt(starCost, 10);
+    const cost = parseInt(goalCost, 10);
     if (isNaN(cost) || cost < 1) return;
     onSubmit({
       name: name.trim(),
       description: description.trim(),
-      starCost: cost,
+      goalCost: cost,
       icon,
       availability,
       quantity: availability === 'limited' ? parseInt(quantity, 10) || 1 : undefined,
@@ -63,9 +63,9 @@ export function RewardForm({
       />
 
       <TextInput
-        label="Star Cost"
-        value={starCost}
-        onChangeText={(t) => setStarCost(t.replace(/[^0-9]/g, ''))}
+        label="Goal Cost"
+        value={goalCost}
+        onChangeText={(t) => setGoalCost(t.replace(/[^0-9]/g, ''))}
         mode="outlined"
         keyboardType="number-pad"
         style={styles.input}

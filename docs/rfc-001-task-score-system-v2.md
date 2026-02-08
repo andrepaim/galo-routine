@@ -127,11 +127,12 @@ Opponent's match score = Simulated based on opponent's strength profile + Rival 
 
 ### 10.4 Day Closure
 
-- Day closes when **parent confirms the final task** (explicit action)
+- Day closes **automatically** when the parent gives feedback (approve/reject) on the **last task of the day**
+- No explicit "close day" button needed — the act of reviewing all tasks IS closing the day
 - This allows the child to see match result and updated table before sleeping
 - Results are immutable after closure
 - Rescheduling a task removes it from the current day's match
-- If parent doesn't close the day, system auto-closes at **06:00 next day**
+- If parent doesn't review all tasks, system auto-closes at **midnight**
 
 ---
 
@@ -464,7 +465,7 @@ User {
 | All tasks completed | Your Team scores max; opponent has only simulated score |
 | No tasks completed | Opponent gets all routine goals + simulated score |
 | Mid-day task reschedule | Task removed from current match |
-| Parent forgets to close day | Auto-close at 06:00 next day |
+| Parent doesn't review all tasks | Auto-close at midnight |
 
 ---
 
@@ -473,7 +474,7 @@ User {
 - Task completion events are timestamped and immutable
 - Scores are deterministic and reproducible
 - Manual overrides (if any) must be logged
-- Day closure is parent-triggered (with auto fallback)
+- Day closure is automatic (on last task feedback or midnight)
 
 ---
 

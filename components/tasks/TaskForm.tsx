@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, SegmentedButtons, Text, Chip, IconButton, Switch, Icon } from 'react-native-paper';
-import { Colors, Layout, DAY_NAMES, STAR_VALUES, TASK_ICONS, TASK_CATEGORIES } from '../../constants';
+import { Colors, Layout, DAY_NAMES, GOAL_VALUES, TASK_ICONS, TASK_CATEGORIES } from '../../constants';
 import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { TimePicker } from '../ui/TimePicker';
 import type { TaskFormData, TaskCategoryId } from '../../lib/types';
@@ -23,7 +23,7 @@ export function TaskForm({
 }: TaskFormProps) {
   const [name, setName] = useState(initialData?.name ?? '');
   const [description, setDescription] = useState(initialData?.description ?? '');
-  const [starValue, setStarValue] = useState(initialData?.starValue ?? 1);
+  const [goals, setGoals] = useState(initialData?.goals ?? 1);
   const [recurrenceType, setRecurrenceType] = useState<'daily' | 'specific_days' | 'once'>(
     initialData?.recurrenceType ?? 'daily',
   );
@@ -43,7 +43,7 @@ export function TaskForm({
     onSubmit({
       name: name.trim(),
       description: description.trim(),
-      starValue,
+      goals,
       icon,
       recurrenceType,
       days,
@@ -51,6 +51,7 @@ export function TaskForm({
       endTime,
       category: category as TaskCategoryId,
       requiresProof,
+      taskType: 'routine',
     });
   };
 
@@ -95,18 +96,18 @@ export function TaskForm({
       </View>
 
       <Text variant="titleSmall" style={styles.label}>
-        Star Value
+        Gols
       </Text>
       <View style={styles.starRow}>
-        {STAR_VALUES.map((v) => (
+        {GOAL_VALUES.map((v) => (
           <Chip
             key={v}
-            selected={starValue === v}
-            onPress={() => setStarValue(v)}
-            style={[styles.starChip, starValue === v && styles.starChipSelected]}
-            textStyle={starValue === v ? styles.starChipTextSelected : undefined}
+            selected={goals === v}
+            onPress={() => setGoals(v)}
+            style={[styles.starChip, goals === v && styles.starChipSelected]}
+            textStyle={goals === v ? styles.starChipTextSelected : undefined}
           >
-            {'★'.repeat(v)}
+            {'⚽'.repeat(v)}
           </Chip>
         ))}
       </View>

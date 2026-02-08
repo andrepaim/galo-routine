@@ -34,7 +34,7 @@ export const useGoalStore = create<GoalStore>((set) => ({
     const goal: Omit<LongTermGoal, 'id'> = {
       name: data.name,
       description: data.description,
-      targetStars: data.targetStars,
+      targetGoals: data.targetGoals,
       deadline: data.deadline ? Timestamp.fromDate(data.deadline) : undefined,
       rewardDescription: data.rewardDescription,
       isCompleted: false,
@@ -46,7 +46,7 @@ export const useGoalStore = create<GoalStore>((set) => ({
     const update: Partial<LongTermGoal> = {};
     if (data.name !== undefined) update.name = data.name;
     if (data.description !== undefined) update.description = data.description;
-    if (data.targetStars !== undefined) update.targetStars = data.targetStars;
+    if (data.targetGoals !== undefined) update.targetGoals = data.targetGoals;
     if (data.rewardDescription !== undefined) update.rewardDescription = data.rewardDescription;
     if (data.deadline !== undefined) update.deadline = Timestamp.fromDate(data.deadline);
     await updateGoal(familyId, goalId, update);

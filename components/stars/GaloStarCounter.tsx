@@ -80,7 +80,7 @@ export function GaloStarCounter({ earned, budget, pending = 0 }: GaloStarCounter
           {STAR_EMOJI}
         </Animated.Text>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Estrelas do Dia</Text>
+          <Text style={styles.title}>Gols do Dia</Text>
           <Text style={styles.subtitle}>{getMessage()}</Text>
         </View>
         <Animated.Text style={[styles.starEmoji, shieldAnimatedStyle]}>

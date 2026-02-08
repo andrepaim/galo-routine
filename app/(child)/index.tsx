@@ -22,7 +22,7 @@ import { ChildColors, ChildSizes, GALO_EMOJI, STAR_EMOJI, Layout } from '../../c
 const GaloVolpiImage = require('../../assets/images/mascot/galo-volpi-white.png');
 import { useAuthStore, useCompletionStore } from '../../lib/stores';
 import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
-import { useStarBudget } from '../../lib/hooks/useStarBudget';
+import { useGoalBudget } from '../../lib/hooks/useGoalBudget';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
 import { useChampionship, useMatch } from '../../lib/hooks';
 import { GaloTaskCard } from '../../components/tasks/GaloTaskCard';
@@ -37,7 +37,7 @@ export default function ChildTodayScreen() {
   const familyId = useAuthStore((s) => s.familyId);
   const family = useAuthStore((s) => s.family);
   const { activePeriod } = useCurrentPeriod();
-  const starProgress = useStarBudget();
+  const goalProgress = useGoalBudget();
   const { todayTasks, isLoading } = useTodayTasks();
   const markTaskDone = useCompletionStore((s) => s.markTaskDone);
   
@@ -105,11 +105,11 @@ export default function ChildTodayScreen() {
   ).length;
   const progress = todayTasks.length > 0 ? (completedCount / todayTasks.length) * 100 : 0;
 
-  // Calculate goals from completed tasks (using starValue which maps to goals)
+  // Calculate goals from completed tasks
   const completedGoals = todayTasks
     .filter(t => t.completion?.status === 'approved' || t.completion?.status === 'pending')
-    .reduce((sum, t) => sum + (t.starValue || 1), 0);
-  const totalGoals = todayTasks.reduce((sum, t) => sum + (t.starValue || 1), 0);
+    .reduce((sum, t) => sum + (t.goals || 1), 0);
+  const totalGoals = todayTasks.reduce((sum, t) => sum + (t.goals || 1), 0);
 
   return (
     <View style={styles.container}>
@@ -157,7 +157,7 @@ export default function ChildTodayScreen() {
                 <GaloGoalCounter
                   scored={completedGoals}
                   possible={totalGoals}
-                  pending={starProgress?.pending || 0}
+                  pending={goalProgress?.pending || 0}
                   opponentName={displayOpponentName}
                   opponentGoals={displayOpponentGoals}
                 />

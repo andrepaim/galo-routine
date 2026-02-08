@@ -50,7 +50,7 @@ export default function RewardsScreen() {
           <Animated.View entering={FadeInDown.delay(index * 60).duration(300)}>
             <RewardCard
               reward={item}
-              starBalance={family?.starBalance ?? 0}
+              goalBalance={family?.goalBalance ?? 0}
               onPress={() => router.push(`/(parent)/rewards/${item.id}`)}
             />
           </Animated.View>
@@ -59,7 +59,7 @@ export default function RewardsScreen() {
           <EmptyState
             icon="gift-outline"
             title="Sem Prêmios"
-            description="Crie prêmios para seu filho resgatar com as estrelas!"
+            description="Crie prêmios para seu filho resgatar com os gols!"
           />
         }
         contentContainerStyle={styles.list}

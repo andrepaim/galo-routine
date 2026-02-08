@@ -1,7 +1,7 @@
 export { useCurrentPeriod } from './useCurrentPeriod';
 export { useTodayTasks } from './useTodayTasks';
-export { useStarBudget } from './useStarBudget';
+export { useGoalBudget } from './useGoalBudget';
 export { useSubscriptions } from './useSubscriptions';
-export { useStarBudgetSync } from './useStarBudgetSync';
+export { useGoalBudgetSync } from './useGoalBudgetSync';
 export { useChampionship } from './useChampionship';
 export { useMatch, useMatchSync } from './useMatch';

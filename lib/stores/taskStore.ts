@@ -26,10 +26,11 @@ function formDataToTask(data: TaskFormData): Omit<Task, 'id'> {
   return {
     name: data.name,
     description: data.description,
-    starValue: data.starValue,
+    goals: data.goals,
     icon: data.icon,
     isActive: true,
     recurrence,
+    taskType: data.taskType ?? 'routine',
     ...(data.startTime ? { startTime: data.startTime } : {}),
     ...(data.endTime ? { endTime: data.endTime } : {}),
     ...(data.category ? { category: data.category } : {}),
@@ -61,7 +62,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
     const update: Partial<Task> = {};
     if (data.name !== undefined) update.name = data.name;
     if (data.description !== undefined) update.description = data.description;
-    if (data.starValue !== undefined) update.starValue = data.starValue;
+    if (data.goals !== undefined) update.goals = data.goals;
     if (data.icon !== undefined) update.icon = data.icon;
     if (data.recurrenceType !== undefined) {
       const recurrence: Task['recurrence'] = { type: data.recurrenceType };

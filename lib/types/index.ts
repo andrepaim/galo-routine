@@ -11,9 +11,9 @@ export interface Family {
   childName: string;
   parentName: string;
   settings: FamilySettings;
-  // Cumulative star system (Feature 3)
-  starBalance: number;
-  lifetimeStarsEarned: number;
+  // Cumulative goal system (Feature 3)
+  goalBalance: number;
+  lifetimeGoalsEarned: number;
   // Streak tracking (Feature 6)
   currentStreak: number;
   bestStreak: number;
@@ -32,13 +32,13 @@ export interface FamilySettings {
   customPeriodDays?: number;
   periodStartDay: number; // 0=Sun..6=Sat
   autoRollPeriods: boolean;
-  // Bonus star mechanics (Feature 10)
+  // Bonus goal mechanics (Feature 10)
   onTimeBonusEnabled: boolean;
-  onTimeBonusStars: number;
+  onTimeBonusGoals: number;
   perfectDayBonusEnabled: boolean;
-  perfectDayBonusStars: number;
+  perfectDayBonusGoals: number;
   earlyFinishBonusEnabled: boolean;
-  earlyFinishBonusStars: number;
+  earlyFinishBonusGoals: number;
   earlyFinishCutoff: string; // "HH:mm" format
   // Streak settings (Feature 6)
   streakFreezeCost: number;
@@ -88,7 +88,8 @@ export interface Task {
   id?: string;
   name: string;
   description: string;
-  starValue: number; // 1-5
+  goals: number; // 1-5
+  taskType: 'routine' | 'bonus';
   icon?: string;
   isActive: boolean;
   recurrence: TaskRecurrence;
@@ -110,9 +111,9 @@ export interface Period {
   startDate: Timestamp;
   endDate: Timestamp;
   status: PeriodStatus;
-  starBudget: number;
-  starsEarned: number;
-  starsPending: number;
+  goalBudget: number;
+  goalsEarned: number;
+  goalsPending: number;
   thresholds: PeriodThresholds;
   outcome?: PeriodOutcome;
 }
@@ -133,7 +134,7 @@ export interface TaskCompletion {
   id?: string;
   taskId: string;
   taskName: string;
-  taskStarValue: number;
+  taskGoalValue: number;
   date: Timestamp;
   status: CompletionStatus;
   completedAt: Timestamp;
@@ -154,7 +155,7 @@ export interface Reward {
   id?: string;
   name: string;
   description: string;
-  starCost: number;
+  goalCost: number;
   icon: string;
   isActive: boolean;
   availability: 'unlimited' | 'limited';
@@ -166,7 +167,7 @@ export interface Redemption {
   id?: string;
   rewardId: string;
   rewardName: string;
-  starCost: number;
+  goalCost: number;
   redeemedAt: Timestamp;
   status: RedemptionStatus;
   fulfilledAt?: Timestamp;
@@ -180,7 +181,7 @@ export interface LongTermGoal {
   id?: string;
   name: string;
   description: string;
-  targetStars: number;
+  targetGoals: number;
   deadline?: Timestamp;
   rewardDescription: string;
   isCompleted: boolean;
@@ -192,13 +193,13 @@ export interface LongTermGoal {
 export interface StreakFreeze {
   id?: string;
   date: string; // "yyyy-MM-dd"
-  starCost: number;
+  goalCost: number;
   createdAt: Timestamp;
 }
 
 export interface StreakMilestone {
   days: number;
-  bonusStars: number;
+  bonusGoals: number;
   label: string;
 }
 
@@ -248,7 +249,8 @@ export interface RegisterFormData {
 export interface TaskFormData {
   name: string;
   description: string;
-  starValue: number;
+  goals: number;
+  taskType: 'routine' | 'bonus';
   icon?: string;
   recurrenceType: 'daily' | 'specific_days' | 'once';
   days: number[];
@@ -261,7 +263,7 @@ export interface TaskFormData {
 export interface RewardFormData {
   name: string;
   description: string;
-  starCost: number;
+  goalCost: number;
   icon: string;
   availability: 'unlimited' | 'limited';
   quantity?: number;
@@ -271,7 +273,7 @@ export interface RewardFormData {
 export interface GoalFormData {
   name: string;
   description: string;
-  targetStars: number;
+  targetGoals: number;
   deadline?: Date;
   rewardDescription: string;
 }
@@ -283,7 +285,7 @@ export interface TodayTask extends Task {
   completion?: TaskCompletion;
 }
 
-export interface StarProgress {
+export interface GoalProgress {
   earned: number;
   pending: number;
   budget: number;
@@ -307,7 +309,7 @@ export interface DayTasks {
 export interface TaskTemplate {
   name: string;
   description: string;
-  starValue: number;
+  goals: number;
   icon: string;
   category: TaskCategoryId;
   recurrence: TaskRecurrence;

@@ -7,14 +7,14 @@ import type { Reward } from '../../lib/types';
 
 interface RewardCardProps {
   reward: Reward;
-  starBalance: number;
+  goalBalance: number;
   onRedeem?: () => void;
   onPress?: () => void;
   showRedeem?: boolean;
 }
 
-export function RewardCard({ reward, starBalance, onRedeem, onPress, showRedeem = false }: RewardCardProps) {
-  const canAfford = starBalance >= reward.starCost;
+export function RewardCard({ reward, goalBalance, onRedeem, onPress, showRedeem = false }: RewardCardProps) {
+  const canAfford = goalBalance >= reward.goalCost;
   const isAvailable = reward.isActive && (reward.availability === 'unlimited' || (reward.quantity ?? 0) > 0);
 
   return (
@@ -35,7 +35,7 @@ export function RewardCard({ reward, starBalance, onRedeem, onPress, showRedeem 
           <View style={styles.costRow}>
             <Icon source="star" size={16} color={ChildColors.starGold} />
             <Text variant="titleSmall" style={styles.cost}>
-              {reward.starCost}
+              {reward.goalCost}
             </Text>
             {reward.availability === 'limited' && (
               <Text variant="bodySmall" style={styles.quantity}>

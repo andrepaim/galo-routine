@@ -1,0 +1,24 @@
+{
+  "teams": [
+    {"id": "team-1", "name": "Team Alpha", "country": "BR"},
+    {"id": "team-2", "name": "Team Beta", "country": "BR"},
+    {"id": "team-3", "name": "Team Gamma", "country": "BR"},
+    {"id": "team-4", "name": "Team Delta", "country": "BR"},
+    {"id": "team-5", "name": "Team Epsilon", "country": "BR"},
+    {"id": "team-6", "name": "Team Zeta", "country": "BR"},
+    {"id": "team-7", "name": "Team Eta", "country": "BR"},
+    {"id": "team-8", "name": "Team Theta", "country": "BR"},
+    {"id": "team-9", "name": "Team Iota", "country": "BR"},
+    {"id": "team-10", "name": "Team Kappa", "country": "BR"},
+    {"id": "team-11", "name": "Team Lambda", "country": "BR"},
+    {"id": "team-12", "name": "Team Mu", "country": "BR"},
+    {"id": "team-13", "name": "Team Nu", "country": "BR"},
+    {"id": "team-14", "name": "Team Xi", "country": "BR"},
+    {"id": "team-15", "name": "Team Omicron", "country": "BR"},
+    {"id": "team-16", "name": "Team Pi", "country": "BR"},
+    {"id": "team-17", "name": "Team Rho", "country": "BR"},
+    {"id": "team-18", "name": "Team Sigma", "country": "BR"},
+    {"id": "team-19", "name": "Team Tau", "country": "BR"},
+    {"id": "team-20", "name": "Team Upsilon", "country": "BR"}
+  ]
+}

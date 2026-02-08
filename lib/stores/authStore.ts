@@ -10,8 +10,8 @@ import {
   verifyChildPin,
 } from '../firebase/auth';
 
-const ROLE_KEY = 'star_routine_role';
-const FAMILY_ID_KEY = 'star_routine_family_id';
+const ROLE_KEY = 'galo_routine_role';
+const FAMILY_ID_KEY = 'galo_routine_family_id';
 
 interface AuthStore extends AuthState {
   family: Family | null;
@@ -103,8 +103,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             childPin: 'mock-hashed-pin',
             parentName: 'Andre',
             childName: 'Vitor',
-            starBalance: 42,
-            lifetimeStarsEarned: 150,
+            goalBalance: 42,
+            lifetimeGoalsEarned: 150,
             currentStreak: 7,
             bestStreak: 14,
             settings: {
@@ -116,11 +116,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
               periodStartDay: 0,
               autoRollPeriods: true,
               onTimeBonusEnabled: true,
-              onTimeBonusStars: 1,
+              onTimeBonusGoals: 1,
               perfectDayBonusEnabled: true,
-              perfectDayBonusStars: 3,
+              perfectDayBonusGoals: 3,
               earlyFinishBonusEnabled: false,
-              earlyFinishBonusStars: 2,
+              earlyFinishBonusGoals: 2,
               earlyFinishCutoff: '12:00',
               streakFreezeCost: 5,
               maxStreakFreezesPerPeriod: 1,
