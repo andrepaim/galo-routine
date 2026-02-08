@@ -73,6 +73,24 @@ service cloud.firestore {
         allow read: if isFamilyMember(familyId);
         allow write: if isFamilyMember(familyId);
       }
+
+      // Championships subcollection
+      match /championships/{championshipId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+
+        // Matches subcollection within championships
+        match /matches/{matchId} {
+          allow read: if isFamilyMember(familyId);
+          allow write: if isFamilyMember(familyId);
+        }
+      }
+
+      // Trophies subcollection
+      match /trophies/{trophyId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+      }
     }
 
     // Deny all other access
