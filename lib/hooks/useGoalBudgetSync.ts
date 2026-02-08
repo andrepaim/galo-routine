@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useAuthStore, useTaskStore, usePeriodStore } from '../stores';
-import { calculateStarBudget } from '../utils/starCalculations';
+import { calculateGoalBudget } from '../utils/goalCalculations';
 import { updatePeriod } from '../firebase/firestore';
 
-export function useStarBudgetSync() {
+export function useGoalBudgetSync() {
   const familyId = useAuthStore((s) => s.familyId);
   const tasks = useTaskStore((s) => s.tasks);
   const activePeriod = usePeriodStore((s) => s.activePeriod);
@@ -14,16 +14,16 @@ export function useStarBudgetSync() {
 
     const startDate = activePeriod.startDate.toDate();
     const endDate = activePeriod.endDate.toDate();
-    const newBudget = calculateStarBudget(tasks, startDate, endDate);
+    const newBudget = calculateGoalBudget(tasks, startDate, endDate);
 
-    if (newBudget === lastBudgetRef.current || newBudget === activePeriod.starBudget) {
+    if (newBudget === lastBudgetRef.current || newBudget === activePeriod.goalBudget) {
       lastBudgetRef.current = newBudget;
       return;
     }
 
     lastBudgetRef.current = newBudget;
-    updatePeriod(familyId, activePeriod.id, { starBudget: newBudget }).catch((err) => {
-      console.error('Failed to sync star budget:', err);
+    updatePeriod(familyId, activePeriod.id, { goalBudget: newBudget }).catch((err) => {
+      console.error('Failed to sync goal budget:', err);
     });
-  }, [familyId, tasks, activePeriod?.id, activePeriod?.starBudget]);
+  }, [familyId, tasks, activePeriod?.id, activePeriod?.goalBudget]);
 }

@@ -1,43 +1,43 @@
-import type { Task, Period, StarProgress } from '../types';
+import type { Task, Period, GoalProgress } from '../types';
 import { countTaskOccurrences } from './recurrence';
 
 /**
- * Calculate the total star budget for a period based on active tasks and their recurrence.
+ * Calculate the total goal budget for a period based on active tasks and their recurrence.
  */
-export function calculateStarBudget(tasks: Task[], startDate: Date, endDate: Date): number {
+export function calculateGoalBudget(tasks: Task[], startDate: Date, endDate: Date): number {
   return tasks
     .filter((t) => t.isActive)
     .reduce((total, task) => {
       const occurrences = countTaskOccurrences(task.recurrence, startDate, endDate);
-      return total + task.starValue * occurrences;
+      return total + task.goals * occurrences;
     }, 0);
 }
 
 /**
- * Determine the outcome of a period based on star percentage.
+ * Determine the outcome of a period based on goal percentage.
  */
 export function determinePeriodOutcome(
-  starsEarned: number,
-  starBudget: number,
+  goalsEarned: number,
+  goalBudget: number,
   rewardPercent: number,
   penaltyPercent: number,
 ): 'reward' | 'neutral' | 'penalty' {
-  if (starBudget === 0) return 'neutral';
-  const percent = (starsEarned / starBudget) * 100;
+  if (goalBudget === 0) return 'neutral';
+  const percent = (goalsEarned / goalBudget) * 100;
   if (percent >= rewardPercent) return 'reward';
   if (percent < penaltyPercent) return 'penalty';
   return 'neutral';
 }
 
 /**
- * Get star progress data for UI display.
+ * Get goal progress data for UI display.
  */
-export function getStarProgress(period: Period): StarProgress {
+export function getGoalProgress(period: Period): GoalProgress {
   // When there are no tasks (budget=0), treat as neutral zone
-  if (period.starBudget === 0) {
+  if (period.goalBudget === 0) {
     return {
-      earned: period.starsEarned,
-      pending: period.starsPending,
+      earned: period.goalsEarned,
+      pending: period.goalsPending,
       budget: 0,
       earnedPercent: 0,
       pendingPercent: 0,
@@ -47,13 +47,13 @@ export function getStarProgress(period: Period): StarProgress {
     };
   }
 
-  const earnedPercent = (period.starsEarned / period.starBudget) * 100;
-  const pendingPercent = (period.starsPending / period.starBudget) * 100;
+  const earnedPercent = (period.goalsEarned / period.goalBudget) * 100;
+  const pendingPercent = (period.goalsPending / period.goalBudget) * 100;
 
   return {
-    earned: period.starsEarned,
-    pending: period.starsPending,
-    budget: period.starBudget,
+    earned: period.goalsEarned,
+    pending: period.goalsPending,
+    budget: period.goalBudget,
     earnedPercent,
     pendingPercent,
     isRewardZone: earnedPercent >= period.thresholds.rewardPercent,

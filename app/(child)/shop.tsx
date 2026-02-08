@@ -32,14 +32,14 @@ const REWARD_ICONS: Record<string, string> = {
 
 function GaloRewardCard({ 
   reward, 
-  starBalance, 
+  goalBalance, 
   onRedeem 
 }: { 
   reward: any; 
-  starBalance: number; 
+  goalBalance: number; 
   onRedeem: () => void;
 }) {
-  const canAfford = starBalance >= reward.starCost;
+  const canAfford = goalBalance >= reward.goalCost;
   const cardScale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -97,7 +97,7 @@ function GaloRewardCard({
               styles.priceText,
               canAfford ? styles.priceTextAffordable : styles.priceTextExpensive
             ]}>
-              {reward.starCost}
+              {reward.goalCost}
             </Text>
           </View>
         </Surface>
@@ -111,15 +111,15 @@ export default function RewardShopScreen() {
   const family = useAuthStore((s) => s.family);
   const { rewards, redemptions, redeemReward } = useRewardStore();
 
-  const starBalance = family?.starBalance ?? 0;
+  const goalBalance = family?.goalBalance ?? 0;
   const activeRewards = rewards.filter((r) => r.isActive !== false);
   const myRedemptions = redemptions.filter((r) => r.status === 'pending' || r.status === 'fulfilled');
 
   const handleRedeem = (reward: typeof rewards[0]) => {
-    if (starBalance < reward.starCost) return;
+    if (goalBalance < reward.goalCost) return;
     Alert.alert(
-      '🛒 Trocar Estrelas',
-      `Gastar ${reward.starCost} estrelas em "${reward.name}"?\n\nVocê terá ${starBalance - reward.starCost} estrelas restantes.`,
+      '🛒 Trocar Gols',
+      `Gastar ${reward.goalCost} gols em "${reward.name}"?\n\nVocê terá ${goalBalance - reward.goalCost} gols restantes.`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -150,9 +150,9 @@ export default function RewardShopScreen() {
               <Surface style={styles.balanceCard} elevation={0}>
                 <View style={styles.balanceHeader}>
                   <Text style={styles.balanceEmoji}>{STAR_EMOJI}</Text>
-                  <Text style={styles.balanceTitle}>Suas Estrelas</Text>
+                  <Text style={styles.balanceTitle}>Seus Gols</Text>
                 </View>
-                <Text style={styles.balanceNumber}>{starBalance}</Text>
+                <Text style={styles.balanceNumber}>{goalBalance}</Text>
                 <Text style={styles.balanceSubtitle}>disponíveis para trocar</Text>
               </Surface>
             </Animated.View>
@@ -194,7 +194,7 @@ export default function RewardShopScreen() {
           <Animated.View entering={FadeInDown.delay(200 + index * 80).duration(300)}>
             <GaloRewardCard
               reward={item}
-              starBalance={starBalance}
+              goalBalance={goalBalance}
               onRedeem={() => handleRedeem(item)}
             />
           </Animated.View>

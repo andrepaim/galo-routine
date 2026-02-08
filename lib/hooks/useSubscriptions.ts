@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { format } from 'date-fns';
 import {
   useAuthStore,
   useTaskStore,
@@ -7,6 +8,7 @@ import {
   useRewardStore,
   useGoalStore,
   useBadgeStore,
+  useChampionshipStore,
 } from '../stores';
 import { subscribeToFamily } from '../firebase/firestore';
 
@@ -17,6 +19,7 @@ import { subscribeToFamily } from '../firebase/firestore';
 export function useSubscriptions() {
   const familyId = useAuthStore((s) => s.familyId);
   const activePeriod = usePeriodStore((s) => s.activePeriod);
+  const championship = useChampionshipStore((s) => s.championship);
 
   useEffect(() => {
     if (!familyId) return;
@@ -33,11 +36,11 @@ export function useSubscriptions() {
       // Mock tasks - need isActive: true for them to show!
       useTaskStore.setState({
         tasks: [
-          { id: 'task-1', name: 'Escovar os dentes', category: 'hygiene', starValue: 2, startTime: '07:00', endTime: '07:15', recurrence: { type: 'daily' }, isActive: true },
-          { id: 'task-2', name: 'Fazer lição de casa', category: 'school', starValue: 3, startTime: '14:00', endTime: '15:00', recurrence: { type: 'daily' }, isActive: true },
-          { id: 'task-3', name: 'Arrumar o quarto', category: 'chores', starValue: 2, startTime: '08:00', endTime: '08:30', recurrence: { type: 'daily' }, isActive: true },
-          { id: 'task-4', name: 'Ler um livro', category: 'study', starValue: 3, startTime: '19:00', endTime: '19:30', recurrence: { type: 'daily' }, isActive: true },
-          { id: 'task-5', name: 'Treinar futebol ⚽', category: 'exercise', starValue: 4, startTime: '16:00', endTime: '17:00', recurrence: { type: 'specific_days', days: [1, 3, 5] }, isActive: true },
+          { id: 'task-1', name: 'Escovar os dentes', category: 'hygiene', goals: 2, startTime: '07:00', endTime: '07:15', recurrence: { type: 'daily' }, isActive: true, taskType: 'routine' },
+          { id: 'task-2', name: 'Fazer lição de casa', category: 'school', goals: 3, startTime: '14:00', endTime: '15:00', recurrence: { type: 'daily' }, isActive: true, taskType: 'routine' },
+          { id: 'task-3', name: 'Arrumar o quarto', category: 'chores', goals: 2, startTime: '08:00', endTime: '08:30', recurrence: { type: 'daily' }, isActive: true, taskType: 'routine' },
+          { id: 'task-4', name: 'Ler um livro', category: 'study', goals: 3, startTime: '19:00', endTime: '19:30', recurrence: { type: 'daily' }, isActive: true, taskType: 'routine' },
+          { id: 'task-5', name: 'Treinar futebol ⚽', category: 'exercise', goals: 4, startTime: '16:00', endTime: '17:00', recurrence: { type: 'specific_days', days: [1, 3, 5] }, isActive: true, taskType: 'routine' },
         ] as any,
         isLoading: false,
       });
@@ -61,9 +64,9 @@ export function useSubscriptions() {
         startDate: mockTimestamp(periodStart),
         endDate: mockTimestamp(periodEnd),
         status: 'active',
-        starBudget: 50,
-        starsEarned: 12,
-        starsPending: 3,
+        goalBudget: 50,
+        goalsEarned: 12,
+        goalsPending: 3,
         thresholds: {
           rewardPercent: 80,
           penaltyPercent: 50,
@@ -85,10 +88,10 @@ export function useSubscriptions() {
             id: 'comp-1', 
             taskId: 'task-1', 
             taskName: 'Escovar os dentes',
-            taskStarValue: 2,
+            taskGoalValue: 2,
             date: mockTimestamp(now), 
             status: 'approved', 
-            starsEarned: 2 
+            goalsEarned: 2
           },
         ] as any,
         isLoading: false,
@@ -97,9 +100,9 @@ export function useSubscriptions() {
       // Mock rewards
       useRewardStore.setState({
         rewards: [
-          { id: 'reward-1', name: '30 min de videogame', starCost: 10, icon: 'gamepad-variant' },
-          { id: 'reward-2', name: 'Filme à noite', starCost: 15, icon: 'movie' },
-          { id: 'reward-3', name: 'Sorvete', starCost: 8, icon: 'ice-cream' },
+          { id: 'reward-1', name: '30 min de videogame', goalCost: 10, icon: 'gamepad-variant' },
+          { id: 'reward-2', name: 'Filme à noite', goalCost: 15, icon: 'movie' },
+          { id: 'reward-3', name: 'Sorvete', goalCost: 8, icon: 'ice-cream' },
         ] as any,
         redemptions: [],
         isLoading: false,
@@ -108,7 +111,7 @@ export function useSubscriptions() {
       // Mock goals
       useGoalStore.setState({
         goals: [
-          { id: 'goal-1', name: 'Bicicleta nova', targetStars: 500, currentStars: 150, deadline: '2026-06-01' },
+          { id: 'goal-1', name: 'Bicicleta nova', targetGoals: 500, currentGoals: 150, deadline: '2026-06-01' },
         ] as any,
         isLoading: false,
       });
@@ -119,6 +122,15 @@ export function useSubscriptions() {
           { id: 'badge-1', badgeId: 'first_star', earnedAt: now.toISOString() },
         ] as any,
         isLoading: false,
+      });
+
+      // Mock championship
+      useChampionshipStore.setState({
+        championship: null,
+        todayMatch: null,
+        trophies: [],
+        isLoading: false,
+        isMatchLoading: false,
       });
 
       return () => {}; // No-op cleanup for dev mode
@@ -139,6 +151,8 @@ export function useSubscriptions() {
     unsubs.push(useRewardStore.getState().subscribeRedemptions(familyId));
     unsubs.push(useGoalStore.getState().subscribe(familyId));
     unsubs.push(useBadgeStore.getState().subscribe(familyId));
+    unsubs.push(useChampionshipStore.getState().subscribeChampionship(familyId));
+    unsubs.push(useChampionshipStore.getState().subscribeTrophies(familyId));
 
     return () => unsubs.forEach((u) => u());
   }, [familyId]);
@@ -150,4 +164,12 @@ export function useSubscriptions() {
     const unsub = useCompletionStore.getState().subscribe(familyId, activePeriod.id);
     return () => unsub();
   }, [familyId, activePeriod?.id]);
+
+  // Subscribe to today's match when we have a championship
+  useEffect(() => {
+    if (!familyId || !championship?.id) return;
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const unsub = useChampionshipStore.getState().subscribeTodayMatch(familyId, championship.id, today);
+    return () => unsub();
+  }, [familyId, championship?.id]);
 }

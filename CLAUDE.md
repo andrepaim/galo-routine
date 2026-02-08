@@ -1,11 +1,12 @@
-# Star Routine
+# Galo Routine
 
 A parent-child task & reward app built with Expo (SDK 54), React Native, Firebase, and Zustand.
 
 ## Commands
 - `npx expo start --tunnel` — start Expo dev server with tunnel (tested on physical device via Expo Go)
 - `npx expo start --web` — start Expo web dev server
-- `npx tsc --noEmit` — type-check (no test suite yet)
+- `npx tsc --noEmit` — type-check
+- `npx jest` — run unit tests (Jest + jest-expo)
 - Cloud functions: `cd functions && npm run build && npm run deploy`
 
 ## Architecture
@@ -14,7 +15,7 @@ A parent-child task & reward app built with Expo (SDK 54), React Native, Firebas
 File-based routing with three groups:
 - `app/(auth)/` — login, register, child-pin (no auth required)
 - `app/(parent)/` — tab layout: home, tasks/, periods/, approvals, rewards/, goals, analytics, settings
-- `app/(child)/` — tab layout: today, tasks, stars, shop, table, trophies, badges (hidden), profile
+- `app/(child)/` — tab layout: today, tasks, championship (Meu Campeonato), shop, table, trophies, badges (hidden), profile
 
 Auth gate in `app/_layout.tsx` redirects based on `role` (parent/child/null).
 
@@ -23,8 +24,8 @@ Eight stores in `lib/stores/`:
 - `authStore` — auth state, role, family data (persists role via expo-secure-store)
 - `taskStore` — tasks CRUD + batch creation + real-time Firestore subscription
 - `periodStore` — periods, active period, completion logic
-- `completionStore` — task completions (pending/approved/rejected), star balance increment on approval
-- `rewardStore` — rewards CRUD, redemptions, star balance deduction on redemption
+- `completionStore` — task completions (pending/approved/rejected), goal balance increment on approval
+- `rewardStore` — rewards CRUD, redemptions, goal balance deduction on redemption
 - `goalStore` — long-term goals CRUD
 - `badgeStore` — earned badges tracking
 - `championshipStore` — championship state, matches, trophies, day closure logic
@@ -38,7 +39,7 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
   - `periods/{periodId}/completions` — task completion records
   - `rewards` — reward definitions (shop items)
   - `redemptions` — reward redemption records
-  - `goals` — long-term star goals
+  - `goals` — long-term goal targets
   - `earnedBadges` — badge awards
   - `streakFreezes` — streak freeze records
   - `championships` — monthly championship documents (teams, standings, fixtures)
@@ -46,21 +47,22 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
   - `trophies` — earned trophies (weekly and championship)
 - **Cloud Functions** (`functions/src/index.ts`):
   - `autoRollPeriods` — daily cron at midnight, auto-completes expired periods + creates new ones
-  - `onCompletionWrite` — trigger that recalculates period star counts, handles bonus stars, streak updates, and badge awards
+  - `onCompletionWrite` — trigger that recalculates period goal counts, handles bonus goals, streak updates, and badge awards
   - `dailyStreakCheck` — daily cron at 11 PM, resets broken streaks
+  - `autoCloseDayMatches` — daily cron at midnight UTC, auto-closes open championship matches
 
 ### Key types
 - `lib/types/index.ts` — core types:
   - `Family` / `FamilySettings` — family config, thresholds, bonus settings, streak settings, notification settings
-  - `Task` / `TaskRecurrence` — tasks with daily/specific_days/once recurrence, categories, time scheduling
-  - `Period` / `PeriodThresholds` — time periods with star budgets and reward/penalty zones
+  - `Task` / `TaskRecurrence` — tasks with daily/specific_days/once recurrence, categories, time scheduling, taskType (routine/bonus)
+  - `Period` / `PeriodThresholds` — time periods with goal budgets and reward/penalty zones
   - `TaskCompletion` — pending → approved/rejected flow with on-time bonus and proof fields
-  - `Reward` / `Redemption` — shop rewards with star costs and approval flow
-  - `LongTermGoal` — lifetime star goals with deadlines
+  - `Reward` / `Redemption` — shop rewards with goal costs and approval flow
+  - `LongTermGoal` — lifetime goal targets with deadlines
   - `Badge` / `EarnedBadge` — achievement badges (milestone, consistency, category)
   - `StreakFreeze` / `StreakMilestone` — streak tracking helpers
   - `TaskCategory` / `TaskTemplate` — category system and task templates
-  - `StarProgress` — computed: earned/pending/budget percentages + zone flags
+  - `GoalProgress` — computed: earned/pending/budget percentages + zone flags
 - `lib/types/championship.ts` — championship types:
   - `Championship` — monthly league with teams, standings, fixtures
   - `ChampionshipTeam` — simulated or user team with profile parameters
@@ -88,7 +90,7 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
 ## Key directories
 | Directory | Purpose |
 |-----------|---------|
-| `components/stars/` | StarBudgetRing, StarCounter, StarDisplay, GaloStarCounter |
+| `components/stars/` | StarBudgetRing (GoalProgress ring), StarCounter, StarDisplay, GaloStarCounter (Gols do Dia) |
 | `components/tasks/` | TaskCard, ChildTaskCard, GaloTaskCard, ApprovalCard, TaskForm, TemplateSelector |
 | `components/rewards/` | RewardCard, RewardForm |
 | `components/timeline/` | TimelineView, FocusModeCard |
@@ -98,8 +100,8 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
 | `components/periods/` | PeriodSummary |
 | `components/championship/` | StandingsTable, LiveScoreboard, RivalReveal, GaloGoalCounter, DayClosureModal |
 | `components/ui/` | AnimatedPressable, CelebrationOverlay, EmptyState, LoadingScreen, SkeletonLoader, TimePicker |
-| `lib/hooks/` | useCurrentPeriod, useTodayTasks, useStarBudget, useStarBudgetSync, useSubscriptions, useChampionship, useMatch (+ useMatchSync) |
-| `lib/utils/` | starCalculations, recurrence, periodUtils, pin, time, storage |
+| `lib/hooks/` | useCurrentPeriod, useTodayTasks, useGoalBudget, useGoalBudgetSync, useSubscriptions, useChampionship, useMatch (+ useMatchSync) |
+| `lib/utils/` | goalCalculations, recurrence, periodUtils, pin, time, storage |
 | `lib/services/` | championshipService, matchService |
 | `lib/firebase/` | config, auth, firestore |
 | `constants/` | colors, layout, defaults, theme, childTheme, leagueConfig, index |
@@ -154,17 +156,17 @@ Football-themed gamification where task completion translates into "goals" in a 
 - Periods page
 
 ### Code-complete (not runtime-tested on native)
-- **Phase 2**: Star system & thresholds (animated rings, counters, cards)
+- **Phase 2**: Goal system & thresholds (animated rings, counters, cards)
 - **Feature 1**: Rewards CRUD & shop (parent CRUD, child shop with redemptions)
 - **Feature 2**: Timeline view & focus mode (components created, integrated in child tasks)
-- **Feature 3**: Cumulative points & long-term goals (star balance, lifetime counter, goals screen)
+- **Feature 3**: Cumulative points & long-term goals (goal balance, lifetime counter, goals screen)
 - **Feature 4**: Task templates (19 predefined templates, bulk creation)
 - **Feature 5**: Notifications (settings UI only, no expo-notifications integration yet)
 - **Feature 6**: Streaks & consistency bonuses (display, cloud function tracking, freezes)
 - **Feature 7**: Achievement badges (badge grid, cloud function awarding)
 - **Feature 8**: Task categories/tags (9 predefined categories, color stripes)
 - **Feature 9**: Parent analytics dashboard (overview card, category breakdown, task analysis)
-- **Feature 10**: Bonus star mechanics (on-time, perfect day, early finish bonuses)
+- **Feature 10**: Bonus goal mechanics (on-time, perfect day, early finish bonuses)
 - **Feature 11**: Task completion proof (fields added, no photo picker yet)
 - **Feature 12**: Child profile (avatar picker, accent color, stats)
 - **Feature 13**: Championship system (monthly leagues, AI teams, daily matches, standings table, trophies, day closure, Galo theme)
@@ -175,4 +177,4 @@ Football-themed gamification where task completion translates into "goals" in a 
 - Custom category creation
 - Early finish bonus check in cloud functions
 - Championship promotion/relegation automation at month end
-- Championship cloud function for auto-closing days
+- Championship cloud function for auto-closing days (added `autoCloseDayMatches` in functions)

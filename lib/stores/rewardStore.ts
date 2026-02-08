@@ -51,7 +51,7 @@ export const useRewardStore = create<RewardStore>((set, get) => ({
     const reward: Omit<Reward, 'id'> = {
       name: data.name,
       description: data.description,
-      starCost: data.starCost,
+      goalCost: data.goalCost,
       icon: data.icon,
       isActive: true,
       availability: data.availability,
@@ -65,7 +65,7 @@ export const useRewardStore = create<RewardStore>((set, get) => ({
     const update: Partial<Reward> = {};
     if (data.name !== undefined) update.name = data.name;
     if (data.description !== undefined) update.description = data.description;
-    if (data.starCost !== undefined) update.starCost = data.starCost;
+    if (data.goalCost !== undefined) update.goalCost = data.goalCost;
     if (data.icon !== undefined) update.icon = data.icon;
     if (data.availability !== undefined) {
       update.availability = data.availability;
@@ -87,14 +87,14 @@ export const useRewardStore = create<RewardStore>((set, get) => ({
     const redemption: Omit<Redemption, 'id'> = {
       rewardId: reward.id!,
       rewardName: reward.name,
-      starCost: reward.starCost,
+      goalCost: reward.goalCost,
       redeemedAt: Timestamp.fromDate(new Date()),
       status: reward.requiresApproval ? 'pending' : 'fulfilled',
       fulfilledAt: reward.requiresApproval ? undefined : Timestamp.fromDate(new Date()),
     };
     await createRedemption(familyId, redemption);
-    // Deduct stars from balance
-    await incrementFamilyField(familyId, 'starBalance', -reward.starCost);
+    // Deduct goals from balance
+    await incrementFamilyField(familyId, 'goalBalance', -reward.goalCost);
     // Decrement limited quantity
     if (reward.availability === 'limited' && reward.quantity !== undefined && reward.quantity > 0) {
       await updateReward(familyId, reward.id!, { quantity: reward.quantity - 1 });
@@ -109,10 +109,10 @@ export const useRewardStore = create<RewardStore>((set, get) => ({
   },
 
   rejectRedemption: async (familyId: string, redemptionId: string) => {
-    // Refund stars on rejection
+    // Refund goals on rejection
     const redemption = get().redemptions.find((r) => r.id === redemptionId);
     if (redemption) {
-      await incrementFamilyField(familyId, 'starBalance', redemption.starCost);
+      await incrementFamilyField(familyId, 'goalBalance', redemption.goalCost);
     }
     await updateRedemption(familyId, redemptionId, { status: 'rejected' });
   },

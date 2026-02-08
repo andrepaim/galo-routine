@@ -64,7 +64,7 @@ export function StreakDisplay({
                   <Icon source="star" size={16} color={ChildColors.starGold} />
                   <Text variant="bodySmall" style={styles.statText}>
                     {daysToNext} {daysToNext === 1 ? 'day' : 'days'} to {nextMilestone.label}
-                    {'\n'}(+{nextMilestone.bonusStars} bonus stars)
+                    {'\n'}(+{nextMilestone.bonusGoals} bonus gols)
                   </Text>
                 </View>
               )}
@@ -83,7 +83,7 @@ export function StreakDisplay({
                     </Text>
                   </View>
                   <Text variant="labelSmall" style={styles.milestoneLabel}>
-                    +{milestone.bonusStars}
+                    +{milestone.bonusGoals}
                   </Text>
                 </View>
               );

@@ -58,12 +58,12 @@ export default function ChildProfileScreen() {
         <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statEmoji}>{STAR_EMOJI}</Text>
-            <Text style={styles.statNumber}>{family?.starBalance ?? 0}</Text>
-            <Text style={styles.statLabel}>Estrelas</Text>
+            <Text style={styles.statNumber}>{family?.goalBalance ?? 0}</Text>
+            <Text style={styles.statLabel}>Gols</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statEmoji}>🌟</Text>
-            <Text style={styles.statNumber}>{family?.lifetimeStarsEarned ?? 0}</Text>
+            <Text style={styles.statNumber}>{family?.lifetimeGoalsEarned ?? 0}</Text>
             <Text style={styles.statLabel}>Total Ganhas</Text>
           </View>
           <View style={styles.statCard}>

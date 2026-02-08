@@ -10,12 +10,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Layout } from '../../constants';
 import { ChildColors } from '../../constants/childTheme';
-import type { StarProgress } from '../../lib/types';
+import type { GoalProgress } from '../../lib/types';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface StarBudgetRingProps {
-  progress: StarProgress;
+  progress: GoalProgress;
   size?: number;
   strokeWidth?: number;
   rewardPercent?: number;
@@ -167,7 +167,7 @@ export function StarBudgetRing({
           of {progress.budget}
         </Text>
         <Text variant="labelSmall" style={styles.label}>
-          STARS
+          GOLS
         </Text>
       </View>
     </View>

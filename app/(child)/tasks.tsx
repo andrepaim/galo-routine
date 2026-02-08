@@ -88,7 +88,7 @@ export default function ChildTasksScreen() {
                 </View>
               </View>
               <View style={styles.starBadge}>
-                <Text style={styles.starValue}>+{item.starValue}</Text>
+                <Text style={styles.goalValue}>+{item.goals}</Text>
               </View>
             </View>
           );
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 12,
   },
-  starValue: {
+  goalValue: {
     fontSize: 14,
     fontWeight: 'bold',
     color: ChildColors.galoBlack,

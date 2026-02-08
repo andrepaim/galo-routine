@@ -27,6 +27,7 @@ interface CompletionStore {
   ) => Promise<void>;
   getPendingCompletions: () => TaskCompletion[];
   getCompletionForTask: (taskId: string, date: Date) => TaskCompletion | undefined;
+  areAllTodayReviewed: () => boolean;
 }
 
 export const useCompletionStore = create<CompletionStore>((set, get) => ({
@@ -58,7 +59,7 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
     const completion: Omit<TaskCompletion, 'id'> = {
       taskId: task.id!,
       taskName: task.name,
-      taskStarValue: task.starValue,
+      taskGoalValue: task.goals,
       date: Timestamp.fromDate(now),
       status: 'pending',
       completedAt: Timestamp.fromDate(now),
@@ -73,19 +74,19 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
     periodId: string,
     completionId: string,
   ) => {
-    // Find the completion to get its star value
+    // Find the completion to get its goal value
     const completion = get().completions.find((c) => c.id === completionId);
-    const starValue = completion?.taskStarValue ?? 0;
+    const goalValue = completion?.taskGoalValue ?? 0;
 
     await updateCompletion(familyId, periodId, completionId, {
       status: 'approved',
       reviewedAt: Timestamp.fromDate(new Date()),
     });
 
-    // Increment star balance and lifetime stars
-    if (starValue > 0) {
-      await incrementFamilyField(familyId, 'starBalance', starValue);
-      await incrementFamilyField(familyId, 'lifetimeStarsEarned', starValue);
+    // Increment goal balance and lifetime goals
+    if (goalValue > 0) {
+      await incrementFamilyField(familyId, 'goalBalance', goalValue);
+      await incrementFamilyField(familyId, 'lifetimeGoalsEarned', goalValue);
     }
   },
 
@@ -110,5 +111,15 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
     const dateStr = format(date, 'yyyy-MM-dd');
     const completionId = `${taskId}_${dateStr}`;
     return get().completions.find((c) => c.id === completionId);
+  },
+
+  areAllTodayReviewed: () => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todayCompletions = get().completions.filter((c) => {
+      const completionDate = c.date instanceof Date ? c.date : (c.date as any).toDate?.() ?? new Date();
+      return format(completionDate, 'yyyy-MM-dd') === today;
+    });
+    if (todayCompletions.length === 0) return false;
+    return todayCompletions.every((c) => c.status === 'approved' || c.status === 'rejected');
   },
 }));

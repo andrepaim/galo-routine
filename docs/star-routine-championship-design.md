@@ -219,7 +219,7 @@ export const POINTS = {
   LOSS: 0,
 };
 
-export const AUTO_CLOSE_HOUR = 6;  // 06:00 next day
+export const AUTO_CLOSE_HOUR = 0;  // Midnight
 ```
 
 ---
@@ -459,18 +459,18 @@ New tab showing full standings.
 **Estimated:** 2 hours
 **Depends on:** 1.5, 2.3
 
-Parent confirms end of day → animations → results.
+Day closes automatically when parent reviews last task → animations → results.
 
 **File:** `/root/star-routine/components/championship/DayClosureModal.tsx`
 
 **Flow:**
-1. Parent taps "Encerrar Dia" button
-2. Confirmation: "Encerrar a partida de hoje?"
-3. On confirm:
-   - Whistle sound (optional)
+1. Parent approves/rejects the last pending task of the day
+2. System detects all tasks have been reviewed
+3. Automatically triggers day closure:
    - Calculate final scores
    - Simulate opponent's match
    - Full-screen result animation
+4. If parent doesn't review all tasks, auto-close at **midnight**
 
 **Result Animation:**
 

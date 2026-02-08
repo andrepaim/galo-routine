@@ -65,12 +65,12 @@ export default function LoginScreen() {
         style={styles.content}
       >
         <View style={styles.header}>
-          <Icon source="star-shooting" size={64} color={ChildColors.starGold} />
+          <Icon source="shield-star" size={64} color={ChildColors.starGold} />
           <Text variant="headlineLarge" style={styles.title}>
-            Star Routine
+            Galo Routine
           </Text>
           <Text variant="bodyLarge" style={styles.subtitle}>
-            Track tasks, earn stars!
+            Complete tarefas, marque gols!
           </Text>
         </View>
 

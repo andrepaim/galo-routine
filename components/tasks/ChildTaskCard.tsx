@@ -84,7 +84,7 @@ export function ChildTaskCard({ task, onComplete, index = 0 }: ChildTaskCardProp
                 />
               )}
               right={() => (
-                <StarDisplay count={task.starValue} maxStars={task.starValue} size={24} showEmpty={false} />
+                <StarDisplay count={task.goals} maxStars={task.goals} size={24} showEmpty={false} />
               )}
             />
             {isRejected && task.completion?.rejectionReason && (

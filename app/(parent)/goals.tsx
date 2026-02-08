@@ -17,11 +17,11 @@ export default function GoalsScreen() {
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [targetStars, setTargetStars] = useState('100');
+  const [targetGoals, setTargetGoals] = useState('100');
   const [rewardDescription, setRewardDescription] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const lifetimeStars = family?.lifetimeStarsEarned ?? 0;
+  const lifetimeGoals = family?.lifetimeGoalsEarned ?? 0;
   const activeGoals = goals.filter((g) => !g.isCompleted);
   const completedGoals = goals.filter((g) => g.isCompleted);
 
@@ -32,14 +32,14 @@ export default function GoalsScreen() {
       await addGoal(familyId, {
         name: name.trim(),
         description: description.trim(),
-        targetStars: parseInt(targetStars, 10) || 100,
+        targetGoals: parseInt(targetGoals, 10) || 100,
         rewardDescription: rewardDescription.trim(),
       });
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setShowForm(false);
       setName('');
       setDescription('');
-      setTargetStars('100');
+      setTargetGoals('100');
       setRewardDescription('');
     } catch (e) {
       console.error('Failed to create goal:', e);
@@ -68,10 +68,10 @@ export default function GoalsScreen() {
           <View>
             <Animated.View entering={FadeInUp.duration(400)} style={styles.lifetimeCard}>
               <Text variant="bodySmall" style={styles.lifetimeLabel}>
-                TOTAL DE ESTRELAS GANHAS
+                TOTAL DE GOLS MARCADOS
               </Text>
               <Text variant="headlineLarge" style={styles.lifetimeCount}>
-                {lifetimeStars}
+                {lifetimeGoals}
               </Text>
             </Animated.View>
 
@@ -104,9 +104,9 @@ export default function GoalsScreen() {
                       activeOutlineColor={ChildColors.starGold}
                     />
                     <TextInput
-                      label="Estrelas Necessárias"
-                      value={targetStars}
-                      onChangeText={(t) => setTargetStars(t.replace(/[^0-9]/g, ''))}
+                      label="Gols Necessários"
+                      value={targetGoals}
+                      onChangeText={(t) => setTargetGoals(t.replace(/[^0-9]/g, ''))}
                       mode="outlined"
                       keyboardType="number-pad"
                       style={styles.input}
@@ -155,7 +155,7 @@ export default function GoalsScreen() {
           <Animated.View entering={FadeInDown.delay(index * 80).duration(300)}>
             <GoalCard
               goal={item}
-              lifetimeStars={lifetimeStars}
+              lifetimeGoals={lifetimeGoals}
               onDelete={() => handleDelete(item.id!, item.name)}
             />
           </Animated.View>

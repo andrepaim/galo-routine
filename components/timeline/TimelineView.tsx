@@ -124,7 +124,7 @@ export function TimelineView({ tasks, onTaskPress, onComplete }: TimelineViewPro
                   >
                     {task.name}
                   </Text>
-                  <StarDisplay count={task.starValue} maxStars={task.starValue} size={14} showEmpty={false} />
+                  <StarDisplay count={task.goals} maxStars={task.goals} size={14} showEmpty={false} />
                 </View>
                 <Text variant="bodySmall" style={styles.taskBlockTime}>
                   {formatTimeDisplay(task.startTime!)}
@@ -168,7 +168,7 @@ export function TimelineView({ tasks, onTaskPress, onComplete }: TimelineViewPro
                   >
                     {task.name}
                   </Text>
-                  <StarDisplay count={task.starValue} maxStars={task.starValue} size={16} showEmpty={false} />
+                  <StarDisplay count={task.goals} maxStars={task.goals} size={16} showEmpty={false} />
                 </Card.Content>
               </Card>
             );

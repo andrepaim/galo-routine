@@ -79,7 +79,7 @@ export function FocusModeCard({ task, nextTask, onComplete, onDismiss }: FocusMo
                 </Text>
               )}
             </View>
-            <StarDisplay count={task.starValue} maxStars={task.starValue} size={20} showEmpty={false} />
+            <StarDisplay count={task.goals} maxStars={task.goals} size={20} showEmpty={false} />
           </View>
 
           {!isDone ? (

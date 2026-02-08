@@ -8,14 +8,14 @@ import type { LongTermGoal } from '../../lib/types';
 
 interface GoalCardProps {
   goal: LongTermGoal;
-  lifetimeStars: number;
+  lifetimeGoals: number;
   onPress?: () => void;
   onDelete?: () => void;
 }
 
-export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardProps) {
-  const progress = Math.min(lifetimeStars / goal.targetStars, 1);
-  const starsRemaining = Math.max(0, goal.targetStars - lifetimeStars);
+export function GoalCard({ goal, lifetimeGoals, onPress, onDelete }: GoalCardProps) {
+  const progress = Math.min(lifetimeGoals / goal.targetGoals, 1);
+  const goalsRemaining = Math.max(0, goal.targetGoals - lifetimeGoals);
   const deadlineStr = goal.deadline ? format(goal.deadline.toDate(), 'MMM d, yyyy') : undefined;
 
   return (
@@ -53,7 +53,7 @@ export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardPro
         <View style={styles.progressSection}>
           <View style={styles.progressLabels}>
             <Text variant="bodySmall" style={styles.progressText}>
-              {lifetimeStars} / {goal.targetStars} stars
+              {lifetimeGoals} / {goal.targetGoals} gols
             </Text>
             <Text variant="bodySmall" style={styles.progressPercent}>
               {Math.round(progress * 100)}%
@@ -64,9 +64,9 @@ export function GoalCard({ goal, lifetimeStars, onPress, onDelete }: GoalCardPro
             color={goal.isCompleted ? ChildColors.starGold : ChildColors.starGold}
             style={styles.progressBar}
           />
-          {!goal.isCompleted && starsRemaining > 0 && (
+          {!goal.isCompleted && goalsRemaining > 0 && (
             <Text variant="bodySmall" style={styles.remaining}>
-              {starsRemaining} more stars to go!
+              {goalsRemaining} gols restantes!
             </Text>
           )}
         </View>

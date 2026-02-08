@@ -1,5 +1,5 @@
 export { isTaskScheduledForDate, getTasksForDate, countTaskOccurrences } from './recurrence';
-export { calculateStarBudget, determinePeriodOutcome, getStarProgress } from './starCalculations';
+export { calculateGoalBudget, determinePeriodOutcome, getGoalProgress } from './goalCalculations';
 export {
   calculatePeriodDates,
   buildPeriod,

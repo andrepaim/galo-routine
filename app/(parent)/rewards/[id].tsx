@@ -56,7 +56,7 @@ export default function EditRewardScreen() {
         initialData={{
           name: reward.name,
           description: reward.description,
-          starCost: reward.starCost,
+          goalCost: reward.goalCost,
           icon: reward.icon,
           availability: reward.availability,
           quantity: reward.quantity,

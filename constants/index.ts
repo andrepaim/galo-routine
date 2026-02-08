@@ -10,7 +10,7 @@ export {
 } from './childTheme';
 export {
   DEFAULT_SETTINGS,
-  STAR_VALUES,
+  GOAL_VALUES,
   DAY_NAMES,
   DAY_NAMES_FULL,
   TASK_ICONS,

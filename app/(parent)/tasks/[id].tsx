@@ -68,12 +68,14 @@ export default function EditTaskScreen() {
         initialData={{
           name: task.name,
           description: task.description,
-          starValue: task.starValue,
+          goals: task.goals,
           icon: task.icon,
           recurrenceType: task.recurrence.type,
           days: task.recurrence.days ?? [],
           startTime: task.startTime,
           endTime: task.endTime,
+          category: task.category,
+          taskType: task.taskType ?? 'routine',
         }}
         onSubmit={handleSubmit}
         onCancel={() => router.back()}

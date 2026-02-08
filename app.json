@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "Star Routine",
-    "slug": "star-routine",
+    "name": "Galo Routine",
+    "slug": "galo-routine",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "star-routine",
+    "scheme": "galo-routine",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.starroutine.app"
+      "package": "com.galoroutine.app"
     },
     "web": {
       "favicon": "./assets/favicon.png",

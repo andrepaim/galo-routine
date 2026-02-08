@@ -36,7 +36,7 @@ export function TaskCard({ task, onPress, onLongPress, showRecurrence = true }: 
             />
           </View>
         )}
-        right={() => <StarDisplay count={task.starValue} maxStars={5} size={16} />}
+        right={() => <StarDisplay count={task.goals} maxStars={5} size={16} />}
       />
       {showRecurrence && (
         <Card.Content style={styles.recurrence}>

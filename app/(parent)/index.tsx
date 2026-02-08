@@ -9,7 +9,7 @@ import { Layout } from '../../constants';
 import { ChildColors, ChildSizes } from '../../constants/childTheme';
 import { useAuthStore, usePeriodStore, useCompletionStore, useRewardStore } from '../../lib/stores';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
-import { useStarBudget } from '../../lib/hooks/useStarBudget';
+import { useGoalBudget } from '../../lib/hooks/useGoalBudget';
 import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
 import { useChampionship, useMatch } from '../../lib/hooks';
 import { StarCounter } from '../../components/stars/StarCounter';
@@ -28,7 +28,7 @@ export default function ParentHomeScreen() {
   const childName = useAuthStore((s) => s.childName);
   const family = useAuthStore((s) => s.family);
   const { activePeriod, isLoading: periodLoading } = useCurrentPeriod();
-  const starProgress = useStarBudget();
+  const starProgress = useGoalBudget();
   const pendingCount = useCompletionStore((s) => s.getPendingCompletions().length);
   const pendingRedemptions = useRewardStore((s) => s.redemptions.filter((r) => r.status === 'pending').length);
   
@@ -47,7 +47,7 @@ export default function ParentHomeScreen() {
     return todayTasks.map(task => ({
       id: task.id,
       name: task.name,
-      goals: task.starValue || 1,
+      goals: task.goals || 1,
       taskType: (task.isBonus ? 'bonus' : 'routine') as 'routine' | 'bonus',
       completed: task.completion?.status === 'approved',
       completedAt: task.completion?.completedAt,
@@ -182,10 +182,10 @@ export default function ParentHomeScreen() {
             <Card.Content style={styles.statContent}>
               <Icon source="star" size={28} color={ChildColors.starGold} />
               <Text variant="headlineSmall" style={styles.statNumber}>
-                {family?.starBalance ?? 0}
+                {family?.goalBalance ?? 0}
               </Text>
               <Text variant="bodySmall" style={styles.statLabel}>
-                Saldo de Estrelas
+                Saldo de Gols
               </Text>
             </Card.Content>
           </Card>
@@ -255,7 +255,7 @@ export default function ParentHomeScreen() {
                 <View style={styles.matchScorePreview}>
                   <Text style={styles.matchScoreLabel}>Placar atual:</Text>
                   <Text style={styles.matchScore}>
-                    {todayTasks.filter(t => t.completion?.status === 'approved').reduce((sum, t) => sum + (t.starValue || 1), 0)} ⚽ ? 
+                    {todayTasks.filter(t => t.completion?.status === 'approved').reduce((sum, t) => sum + (t.goals || 1), 0)} ⚽ ?
                   </Text>
                 </View>
                 <Button

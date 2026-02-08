@@ -68,8 +68,8 @@ export const POINTS = {
   LOSS: 0,
 } as const;
 
-// Auto-close day at this hour (next day) if parent forgets
-export const AUTO_CLOSE_HOUR = 6;
+// Auto-close day at midnight if parent hasn't reviewed all tasks
+export const AUTO_CLOSE_HOUR = 0;
 
 // League display info
 export const LEAGUE_DISPLAY: Record<LeagueId, { emoji: string; color: string }> = {

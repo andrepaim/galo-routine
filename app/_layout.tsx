@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { theme } from '../constants/theme';
 import { useAuthStore } from '../lib/stores';
-import { useSubscriptions, useStarBudgetSync } from '../lib/hooks';
+import { useSubscriptions, useGoalBudgetSync } from '../lib/hooks';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
 
 function AuthGate() {
@@ -38,7 +38,7 @@ function AuthGate() {
 
 function DataSubscriptions() {
   useSubscriptions();
-  useStarBudgetSync();
+  useGoalBudgetSync();
   return null;
 }
 
@@ -56,7 +56,7 @@ export default function RootLayout() {
     return (
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
-          <LoadingScreen message="Starting Star Routine..." />
+          <LoadingScreen message="Starting Galo Routine..." />
         </PaperProvider>
       </SafeAreaProvider>
     );
