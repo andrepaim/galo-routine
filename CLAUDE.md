@@ -4,6 +4,7 @@ A parent-child task & reward app built with Expo (SDK 54), React Native, Firebas
 
 ## Commands
 - `npx expo start --tunnel` — start Expo dev server with tunnel (tested on physical device via Expo Go)
+- `npx expo start --web` — start Expo web dev server
 - `npx tsc --noEmit` — type-check (no test suite yet)
 - Cloud functions: `cd functions && npm run build && npm run deploy`
 
@@ -13,12 +14,12 @@ A parent-child task & reward app built with Expo (SDK 54), React Native, Firebas
 File-based routing with three groups:
 - `app/(auth)/` — login, register, child-pin (no auth required)
 - `app/(parent)/` — tab layout: home, tasks/, periods/, approvals, rewards/, goals, analytics, settings
-- `app/(child)/` — tab layout: today, tasks, stars, shop, badges, profile
+- `app/(child)/` — tab layout: today, tasks, stars, shop, table, trophies, badges (hidden), profile
 
 Auth gate in `app/_layout.tsx` redirects based on `role` (parent/child/null).
 
 ### State (Zustand)
-Seven stores in `lib/stores/`:
+Eight stores in `lib/stores/`:
 - `authStore` — auth state, role, family data (persists role via expo-secure-store)
 - `taskStore` — tasks CRUD + batch creation + real-time Firestore subscription
 - `periodStore` — periods, active period, completion logic
@@ -26,6 +27,7 @@ Seven stores in `lib/stores/`:
 - `rewardStore` — rewards CRUD, redemptions, star balance deduction on redemption
 - `goalStore` — long-term goals CRUD
 - `badgeStore` — earned badges tracking
+- `championshipStore` — championship state, matches, trophies, day closure logic
 
 Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in `lib/hooks/useSubscriptions.ts`, called from root layout's `DataSubscriptions` component. Family document is also subscribed for real-time balance/streak updates.
 
@@ -39,22 +41,39 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
   - `goals` — long-term star goals
   - `earnedBadges` — badge awards
   - `streakFreezes` — streak freeze records
+  - `championships` — monthly championship documents (teams, standings, fixtures)
+  - `championships/{championshipId}/matches` — daily match records
+  - `trophies` — earned trophies (weekly and championship)
 - **Cloud Functions** (`functions/src/index.ts`):
   - `autoRollPeriods` — daily cron at midnight, auto-completes expired periods + creates new ones
   - `onCompletionWrite` — trigger that recalculates period star counts, handles bonus stars, streak updates, and badge awards
   - `dailyStreakCheck` — daily cron at 11 PM, resets broken streaks
 
-### Key types (`lib/types/index.ts`)
-- `Family` / `FamilySettings` — family config, thresholds, bonus settings, streak settings, notification settings
-- `Task` / `TaskRecurrence` — tasks with daily/specific_days/once recurrence, categories, time scheduling
-- `Period` / `PeriodThresholds` — time periods with star budgets and reward/penalty zones
-- `TaskCompletion` — pending → approved/rejected flow with on-time bonus and proof fields
-- `Reward` / `Redemption` — shop rewards with star costs and approval flow
-- `LongTermGoal` — lifetime star goals with deadlines
-- `Badge` / `EarnedBadge` — achievement badges (milestone, consistency, category)
-- `StreakFreeze` / `StreakMilestone` — streak tracking helpers
-- `TaskCategory` / `TaskTemplate` — category system and task templates
-- `StarProgress` — computed: earned/pending/budget percentages + zone flags
+### Key types
+- `lib/types/index.ts` — core types:
+  - `Family` / `FamilySettings` — family config, thresholds, bonus settings, streak settings, notification settings
+  - `Task` / `TaskRecurrence` — tasks with daily/specific_days/once recurrence, categories, time scheduling
+  - `Period` / `PeriodThresholds` — time periods with star budgets and reward/penalty zones
+  - `TaskCompletion` — pending → approved/rejected flow with on-time bonus and proof fields
+  - `Reward` / `Redemption` — shop rewards with star costs and approval flow
+  - `LongTermGoal` — lifetime star goals with deadlines
+  - `Badge` / `EarnedBadge` — achievement badges (milestone, consistency, category)
+  - `StreakFreeze` / `StreakMilestone` — streak tracking helpers
+  - `TaskCategory` / `TaskTemplate` — category system and task templates
+  - `StarProgress` — computed: earned/pending/budget percentages + zone flags
+- `lib/types/championship.ts` — championship types:
+  - `Championship` — monthly league with teams, standings, fixtures
+  - `ChampionshipTeam` — simulated or user team with profile parameters
+  - `Standing` — league table row (points, wins, goals, etc.)
+  - `Fixture` — scheduled match in round-robin
+  - `Match` — daily user match with goals breakdown and closure state
+  - `Trophy` — weekly or championship trophy earned
+  - `ChampionshipTask` — task mapped to championship goals
+  - `MatchResult` — result data for animations
+
+### Services (`lib/services/`)
+- `championshipService.ts` — championship creation, team generation, fixture scheduling, standings management, AI match simulation, promotion logic
+- `matchService.ts` — user goal calculation from tasks, opponent goal simulation, result determination, score formatting, Portuguese result messages
 
 ## Conventions
 - **Named exports** for components (`export function TaskCard`), **default exports** for route screens
@@ -64,44 +83,75 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
 - Styles via `StyleSheet.create()`, gap-based flexbox layout
 - Animations via `react-native-reanimated` (layout animations + shared values)
 - UI components from `react-native-paper` (Material Design 3)
+- App language is **Portuguese (pt-BR)** for all user-facing text
 
 ## Key directories
 | Directory | Purpose |
 |-----------|---------|
-| `components/stars/` | StarBudgetRing, StarCounter, StarDisplay |
-| `components/tasks/` | TaskCard, ChildTaskCard, ApprovalCard, TaskForm, TemplateSelector |
+| `components/stars/` | StarBudgetRing, StarCounter, StarDisplay, GaloStarCounter |
+| `components/tasks/` | TaskCard, ChildTaskCard, GaloTaskCard, ApprovalCard, TaskForm, TemplateSelector |
 | `components/rewards/` | RewardCard, RewardForm |
 | `components/timeline/` | TimelineView, FocusModeCard |
 | `components/badges/` | BadgeGrid |
 | `components/goals/` | GoalCard |
 | `components/streaks/` | StreakDisplay |
-| `lib/hooks/` | useCurrentPeriod, useTodayTasks, useStarBudget, useStarBudgetSync, useSubscriptions |
-| `lib/utils/` | starCalculations, recurrence, periodUtils, pin, time |
+| `components/periods/` | PeriodSummary |
+| `components/championship/` | StandingsTable, LiveScoreboard, RivalReveal, GaloGoalCounter, DayClosureModal |
+| `components/ui/` | AnimatedPressable, CelebrationOverlay, EmptyState, LoadingScreen, SkeletonLoader, TimePicker |
+| `lib/hooks/` | useCurrentPeriod, useTodayTasks, useStarBudget, useStarBudgetSync, useSubscriptions, useChampionship, useMatch (+ useMatchSync) |
+| `lib/utils/` | starCalculations, recurrence, periodUtils, pin, time, storage |
+| `lib/services/` | championshipService, matchService |
 | `lib/firebase/` | config, auth, firestore |
-| `constants/` | colors, layout, defaults (categories, badges, templates, milestones), theme |
+| `constants/` | colors, layout, defaults, theme, childTheme, leagueConfig, index |
+| `assets/images/mascot/` | Galo mascot images (galo-doido, galo-volpi, galo-shield variants) |
+| `assets/data/` | teams.json (team names for championship simulation) |
 
-## Feature status (2026-02-05)
+## Championship System
+
+Football-themed gamification where task completion translates into "goals" in a simulated league:
+
+### Concept
+- Monthly championships with round-robin fixtures
+- Child's team competes against AI-simulated teams
+- Completing tasks = scoring goals; missing routine tasks = opponent bonus goals
+- Daily match closure by parent triggers result calculation + AI simulation
+- League table with standings, win/draw/loss tracking
+- Promotion system: Série D → C → B → A (top 2 qualify)
+
+### League Structure (`constants/leagueConfig.ts`)
+- **Série D**: 8 teams (4 weak, 2 medium, 1 strong) — entry league
+- **Série C**: 10 teams (3 weak, 4 medium, 2 strong)
+- **Série B**: 12 teams (7 medium, 3 strong, 1 elite)
+- **Série A**: 16 teams (8 medium, 4 strong, 3 elite) — top league, no promotion
+- Points: Win=3, Draw=1, Loss=0
+
+### Child Theme (`constants/childTheme.ts`)
+- Atlético Mineiro "Galo" inspired: black, white, gold palette
+- `ChildColors`, `ChildGradients`, `ChildSizes` constants
+- Galo mascot imagery throughout child UI
+
+## Feature status (2026-02-08)
 
 ### Web Testing Setup
 - **Expo Web** running at localhost:8081 (`npx expo start --web`)
 - **Puppeteer** for automated browser testing (scripts in `scripts/`)
 - **Test screenshots** saved to `test-screenshots/`
-- Start expo in screen: `screen -dmS expo bash -c 'cd /root/star-routine && npx expo start --web --port 8081'`
+- Start expo in screen: `screen -dmS expo bash -c 'cd /home/andrepaim/src/star-routine && npx expo start --web --port 8081'`
 
 ### Bugs Fixed (2026-02-05)
 1. **expo-secure-store web compatibility** — Created `lib/utils/storage.ts` for cross-platform storage (SecureStore on native, AsyncStorage on web)
 2. **Login page navigation** — Replaced Button with Link component for "Create Family Account" navigation
 
 ### Runtime-tested on Web (2026-02-05)
-- ✅ Auth flow (register, login)
-- ✅ Parent Dashboard
-- ✅ Task Management page
-- ✅ Rewards System
-- ✅ Approvals page
-- ✅ Goals page
-- ✅ Analytics page
-- ✅ Settings page
-- ✅ Periods page
+- Auth flow (register, login)
+- Parent Dashboard
+- Task Management page
+- Rewards System
+- Approvals page
+- Goals page
+- Analytics page
+- Settings page
+- Periods page
 
 ### Code-complete (not runtime-tested on native)
 - **Phase 2**: Star system & thresholds (animated rings, counters, cards)
@@ -117,9 +167,12 @@ Stores use Firestore `onSnapshot()` for real-time sync. Subscriptions set up in 
 - **Feature 10**: Bonus star mechanics (on-time, perfect day, early finish bonuses)
 - **Feature 11**: Task completion proof (fields added, no photo picker yet)
 - **Feature 12**: Child profile (avatar picker, accent color, stats)
+- **Feature 13**: Championship system (monthly leagues, AI teams, daily matches, standings table, trophies, day closure, Galo theme)
 
 ### Not yet implemented
 - Push notifications via expo-notifications
 - Photo picker for task completion proof
 - Custom category creation
 - Early finish bonus check in cloud functions
+- Championship promotion/relegation automation at month end
+- Championship cloud function for auto-closing days
