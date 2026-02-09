@@ -16,11 +16,18 @@ A parent-child task & reward app built with Expo (SDK 54), React Native, Firebas
 - `npx jest` — run all unit tests
 - `npx jest --coverage` — with coverage report
 
-### E2E Tests
+### E2E Tests (Web — Playwright)
 - Start Expo web first: `npx expo start --web --port 8081`
 - Run E2E suite: `node scripts/e2e-tests.mjs`
 - Screenshots saved to `test-screenshots/e2e/`
 - Uses Playwright headless browser against dev mode URLs (`?dev=parent`, `?dev=child`)
+
+### E2E Tests (Android — adb)
+- Requires: Android emulator with Expo Go, app loaded, logged in as parent
+- Run: `CHILD_PIN=0412 bash scripts/android-e2e-tests.sh`
+- Screenshots saved to `test-screenshots/android/`
+- 19 suites covering all parent/child screens, role switching, PIN auth, terminology audit
+- Full docs: `docs/android-e2e-tests.md`
 
 ### Before Pushing a Feature Branch
 1. `npx tsc --noEmit` — type-check passes
