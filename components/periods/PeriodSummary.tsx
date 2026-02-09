@@ -34,9 +34,9 @@ export function PeriodSummary({ period, onPress }: PeriodSummaryProps) {
 
         <View style={styles.statsRow}>
           <StarCounter
-            earned={period.goalsEarned}
-            budget={period.goalBudget}
-            pending={period.goalsPending}
+            earned={period.goalsEarned ?? 0}
+            budget={period.goalBudget ?? 0}
+            pending={period.goalsPending ?? 0}
           />
           {isActive && (
             <View style={styles.daysLeft}>

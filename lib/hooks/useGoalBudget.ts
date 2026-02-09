@@ -12,11 +12,11 @@ export function useGoalBudget(): GoalProgress | null {
 
     const goalsEarned = completions
       .filter((c) => c.status === 'approved')
-      .reduce((sum, c) => sum + c.taskGoalValue, 0);
+      .reduce((sum, c) => sum + (c.taskGoalValue ?? 0), 0);
 
     const goalsPending = completions
       .filter((c) => c.status === 'pending')
-      .reduce((sum, c) => sum + c.taskGoalValue, 0);
+      .reduce((sum, c) => sum + (c.taskGoalValue ?? 0), 0);
 
     return getGoalProgress({ ...activePeriod, goalsEarned, goalsPending });
   }, [activePeriod, completions]);

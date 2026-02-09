@@ -33,11 +33,15 @@ export function determinePeriodOutcome(
  * Get goal progress data for UI display.
  */
 export function getGoalProgress(period: Period): GoalProgress {
+  const budget = period.goalBudget ?? 0;
+  const earned = period.goalsEarned ?? 0;
+  const pending = period.goalsPending ?? 0;
+
   // When there are no tasks (budget=0), treat as neutral zone
-  if (period.goalBudget === 0) {
+  if (budget === 0) {
     return {
-      earned: period.goalsEarned,
-      pending: period.goalsPending,
+      earned,
+      pending,
       budget: 0,
       earnedPercent: 0,
       pendingPercent: 0,
@@ -47,13 +51,13 @@ export function getGoalProgress(period: Period): GoalProgress {
     };
   }
 
-  const earnedPercent = (period.goalsEarned / period.goalBudget) * 100;
-  const pendingPercent = (period.goalsPending / period.goalBudget) * 100;
+  const earnedPercent = (earned / budget) * 100;
+  const pendingPercent = (pending / budget) * 100;
 
   return {
-    earned: period.goalsEarned,
-    pending: period.goalsPending,
-    budget: period.goalBudget,
+    earned,
+    pending,
+    budget,
     earnedPercent,
     pendingPercent,
     isRewardZone: earnedPercent >= period.thresholds.rewardPercent,

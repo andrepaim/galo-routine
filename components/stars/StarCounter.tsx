@@ -21,7 +21,10 @@ interface StarCounterProps {
   size?: 'small' | 'large';
 }
 
-export function StarCounter({ earned, budget, pending = 0, size = 'small' }: StarCounterProps) {
+export function StarCounter({ earned: rawEarned, budget: rawBudget, pending: rawPending = 0, size = 'small' }: StarCounterProps) {
+  const earned = Number.isFinite(rawEarned) ? rawEarned : 0;
+  const budget = Number.isFinite(rawBudget) ? rawBudget : 0;
+  const pending = Number.isFinite(rawPending) ? rawPending : 0;
   const isLarge = size === 'large';
   const iconSize = isLarge ? 32 : 20;
   const earnedPercent = budget > 0 ? Math.round((earned / budget) * 100) : 0;
