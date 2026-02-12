@@ -1,0 +1,123 @@
+{
+  "passed": 29,
+  "failed": 0,
+  "warnings": 0,
+  "tests": [
+    {
+      "status": "pass",
+      "message": "Login title \"Galo Routine\" visible"
+    },
+    {
+      "status": "pass",
+      "message": "Login subtitle visible"
+    },
+    {
+      "status": "pass",
+      "message": "No stale \"Star Routine\" on login"
+    },
+    {
+      "status": "pass",
+      "message": "Dashboard shows \"Saldo de Gols\""
+    },
+    {
+      "status": "pass",
+      "message": "No stale \"Saldo de Estrelas\""
+    },
+    {
+      "status": "pass",
+      "message": "Tasks page rendered"
+    },
+    {
+      "status": "pass",
+      "message": "Rewards page rendered"
+    },
+    {
+      "status": "pass",
+      "message": "Approvals page accessible"
+    },
+    {
+      "status": "pass",
+      "message": "Goals shows \"TOTAL DE GOLS MARCADOS\""
+    },
+    {
+      "status": "pass",
+      "message": "Analytics shows \"Gols Marcados\""
+    },
+    {
+      "status": "pass",
+      "message": "Settings shows \"Bonus Goals\""
+    },
+    {
+      "status": "pass",
+      "message": "Periods page accessible"
+    },
+    {
+      "status": "pass",
+      "message": "Child dashboard shows \"Gols Hoje\""
+    },
+    {
+      "status": "pass",
+      "message": "Child tasks page accessible"
+    },
+    {
+      "status": "pass",
+      "message": "Championship screen rendered"
+    },
+    {
+      "status": "pass",
+      "message": "Shop shows \"Seus Gols\""
+    },
+    {
+      "status": "pass",
+      "message": "League table page accessible"
+    },
+    {
+      "status": "pass",
+      "message": "Trophies page accessible"
+    },
+    {
+      "status": "pass",
+      "message": "Profile shows \"Gols\" stat"
+    },
+    {
+      "status": "pass",
+      "message": "[Parent Dashboard] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Parent Tasks] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Parent Rewards] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Parent Goals] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Parent Analytics] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Parent Settings] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Child Dashboard] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Child Tasks] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Child Shop] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "message": "[Child Profile] No forbidden terminology"
+    }
+  ]
+}

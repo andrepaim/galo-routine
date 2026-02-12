@@ -1,0 +1,308 @@
+{
+  "passed": 56,
+  "failed": 1,
+  "warnings": 3,
+  "total": 60,
+  "tests": [
+    {
+      "status": "pass",
+      "suite": "Suite 1: Parent Dashboard",
+      "message": "Dashboard header shows 'Início'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 1: Parent Dashboard",
+      "message": "Dashboard shows greeting"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 1: Parent Dashboard",
+      "message": "Dashboard shows 'Saldo de Gols'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 1: Parent Dashboard",
+      "message": "Dashboard shows 'Período Atual'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 1: Parent Dashboard",
+      "message": "Dashboard shows 'Ações Rápidas'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 1: Parent Dashboard",
+      "message": "No stale 'Star Routine' on dashboard"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 1: Parent Dashboard",
+      "message": "No stale 'Saldo de Estrelas' on dashboard"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 2: Parent Tasks",
+      "message": "Tasks page shows title"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 2: Parent Tasks",
+      "message": "Tasks shows 'Todas' filter chip"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 2: Parent Tasks",
+      "message": "Tasks shows 'Hygiene' category"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 2: Parent Tasks",
+      "message": "Tasks shows 'School' category"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 3: Parent Rewards",
+      "message": "Rewards page shows title"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 4: Parent Approvals",
+      "message": "Approvals page shows title"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 5: Parent Periods",
+      "message": "Periods page shows title"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 6: Parent Goals",
+      "message": "Goals page shows title"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 7: Parent Analytics",
+      "message": "Analytics page shows title"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 8: Parent Settings",
+      "message": "Settings page shows title"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 9: Role Switching (Parent → Child)",
+      "message": "PIN screen appeared after tapping Galo shield"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 9: Role Switching (Parent → Child)",
+      "message": "Wrong PIN shows error message"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 9: Role Switching (Parent → Child)",
+      "message": "Successfully switched to child view"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 10: Child Dashboard",
+      "message": "Child dashboard shows 'Meu Dia'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 11: Child Tasks",
+      "message": "Child tasks shows 'Tarefas'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 12: Child Championship",
+      "message": "Championship shows 'Campeonato'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 13: Child Shop",
+      "message": "Shop shows 'Loja'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 14: Child League Table",
+      "message": "Table shows 'Tabela'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 15: Child Trophies",
+      "message": "Trophies shows 'Troféus'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 16: Child Profile",
+      "message": "Profile shows 'Perfil'"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 17: Role Switching (Child → Parent)",
+      "message": "Successfully switched back to parent view"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 18: Terminology Audit",
+      "message": "[Parent inicio] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 18: Terminology Audit",
+      "message": "[Parent tarefas] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 18: Terminology Audit",
+      "message": "[Parent premios] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 18: Terminology Audit",
+      "message": "[Parent aprovar] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 18: Terminology Audit",
+      "message": "[Parent periodos] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 18: Terminology Audit",
+      "message": "[Parent metas] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 18: Terminology Audit",
+      "message": "[Parent relatorios] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 18: Terminology Audit",
+      "message": "[Parent config] No forbidden terminology"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 19: Scroll & Interaction Tests",
+      "message": "Dashboard scrolls down without crash"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 19: Scroll & Interaction Tests",
+      "message": "Dashboard scrolls up without crash"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 19: Scroll & Interaction Tests",
+      "message": "Settings deep scroll without crash"
+    },
+    {
+      "status": "warn",
+      "suite": "Suite 20: Task Creation Flow (Parent)",
+      "message": "Could not find FAB button — trying bottom-right corner (980, 2100)"
+    },
+    {
+      "status": "fail",
+      "suite": "Suite 20: Task Creation Flow (Parent)",
+      "message": "Could not open task creation form"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 21: Task Completion Flow (Child)",
+      "message": "PIN screen appeared for child switch"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 21: Task Completion Flow (Child)",
+      "message": "Child tasks screen accessible"
+    },
+    {
+      "status": "warn",
+      "suite": "Suite 21: Task Completion Flow (Child)",
+      "message": "No tappable task card found (may all be completed)"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 22: Task Approval Flow (Parent)",
+      "message": "Approvals screen accessible"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 22: Task Approval Flow (Parent)",
+      "message": "No pending approvals (empty state shown)"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 23: Child Profile Customization",
+      "message": "Child profile screen accessible"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 23: Child Profile Customization",
+      "message": "Avatar picker section visible"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 23: Child Profile Customization",
+      "message": "Color picker section visible"
+    },
+    {
+      "status": "warn",
+      "suite": "Suite 23: Child Profile Customization",
+      "message": "Could not find avatar icon buttons"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 23: Child Profile Customization",
+      "message": "Tapped 'Salvar Perfil' button"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 23: Child Profile Customization",
+      "message": "Profile save success message shown"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 24: Reward Visibility",
+      "message": "Child shop screen accessible"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 24: Reward Visibility",
+      "message": "Goal balance display visible ('Seus Gols')"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 24: Reward Visibility",
+      "message": "Shop section visible"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 24: Reward Visibility",
+      "message": "Parent rewards screen accessible"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 24: Reward Visibility",
+      "message": "Parent rewards shows empty state"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 25: Navigation Stress Test",
+      "message": "Parent tabs: rapid switching did not crash (UI responsive)"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 25: Navigation Stress Test",
+      "message": "Child tabs: rapid switching did not crash (UI responsive)"
+    },
+    {
+      "status": "pass",
+      "suite": "Suite 25: Navigation Stress Test",
+      "message": "Navigation stress test complete — app survived rapid tab switching"
+    }
+  ]
+}

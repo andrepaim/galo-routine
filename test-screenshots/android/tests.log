@@ -1,0 +1,60 @@
+pass	Suite 1: Parent Dashboard	Dashboard header shows 'Início'
+pass	Suite 1: Parent Dashboard	Dashboard shows greeting
+pass	Suite 1: Parent Dashboard	Dashboard shows 'Saldo de Gols'
+pass	Suite 1: Parent Dashboard	Dashboard shows 'Período Atual'
+pass	Suite 1: Parent Dashboard	Dashboard shows 'Ações Rápidas'
+pass	Suite 1: Parent Dashboard	No stale 'Star Routine' on dashboard
+pass	Suite 1: Parent Dashboard	No stale 'Saldo de Estrelas' on dashboard
+pass	Suite 2: Parent Tasks	Tasks page shows title
+pass	Suite 2: Parent Tasks	Tasks shows 'Todas' filter chip
+pass	Suite 2: Parent Tasks	Tasks shows 'Hygiene' category
+pass	Suite 2: Parent Tasks	Tasks shows 'School' category
+pass	Suite 3: Parent Rewards	Rewards page shows title
+pass	Suite 4: Parent Approvals	Approvals page shows title
+pass	Suite 5: Parent Periods	Periods page shows title
+pass	Suite 6: Parent Goals	Goals page shows title
+pass	Suite 7: Parent Analytics	Analytics page shows title
+pass	Suite 8: Parent Settings	Settings page shows title
+pass	Suite 9: Role Switching (Parent → Child)	PIN screen appeared after tapping Galo shield
+pass	Suite 9: Role Switching (Parent → Child)	Wrong PIN shows error message
+pass	Suite 9: Role Switching (Parent → Child)	Successfully switched to child view
+pass	Suite 10: Child Dashboard	Child dashboard shows 'Meu Dia'
+pass	Suite 11: Child Tasks	Child tasks shows 'Tarefas'
+pass	Suite 12: Child Championship	Championship shows 'Campeonato'
+pass	Suite 13: Child Shop	Shop shows 'Loja'
+pass	Suite 14: Child League Table	Table shows 'Tabela'
+pass	Suite 15: Child Trophies	Trophies shows 'Troféus'
+pass	Suite 16: Child Profile	Profile shows 'Perfil'
+pass	Suite 17: Role Switching (Child → Parent)	Successfully switched back to parent view
+pass	Suite 18: Terminology Audit	[Parent inicio] No forbidden terminology
+pass	Suite 18: Terminology Audit	[Parent tarefas] No forbidden terminology
+pass	Suite 18: Terminology Audit	[Parent premios] No forbidden terminology
+pass	Suite 18: Terminology Audit	[Parent aprovar] No forbidden terminology
+pass	Suite 18: Terminology Audit	[Parent periodos] No forbidden terminology
+pass	Suite 18: Terminology Audit	[Parent metas] No forbidden terminology
+pass	Suite 18: Terminology Audit	[Parent relatorios] No forbidden terminology
+pass	Suite 18: Terminology Audit	[Parent config] No forbidden terminology
+pass	Suite 19: Scroll & Interaction Tests	Dashboard scrolls down without crash
+pass	Suite 19: Scroll & Interaction Tests	Dashboard scrolls up without crash
+pass	Suite 19: Scroll & Interaction Tests	Settings deep scroll without crash
+warn	Suite 20: Task Creation Flow (Parent)	Could not find FAB button — trying bottom-right corner (980, 2100)
+fail	Suite 20: Task Creation Flow (Parent)	Could not open task creation form
+pass	Suite 21: Task Completion Flow (Child)	PIN screen appeared for child switch
+pass	Suite 21: Task Completion Flow (Child)	Child tasks screen accessible
+warn	Suite 21: Task Completion Flow (Child)	No tappable task card found (may all be completed)
+pass	Suite 22: Task Approval Flow (Parent)	Approvals screen accessible
+pass	Suite 22: Task Approval Flow (Parent)	No pending approvals (empty state shown)
+pass	Suite 23: Child Profile Customization	Child profile screen accessible
+pass	Suite 23: Child Profile Customization	Avatar picker section visible
+pass	Suite 23: Child Profile Customization	Color picker section visible
+warn	Suite 23: Child Profile Customization	Could not find avatar icon buttons
+pass	Suite 23: Child Profile Customization	Tapped 'Salvar Perfil' button
+pass	Suite 23: Child Profile Customization	Profile save success message shown
+pass	Suite 24: Reward Visibility	Child shop screen accessible
+pass	Suite 24: Reward Visibility	Goal balance display visible ('Seus Gols')
+pass	Suite 24: Reward Visibility	Shop section visible
+pass	Suite 24: Reward Visibility	Parent rewards screen accessible
+pass	Suite 24: Reward Visibility	Parent rewards shows empty state
+pass	Suite 25: Navigation Stress Test	Parent tabs: rapid switching did not crash (UI responsive)
+pass	Suite 25: Navigation Stress Test	Child tabs: rapid switching did not crash (UI responsive)
+pass	Suite 25: Navigation Stress Test	Navigation stress test complete — app survived rapid tab switching

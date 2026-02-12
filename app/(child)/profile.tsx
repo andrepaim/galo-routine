@@ -11,6 +11,7 @@ import { ChildColors, ChildSizes, GALO_EMOJI, STAR_EMOJI, TROPHY_EMOJI } from '.
 const GaloVolpiImage = require('../../assets/images/mascot/galo-volpi-white.png');
 import { useAuthStore, useBadgeStore } from '../../lib/stores';
 import { updateFamily } from '../../lib/firebase/firestore';
+import { BadgeGrid } from '../../components/badges/BadgeGrid';
 
 export default function ChildProfileScreen() {
   const { familyId, childName, family } = useAuthStore();
@@ -92,8 +93,31 @@ export default function ChildProfileScreen() {
           </View>
         </Animated.View>
 
+        {/* Badges Section */}
+        <Animated.View entering={FadeInUp.delay(175).duration(400)} style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Minhas Conquistas</Text>
+          <View style={styles.badgeProgressSection}>
+            <View style={styles.badgeProgressHeader}>
+              <Text style={styles.badgeProgressLabel}>Progresso</Text>
+              <Text style={styles.badgeProgressPercent}>
+                {ALL_BADGES.length > 0 ? Math.round((earnedBadges.length / ALL_BADGES.length) * 100) : 0}%
+              </Text>
+            </View>
+            <View style={styles.badgeProgressBar}>
+              <View style={[
+                styles.badgeProgressFill,
+                { width: `${ALL_BADGES.length > 0 ? Math.round((earnedBadges.length / ALL_BADGES.length) * 100) : 0}%` }
+              ]} />
+            </View>
+            <Text style={styles.badgeProgressCount}>
+              {earnedBadges.length} de {ALL_BADGES.length} conquistados
+            </Text>
+          </View>
+          <BadgeGrid earnedBadges={earnedBadges} />
+        </Animated.View>
+
         {/* Avatar Picker */}
-        <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.sectionCard}>
+        <Animated.View entering={FadeInUp.delay(250).duration(400)} style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Escolha seu Avatar</Text>
           <View style={styles.avatarGrid}>
             {AVATAR_OPTIONS.map((av) => (
@@ -112,7 +136,7 @@ export default function ChildProfileScreen() {
         </Animated.View>
 
         {/* Color Picker */}
-        <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.sectionCard}>
+        <Animated.View entering={FadeInUp.delay(350).duration(400)} style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Cor Favorita</Text>
           <View style={styles.colorRow}>
             {ACCENT_COLOR_OPTIONS.map((color) => (
@@ -295,6 +319,41 @@ const styles = StyleSheet.create({
   colorSelected: {
     backgroundColor: ChildColors.cardBackgroundLight,
     borderRadius: 20,
+  },
+  badgeProgressSection: {
+    marginBottom: 16,
+  },
+  badgeProgressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  badgeProgressLabel: {
+    fontSize: 14,
+    color: ChildColors.textSecondary,
+  },
+  badgeProgressPercent: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: ChildColors.starGold,
+  },
+  badgeProgressBar: {
+    height: 8,
+    backgroundColor: ChildColors.galoDark,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  badgeProgressFill: {
+    height: '100%',
+    backgroundColor: ChildColors.starGold,
+    borderRadius: 4,
+  },
+  badgeProgressCount: {
+    fontSize: 13,
+    color: ChildColors.textMuted,
+    marginTop: 8,
+    textAlign: 'center',
   },
   saveBtn: {
     marginTop: 8,

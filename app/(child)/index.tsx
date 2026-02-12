@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, FlatList, StyleSheet, Image } from 'react-native';
 import { Text, Icon, Surface } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { format } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import * as Haptics from 'expo-haptics';
-import Animated, { 
-  FadeInLeft, 
-  FadeInUp, 
+import Animated, {
+  FadeInLeft,
+  FadeInUp,
   FadeInDown,
   ZoomIn,
   useSharedValue,
@@ -16,55 +15,56 @@ import Animated, {
   withTiming,
   withSequence,
 } from 'react-native-reanimated';
-import { ChildColors, ChildSizes, GALO_EMOJI, STAR_EMOJI, Layout } from '../../constants';
+import { ChildColors, ChildSizes, Layout } from '../../constants';
 
 // Galo Volpi mascot image (white version for dark background)
 const GaloVolpiImage = require('../../assets/images/mascot/galo-volpi-white.png');
 import { useAuthStore, useCompletionStore } from '../../lib/stores';
-import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
+import { useTasksForDate } from '../../lib/hooks/useTasksForDate';
 import { useGoalBudget } from '../../lib/hooks/useGoalBudget';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
 import { useChampionship, useMatch } from '../../lib/hooks';
 import { GaloTaskCard } from '../../components/tasks/GaloTaskCard';
-import { GaloStarCounter } from '../../components/stars/GaloStarCounter';
 import { GaloGoalCounter, LiveScoreboard } from '../../components/championship';
-import { StreakDisplay } from '../../components/streaks/StreakDisplay';
+import { DaySelector } from '../../components/child/DaySelector';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 
 export default function ChildTodayScreen() {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
   const childName = useAuthStore((s) => s.childName);
   const familyId = useAuthStore((s) => s.familyId);
   const family = useAuthStore((s) => s.family);
   const { activePeriod } = useCurrentPeriod();
   const goalProgress = useGoalBudget();
-  const { todayTasks, isLoading } = useTodayTasks();
+  const { todayTasks, isLoading } = useTasksForDate(selectedDate);
   const markTaskDone = useCompletionStore((s) => s.markTaskDone);
-  
+
   // Championship hooks
-  const { 
-    championship, 
+  const {
+    championship,
     isLoading: isChampionshipLoading,
-    initializeIfNeeded 
+    initializeIfNeeded
   } = useChampionship();
-  
-  const { 
-    match, 
-    opponentName, 
+
+  const {
+    match,
+    opponentName,
     opponentGoals,
     isOpen: isMatchOpen,
   } = useMatch();
 
-  const today = new Date();
-  
+  const isSelectedToday = isToday(selectedDate);
+
   // Dev mode detection for mock data
   const isDevMode = typeof window !== 'undefined' && window.location.search.includes('dev=');
-  
+
   // Mock opponent for dev mode when no real data
   const displayOpponentName = opponentName !== 'Adversário' ? opponentName : (isDevMode ? 'Palmeiras' : opponentName);
   const displayOpponentGoals = match ? opponentGoals : (isDevMode ? 2 : 0);
   const displayIsLive = match ? isMatchOpen : (isDevMode ? true : false);
-  
+
   // Initialize championship on first load if needed
   React.useEffect(() => {
     if (!isChampionshipLoading && !championship && familyId) {
@@ -95,12 +95,16 @@ export default function ChildTodayScreen() {
     await markTaskDone(familyId, activePeriod.id, task);
   };
 
+  // Period dates for day selector range
+  const periodStart = activePeriod?.startDate?.toDate?.();
+  const periodEnd = activePeriod?.endDate?.toDate?.();
+
   // Skip loading screen in dev mode
   if (isLoading && !isDevMode) {
     return <LoadingScreen variant="skeleton-list" />;
   }
 
-  const completedCount = todayTasks.filter(t => 
+  const completedCount = todayTasks.filter(t =>
     t.completion?.status === 'approved' || t.completion?.status === 'pending'
   ).length;
   const progress = todayTasks.length > 0 ? (completedCount / todayTasks.length) * 100 : 0;
@@ -111,28 +115,43 @@ export default function ChildTodayScreen() {
     .reduce((sum, t) => sum + (t.goals || 1), 0);
   const totalGoals = todayTasks.reduce((sum, t) => sum + (t.goals || 1), 0);
 
+  // Date label for section header
+  const sectionLabel = isSelectedToday
+    ? 'Tarefas de Hoje'
+    : `Tarefas de ${format(selectedDate, "EEEE, d", { locale: ptBR })}`;
+
   return (
     <View style={styles.container}>
-      {/* Live Scoreboard at top */}
-      <LiveScoreboard
-        userName={childName || 'Vitor'}
-        userGoals={completedGoals}
-        opponentName={displayOpponentName}
-        opponentGoals={displayOpponentGoals}
-        isLive={displayIsLive}
-      />
-      
+      {/* Live Scoreboard at top — only show for today */}
+      {isSelectedToday && (
+        <LiveScoreboard
+          userName={childName || 'Vitor'}
+          userGoals={completedGoals}
+          opponentName={displayOpponentName}
+          opponentGoals={displayOpponentGoals}
+          isLive={displayIsLive}
+        />
+      )}
+
       <FlatList
         data={todayTasks}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>
+            {/* Day Selector */}
+            <DaySelector
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              periodStart={periodStart}
+              periodEnd={periodEnd}
+            />
+
             {/* Greeting with Animated Rooster */}
             <Animated.View entering={FadeInLeft.duration(500)} style={styles.greetingRow}>
               <Animated.View style={[styles.mascotContainer, roosterStyle]}>
-                <Image 
-                  source={GaloVolpiImage} 
+                <Image
+                  source={GaloVolpiImage}
                   style={styles.mascotImage}
                   resizeMode="contain"
                 />
@@ -146,7 +165,7 @@ export default function ChildTodayScreen() {
                   E aí, {childName || 'Campeão'}!
                 </Text>
                 <Text style={styles.date}>
-                  {format(today, "EEEE, d 'de' MMMM", { locale: ptBR })}
+                  {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
                 </Text>
               </View>
             </Animated.View>
@@ -170,9 +189,9 @@ export default function ChildTodayScreen() {
               <Surface style={styles.statCard} elevation={0}>
                 <Text style={styles.statEmoji}>⚽</Text>
                 <Text style={styles.statNumber}>{completedGoals}</Text>
-                <Text style={styles.statLabel}>Gols Hoje</Text>
+                <Text style={styles.statLabel}>Gols {isSelectedToday ? 'Hoje' : 'do Dia'}</Text>
               </Surface>
-              
+
               {/* Streak */}
               <Surface style={styles.statCard} elevation={0}>
                 <Text style={styles.statEmoji}>🔥</Text>
@@ -191,7 +210,7 @@ export default function ChildTodayScreen() {
             {/* Tasks Header */}
             <Animated.View entering={FadeInLeft.delay(400).duration(400)} style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>
-                Tarefas de Hoje
+                {sectionLabel}
               </Text>
               <View style={styles.taskCount}>
                 <Text style={styles.taskCountText}>
@@ -206,6 +225,7 @@ export default function ChildTodayScreen() {
             task={item}
             onComplete={() => handleComplete(item)}
             index={index}
+            disabled={!isSelectedToday}
           />
         )}
         ListEmptyComponent={
@@ -214,7 +234,7 @@ export default function ChildTodayScreen() {
               <Text style={styles.emptyEmoji}>🎉</Text>
               <Text style={styles.emptyTitle}>Dia Livre!</Text>
               <Text style={styles.emptySubtitle}>
-                Nenhuma tarefa para hoje. Aproveite!
+                Nenhuma tarefa para {isSelectedToday ? 'hoje' : 'este dia'}. Aproveite!
               </Text>
             </Surface>
           </Animated.View>
@@ -238,6 +258,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     marginBottom: ChildSizes.sectionGap,
+    paddingHorizontal: 0,
   },
   mascotContainer: {
     alignItems: 'center',

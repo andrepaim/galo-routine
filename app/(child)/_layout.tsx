@@ -1,6 +1,6 @@
 import { Tabs, useRouter } from 'expo-router';
 import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Icon, IconButton, Text } from 'react-native-paper';
+import { Icon, Text } from 'react-native-paper';
 import { ChildColors, ChildSizes } from '../../constants';
 import { useAuthStore } from '../../lib/stores';
 
@@ -37,7 +37,7 @@ export default function ChildLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Hoje',
+          title: 'Meu Dia',
           headerTitle: 'Meu Dia',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
@@ -47,13 +47,13 @@ export default function ChildLayout() {
         }}
       />
       <Tabs.Screen
-        name="tasks"
+        name="progress"
         options={{
-          title: 'Tarefas',
-          headerTitle: 'Minhas Tarefas',
+          title: 'Progresso',
+          headerTitle: 'Meu Progresso',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="format-list-checks" size={ChildSizes.tabIconSize} color={color} />
+              <Icon source="trending-up" size={ChildSizes.tabIconSize} color={color} />
             </View>
           ),
         }}
@@ -66,55 +66,6 @@ export default function ChildLayout() {
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
               <Icon source="trophy-variant" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="shop"
-        options={{
-          title: 'Loja',
-          headerTitle: 'Loja de Prêmios',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="gift" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="table"
-        options={{
-          title: 'Tabela',
-          headerTitle: 'Classificação',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="format-list-numbered" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="trophies"
-        options={{
-          title: 'Troféus',
-          headerTitle: 'Sala de Troféus',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="trophy" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="badges"
-        options={{
-          href: null, // Hide from tab bar (replaced by trophies)
-          title: 'Conquistas',
-          headerTitle: 'Minhas Conquistas',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="medal" size={ChildSizes.tabIconSize} color={color} />
             </View>
           ),
         }}

@@ -22,9 +22,10 @@ interface GaloTaskCardProps {
   task: TodayTask;
   onComplete: () => void;
   index?: number;
+  disabled?: boolean;
 }
 
-export function GaloTaskCard({ task, onComplete, index = 0 }: GaloTaskCardProps) {
+export function GaloTaskCard({ task, onComplete, index = 0, disabled = false }: GaloTaskCardProps) {
   const status = task.completion?.status;
   const isDone = status === 'pending' || status === 'approved';
   const isPending = status === 'pending';
@@ -131,15 +132,16 @@ export function GaloTaskCard({ task, onComplete, index = 0 }: GaloTaskCardProps)
   return (
     <Animated.View entering={FadeInDown.delay(index * 100).springify()}>
       <Animated.View style={animatedCardStyle}>
-        <Pressable onPress={handlePress} disabled={isDone}>
-          <Surface 
+        <Pressable onPress={handlePress} disabled={isDone || disabled}>
+          <Surface
             style={[
-              styles.card, 
-              { 
+              styles.card,
+              {
                 backgroundColor: statusConfig.bgColor,
                 borderColor: statusConfig.borderColor,
-              }
-            ]} 
+              },
+              disabled && !isDone && { opacity: 0.6 },
+            ]}
             elevation={0}
           >
             {/* Category stripe */}

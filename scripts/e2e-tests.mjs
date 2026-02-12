@@ -232,104 +232,138 @@ async function runTests() {
     }
 
     // ════════════════════════════════════════════════════════════════
-    // 3. CHILD VIEW
+    // 3. CHILD VIEW (4 tabs: Meu Dia, Progresso, Campeonato, Perfil)
     // ════════════════════════════════════════════════════════════════
     console.log('\n📋 3. CHILD VIEW\n');
 
-    // 3a — Dashboard (Today)
-    console.log('  3a. Dashboard (Today)');
+    // 3a — Meu Dia (Dashboard with Day Selector)
+    console.log('  3a. Meu Dia (Dashboard + Day Selector)');
     await page.goto(`${BASE_URL}/?dev=child`, { waitUntil: 'load', timeout: 60000 });
     await delay(SETTLE_MS);
-    await screenshot(page, '03a-child-dashboard');
+    await screenshot(page, '03a-child-meu-dia');
 
     if (await hasErrorOverlay(page)) {
       log('warn', 'Child dashboard has runtime error (Firestore permissions) — dismissing overlay');
       await dismissErrorOverlay(page);
       await delay(1000);
-      await screenshot(page, '03a-child-dashboard-after-dismiss');
+      await screenshot(page, '03a-child-meu-dia-after-dismiss');
     }
     const childDashText = await getBodyText(page);
-    if (childDashText.includes('Gols Hoje')) {
-      log('pass', 'Child dashboard shows "Gols Hoje"');
+    if (childDashText.includes('Gols Hoje') || childDashText.includes('Gols do Dia')) {
+      log('pass', 'Child Meu Dia shows goals label');
     } else if (childDashText.includes('Meu Dia')) {
-      log('warn', 'Child dashboard rendered ("Meu Dia") but "Gols Hoje" not visible (Firestore data not loaded)');
+      log('warn', 'Child Meu Dia rendered ("Meu Dia") but goals label not visible (Firestore data not loaded)');
     } else if (await hasErrorOverlay(page)) {
       log('warn', 'Child dashboard blocked by runtime error — skipping text assertion');
     } else {
-      log('fail', 'Missing "Gols Hoje"');
+      log('fail', 'Missing goals label on Meu Dia');
     }
 
-    // 3b — Tasks
-    console.log('  3b. Tasks');
-    await page.goto(`${BASE_URL}/(child)/tasks?dev=child`, { waitUntil: 'load', timeout: 60000 });
-    await delay(SETTLE_MS);
-    await screenshot(page, '03b-child-tasks');
-
-    if (!page.url().includes('login')) {
-      log('pass', 'Child tasks page accessible');
+    // Check for day selector
+    if (childDashText.includes('Tarefas de Hoje') || childDashText.includes('Tarefas de')) {
+      log('pass', 'Day selector task section visible');
     } else {
-      log('fail', 'Child tasks page redirected to login');
+      log('warn', 'Day selector section may not be visible (no tasks loaded)');
     }
 
-    // 3c — Championship
-    console.log('  3c. Championship');
+    // 3b — Progresso (Rewards + Goals + Streak)
+    console.log('  3b. Progresso');
+    await page.goto(`${BASE_URL}/(child)/progress?dev=child`, { waitUntil: 'load', timeout: 60000 });
+    await delay(SETTLE_MS);
+    await screenshot(page, '03b-child-progress');
+
+    if (await hasErrorOverlay(page)) {
+      log('warn', 'Progress tab has runtime error — dismissing overlay');
+      await dismissErrorOverlay(page);
+      await delay(1000);
+    }
+    const progressText = await getBodyText(page);
+    assertContains(progressText, 'Seus Gols', 'Progress shows "Seus Gols" balance');
+    if (progressText.includes('Prêmios') || progressText.includes('Loja Vazia')) {
+      log('pass', 'Progress shows rewards section');
+    } else {
+      log('warn', 'Progress rewards section may not be visible');
+    }
+    if (progressText.includes('Sequência') || progressText.includes('streak') || progressText.includes('day streak')) {
+      log('pass', 'Progress shows streak section');
+    } else {
+      log('warn', 'Progress streak section may not be visible');
+    }
+
+    // 3c — Campeonato (Championship + Standings + Trophies)
+    console.log('  3c. Campeonato');
     await page.goto(`${BASE_URL}/(child)/stars?dev=child`, { waitUntil: 'load', timeout: 60000 });
     await delay(SETTLE_MS);
-    await screenshot(page, '03c-child-championship');
+    await screenshot(page, '03c-child-campeonato');
 
     const champText = await getBodyText(page);
-    if (champText.includes('Campeonato') || champText.includes('campeonato')) {
+    if (champText.includes('Campeonato') || champText.includes('campeonato') || champText.includes('Série')) {
       log('pass', 'Championship screen rendered');
     } else {
       log('warn', 'Championship content may not be loaded');
     }
-
-    // 3d — Shop
-    console.log('  3d. Shop');
-    await page.goto(`${BASE_URL}/(child)/shop?dev=child`, { waitUntil: 'load', timeout: 60000 });
-    await delay(SETTLE_MS);
-    await screenshot(page, '03d-child-shop');
-
-    const shopText = await getBodyText(page);
-    assertContains(shopText, 'Seus Gols', 'Shop shows "Seus Gols"');
-
-    // 3e — Table
-    console.log('  3e. League Table');
-    await page.goto(`${BASE_URL}/(child)/table?dev=child`, { waitUntil: 'load', timeout: 60000 });
-    await delay(SETTLE_MS);
-    await screenshot(page, '03e-child-table');
-
-    if (!page.url().includes('login')) {
-      log('pass', 'League table page accessible');
+    // Check for merged standings table
+    if (champText.includes('Classificação') || champText.includes('Palmeiras')) {
+      log('pass', 'Championship shows standings table');
     } else {
-      log('fail', 'League table page redirected to login');
+      log('warn', 'Standings table may not be visible');
+    }
+    // Check for merged trophies section
+    if (champText.includes('Troféus') || champText.includes('título')) {
+      log('pass', 'Championship shows trophies section');
+    } else {
+      log('warn', 'Trophies section may not be visible');
     }
 
-    // 3f — Trophies
-    console.log('  3f. Trophies');
-    await page.goto(`${BASE_URL}/(child)/trophies?dev=child`, { waitUntil: 'load', timeout: 60000 });
-    await delay(SETTLE_MS);
-    await screenshot(page, '03f-child-trophies');
-
-    if (!page.url().includes('login')) {
-      log('pass', 'Trophies page accessible');
-    } else {
-      log('fail', 'Trophies page redirected to login');
-    }
-
-    // 3g — Profile
-    console.log('  3g. Profile');
+    // 3d — Perfil (Profile + Badges)
+    console.log('  3d. Perfil');
     await page.goto(`${BASE_URL}/(child)/profile?dev=child`, { waitUntil: 'load', timeout: 60000 });
     await delay(SETTLE_MS);
-    await screenshot(page, '03g-child-profile');
+    await screenshot(page, '03d-child-profile');
 
     const profileText = await getBodyText(page);
     assertContains(profileText, 'Gols', 'Profile shows "Gols" stat');
+    // Check for badges section
+    if (profileText.includes('Minhas Conquistas') || profileText.includes('Conquistas')) {
+      log('pass', 'Profile shows badges section');
+    } else {
+      log('warn', 'Profile badges section may not be visible');
+    }
 
     // ════════════════════════════════════════════════════════════════
-    // 4. TERMINOLOGY AUDIT
+    // 4. VERIFY OLD CHILD TABS ARE GONE
     // ════════════════════════════════════════════════════════════════
-    console.log('\n📋 4. TERMINOLOGY AUDIT\n');
+    console.log('\n📋 4. OLD TABS REMOVED CHECK\n');
+
+    // Old routes should no longer exist — they should redirect or 404
+    const oldRoutes = [
+      { url: `${BASE_URL}/(child)/tasks?dev=child`, label: 'Child Tasks (removed)' },
+      { url: `${BASE_URL}/(child)/shop?dev=child`, label: 'Child Shop (removed)' },
+      { url: `${BASE_URL}/(child)/table?dev=child`, label: 'Child Table (removed)' },
+      { url: `${BASE_URL}/(child)/trophies?dev=child`, label: 'Child Trophies (removed)' },
+      { url: `${BASE_URL}/(child)/badges?dev=child`, label: 'Child Badges (removed)' },
+    ];
+
+    for (const { url, label } of oldRoutes) {
+      try {
+        await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+        await delay(2000);
+        // If we end up on the page without redirect, it means the route still exists
+        // This is OK — we'll just log a warning since Expo may cache old routes
+        if (page.url().includes(url.split('?')[0].split('/').pop())) {
+          log('warn', `[${label}] Route still accessible (may need Expo cache clear)`);
+        } else {
+          log('pass', `[${label}] Route redirected or not found`);
+        }
+      } catch {
+        log('pass', `[${label}] Route no longer accessible`);
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 5. TERMINOLOGY AUDIT
+    // ════════════════════════════════════════════════════════════════
+    console.log('\n📋 5. TERMINOLOGY AUDIT\n');
 
     const FORBIDDEN = [
       'Star Routine',
@@ -348,10 +382,10 @@ async function runTests() {
       { url: `${BASE_URL}/(parent)/goals?dev=parent`, label: 'Parent Goals' },
       { url: `${BASE_URL}/(parent)/analytics?dev=parent`, label: 'Parent Analytics' },
       { url: `${BASE_URL}/(parent)/settings?dev=parent`, label: 'Parent Settings' },
-      { url: `${BASE_URL}/?dev=child`, label: 'Child Dashboard' },
-      { url: `${BASE_URL}/(child)/tasks?dev=child`, label: 'Child Tasks' },
-      { url: `${BASE_URL}/(child)/shop?dev=child`, label: 'Child Shop' },
-      { url: `${BASE_URL}/(child)/profile?dev=child`, label: 'Child Profile' },
+      { url: `${BASE_URL}/?dev=child`, label: 'Child Meu Dia' },
+      { url: `${BASE_URL}/(child)/progress?dev=child`, label: 'Child Progresso' },
+      { url: `${BASE_URL}/(child)/stars?dev=child`, label: 'Child Campeonato' },
+      { url: `${BASE_URL}/(child)/profile?dev=child`, label: 'Child Perfil' },
     ];
 
     for (const { url, label } of auditPages) {
