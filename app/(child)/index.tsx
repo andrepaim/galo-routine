@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, FlatList, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { Text, Icon, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import * as Haptics from 'expo-haptics';
@@ -38,9 +39,11 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 
 export default function ChildTodayScreen() {
+  const router = useRouter();
   const childName = useAuthStore((s) => s.childName);
   const familyId = useAuthStore((s) => s.familyId);
   const family = useAuthStore((s) => s.family);
+  const setRole = useAuthStore((s) => s.setRole);
   const { activePeriod } = useCurrentPeriod();
   const starProgress = useStarBudget();
   const { todayTasks, isLoading } = useTodayTasks();
@@ -169,8 +172,28 @@ export default function ChildTodayScreen() {
     opacity: celebrationScale.value,
   }));
 
+  const switchToParent = async () => {
+    await setRole('parent');
+    router.replace('/(parent)');
+  };
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Header */}
+      <View style={styles.headerBar}>
+        <View>
+          <Text style={styles.greeting}>
+            BOM DIA, {(childName || 'VITOR').toUpperCase()}! 🐔
+          </Text>
+          <Text style={styles.dateText}>
+            {format(today, "EEEE, d 'de' MMMM", { locale: ptBR })}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={switchToParent} style={styles.parentButton}>
+          <Text style={styles.parentButtonText}>👨‍👩‍👦</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Rival Reveal (inline, 2s) */}
       {showRival && (
         <Animated.View 
@@ -302,7 +325,15 @@ export default function ChildTodayScreen() {
           </View>
         </Animated.View>
       )}
-    </View>
+
+      {/* Bottom Nav to Progress */}
+      <TouchableOpacity 
+        style={styles.progressButton}
+        onPress={() => router.push('/(child)/progress')}
+      >
+        <Text style={styles.progressButtonText}>📊 VER PROGRESSO</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
@@ -310,6 +341,47 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: ChildColors.galoBlack,
+  },
+  
+  // Header
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  greeting: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: ChildColors.textPrimary,
+  },
+  dateText: {
+    fontSize: 14,
+    color: ChildColors.textSecondary,
+    textTransform: 'capitalize',
+    marginTop: 2,
+  },
+  parentButton: {
+    padding: 8,
+  },
+  parentButtonText: {
+    fontSize: 28,
+  },
+  
+  // Progress Button
+  progressButton: {
+    backgroundColor: ChildColors.starGold,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  progressButtonText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: ChildColors.galoBlack,
   },
   
   // Rival Reveal
