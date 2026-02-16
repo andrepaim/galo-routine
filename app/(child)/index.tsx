@@ -77,6 +77,13 @@ export default function ChildTodayScreen() {
     }
   }, [isChampionshipLoading, championship, familyId]);
 
+  // Show rival reveal on first load (2 seconds)
+  const [showRival, setShowRival] = useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => setShowRival(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Animation values
   const celebrationScale = useSharedValue(0);
   const ballFly = useSharedValue(0);
@@ -137,13 +144,6 @@ export default function ChildTodayScreen() {
     .filter(t => t.completion?.status === 'approved' || t.completion?.status === 'pending')
     .reduce((sum, t) => sum + (t.starValue || 1), 0);
   const totalGoals = todayTasks.reduce((sum, t) => sum + (t.starValue || 1), 0);
-
-  // Show rival reveal on first load (2 seconds)
-  const [showRival, setShowRival] = useState(true);
-  React.useEffect(() => {
-    const timer = setTimeout(() => setShowRival(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
 
   const ballAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
