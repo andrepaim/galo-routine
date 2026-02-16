@@ -93,6 +93,24 @@ export default function ChildTodayScreen() {
   const netShake = useSharedValue(0);
   const [showVictory, setShowVictory] = useState(false);
 
+  const ballAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: interpolate(ballFly.value, [0, 1], [0, -200]) },
+      { translateX: interpolate(ballFly.value, [0, 1], [0, 100]) },
+      { scale: interpolate(ballFly.value, [0, 0.5, 1], [1, 0.7, 0.3]) },
+    ],
+    opacity: interpolate(ballFly.value, [0, 0.8, 1], [0, 1, 0]),
+  }));
+
+  const netAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: netShake.value }],
+  }));
+
+  const celebrationAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: celebrationScale.value }],
+    opacity: celebrationScale.value,
+  }));
+
   const handleComplete = async (task: typeof todayTasks[0]) => {
     if (!familyId || !activePeriod?.id) return;
     
@@ -147,30 +165,6 @@ export default function ChildTodayScreen() {
     .filter(t => t.completion?.status === 'approved' || t.completion?.status === 'pending')
     .reduce((sum, t) => sum + (t.starValue || 1), 0);
   const totalGoals = todayTasks.reduce((sum, t) => sum + (t.starValue || 1), 0);
-
-  const ballAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { 
-        translateY: interpolate(ballFly.value, [0, 1], [0, -200]) 
-      },
-      { 
-        translateX: interpolate(ballFly.value, [0, 1], [0, 100]) 
-      },
-      { 
-        scale: interpolate(ballFly.value, [0, 0.5, 1], [1, 0.7, 0.3]) 
-      },
-    ],
-    opacity: interpolate(ballFly.value, [0, 0.8, 1], [0, 1, 0]),
-  }));
-
-  const netAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: netShake.value }],
-  }));
-
-  const celebrationAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: celebrationScale.value }],
-    opacity: celebrationScale.value,
-  }));
 
   const switchToParent = async () => {
     await setRole('parent');
