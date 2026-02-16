@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
+import { format, subDays, startOfWeek, addDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { ChildColors, ChildSizes } from '../../constants';
 import { StandingsTable } from '../../components/championship';
 import { useChampionship } from '../../lib/hooks';
@@ -19,16 +21,30 @@ const mockStandings: Standing[] = [
   { teamId: 'santos', teamName: 'Santos', isUser: false, played: 5, won: 2, drawn: 2, lost: 1, goalsFor: 8, goalsAgainst: 7, goalDifference: 1, points: 8, position: 4 },
 ];
 
-// Mock weekly results for the past week
-const mockWeeklyResults = [
-  { day: 'SEG', goals: 3, result: 'VITÓRIA', emoji: '🏆' },
-  { day: 'TER', goals: 2, result: 'VITÓRIA', emoji: '🏆' },
-  { day: 'QUA', goals: 1, result: 'DERROTA', emoji: '😢' },
-  { day: 'QUI', goals: 4, result: 'VITÓRIA', emoji: '🏆' },
-  { day: 'SEX', goals: 2, result: 'EMPATE', emoji: '😐' },
-  { day: 'SAB', goals: 3, result: 'VITÓRIA', emoji: '🏆' },
-  { day: 'DOM', goals: 0, result: '-', emoji: '⚽' }, // Today
-];
+// Generate weekly results based on current date
+const generateWeeklyResults = () => {
+  const today = new Date();
+  const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+  const weekdays = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'];
+  
+  return weekdays.map((day, index) => {
+    const date = addDays(startOfCurrentWeek, index);
+    const isToday = format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+    const isFuture = date > today;
+    
+    if (isFuture) {
+      return { day, goals: 0, result: '-', emoji: '⚽', date };
+    } else if (isToday) {
+      return { day, goals: 0, result: 'HOJE', emoji: '⚽', date };  
+    } else {
+      // Mock past results
+      const mockGoals = Math.floor(Math.random() * 4) + 1;
+      const mockResult = mockGoals >= 3 ? 'VITÓRIA' : mockGoals >= 2 ? 'EMPATE' : 'DERROTA';
+      const mockEmoji = mockGoals >= 3 ? '🏆' : mockGoals >= 2 ? '🤝' : '😞';
+      return { day, goals: mockGoals, result: mockResult, emoji: mockEmoji, date };
+    }
+  });
+};
 
 export default function ProgressScreen() {
   const { championship, standings, isLoading } = useChampionship();
@@ -38,6 +54,9 @@ export default function ProgressScreen() {
   
   // Check if in dev mode
   const isDevMode = typeof window !== 'undefined' && window.location.search.includes('dev=');
+  
+  // Generate weekly data
+  const weeklyResults = generateWeeklyResults();
   
   // Use real data if available, otherwise fall back to mock in dev mode
   const displayStandings = standings.length > 0 ? standings : (isDevMode ? mockStandings : []);
@@ -49,6 +68,10 @@ export default function ProgressScreen() {
   const totalStars = family?.starBalance || 87;
   const nextRewardAt = 100; // Mock value
   const rewardProgress = Math.min((totalStars / nextRewardAt) * 100, 100);
+  
+  // Calculate weekly stats
+  const weeklyWins = weeklyResults.filter(d => d.result === 'VITÓRIA').length;
+  const weeklyGoals = weeklyResults.reduce((sum, d) => sum + d.goals, 0);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -63,22 +86,33 @@ export default function ProgressScreen() {
         
         <Surface style={styles.weeklyCard} elevation={0}>
           <View style={styles.weeklyRow}>
-            {mockWeeklyResults.map((day, index) => {
-              const isToday = day.day === 'DOM';
+            {weeklyResults.map((day, index) => {
+              const isToday = day.result === 'HOJE';
+              const isFuture = day.result === '-';
               return (
                 <View key={day.day} style={styles.dayColumn}>
                   <Text style={styles.dayLabel}>{day.day}</Text>
-                  <View style={[styles.dayResult, isToday && styles.todayResult]}>
+                  <View style={[
+                    styles.dayResult, 
+                    isToday && styles.todayResult,
+                    isFuture && styles.futureResult
+                  ]}>
                     <Text style={styles.dayEmoji}>{day.emoji}</Text>
-                    <View style={styles.goalBalls}>
-                      {[1, 2, 3].map((ball) => (
-                        <Text key={ball} style={styles.goalBall}>
-                          {ball <= day.goals ? '⚽' : '⚪'}
-                        </Text>
-                      ))}
-                    </View>
+                    {!isFuture && (
+                      <View style={styles.goalBalls}>
+                        {[1, 2, 3].map((ball) => (
+                          <Text key={ball} style={styles.goalBall}>
+                            {ball <= day.goals ? '⚽' : '⚪'}
+                          </Text>
+                        ))}
+                      </View>
+                    )}
                   </View>
-                  <Text style={[styles.resultText, isToday && styles.todayText]}>
+                  <Text style={[
+                    styles.resultText, 
+                    isToday && styles.todayText,
+                    isFuture && styles.futureText
+                  ]}>
                     {day.result}
                   </Text>
                 </View>
@@ -173,13 +207,13 @@ export default function ProgressScreen() {
         <View style={styles.statsRow}>
           <Surface style={styles.statCard} elevation={0}>
             <Text style={styles.statEmoji}>🏆</Text>
-            <Text style={styles.statNumber}>4</Text>
+            <Text style={styles.statNumber}>{weeklyWins}</Text>
             <Text style={styles.statLabel}>Vitórias esta semana</Text>
           </Surface>
           
           <Surface style={styles.statCard} elevation={0}>
             <Text style={styles.statEmoji}>⚽</Text>
-            <Text style={styles.statNumber}>15</Text>
+            <Text style={styles.statNumber}>{weeklyGoals}</Text>
             <Text style={styles.statLabel}>Gols marcados</Text>
           </Surface>
         </View>
@@ -264,6 +298,10 @@ const styles = StyleSheet.create({
     borderColor: ChildColors.starGold,
     backgroundColor: 'rgba(255, 215, 0, 0.1)',
   },
+  futureResult: {
+    backgroundColor: ChildColors.textMuted,
+    opacity: 0.5,
+  },
   dayEmoji: {
     fontSize: 20,
     marginBottom: 4,
@@ -283,6 +321,9 @@ const styles = StyleSheet.create({
   },
   todayText: {
     color: ChildColors.starGold,
+  },
+  futureText: {
+    color: ChildColors.textMuted,
   },
   
   // Mini Standings

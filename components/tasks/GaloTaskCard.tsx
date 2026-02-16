@@ -57,28 +57,32 @@ export function GaloTaskCard({ task, onComplete, index = 0 }: GaloTaskCardProps)
   const handlePress = async () => {
     if (isDone) return;
     
-    // Celebration animation sequence!
+    // GOAL! Celebration animation sequence!
     // 1. Quick press feedback
     cardScale.value = withSequence(
       withSpring(0.92, { damping: 6, stiffness: 400 }),
-      withSpring(1.05, { damping: 6, stiffness: 250 }),
+      withSpring(1.08, { damping: 6, stiffness: 250 }),
       withSpring(1.0, { damping: 8, stiffness: 200 }),
     );
 
-    // 2. Stars do a happy spin
+    // 2. Soccer ball spins and bounces (instead of star spin)
     starRotation.value = withSequence(
-      withTiming(720, { duration: 600 }), // Two full spins!
-      withTiming(0, { duration: 0 }),
+      withTiming(360, { duration: 400 }), // One fast spin
+      withSpring(0, { damping: 8, stiffness: 200 }),
     );
 
-    // 3. Check mark pops in with overshoot
-    checkScale.value = withSpring(1.2, { damping: 4, stiffness: 180 });
-    setTimeout(() => {
-      checkScale.value = withSpring(1, { damping: 8, stiffness: 200 });
-    }, 200);
+    // 3. Check mark pops in with overshoot + scale bounce
+    checkScale.value = withSequence(
+      withSpring(1.4, { damping: 4, stiffness: 150 }),
+      withSpring(1.0, { damping: 6, stiffness: 180 })
+    );
 
-    // Haptic celebration
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Haptic goal celebration (stronger)
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    setTimeout(() => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }, 100);
+    
     onComplete();
   };
 
