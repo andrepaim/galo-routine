@@ -1,13 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Image, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, Image, Alert, FlatList } from 'react-native';
 import { Text, Card, Button, Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInLeft, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInLeft, FadeInUp, FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Layout } from '../../constants';
 import { ChildColors, ChildSizes } from '../../constants/childTheme';
-import { useAuthStore, usePeriodStore, useCompletionStore, useRewardStore } from '../../lib/stores';
+import { useAuthStore, useCompletionStore, useRewardStore } from '../../lib/stores';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
 import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
@@ -17,6 +16,8 @@ import { PeriodSummary } from '../../components/periods/PeriodSummary';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
 import { DayClosureModal } from '../../components/championship/DayClosureModal';
+import { ApprovalCard } from '../../components/tasks/ApprovalCard';
+import { EmptyState } from '../../components/ui/EmptyState';
 import type { ChampionshipTask, MatchResult } from '../../lib/types/championship';
 
 // Galo mascot
@@ -27,9 +28,12 @@ export default function ParentHomeScreen() {
   const parentName = useAuthStore((s) => s.parentName);
   const childName = useAuthStore((s) => s.childName);
   const family = useAuthStore((s) => s.family);
+  const familyId = useAuthStore((s) => s.familyId);
   const { activePeriod, isLoading: periodLoading } = useCurrentPeriod();
   const starProgress = useStarBudget();
-  const pendingCount = useCompletionStore((s) => s.getPendingCompletions().length);
+  const { completions, isLoading: completionsLoading, approveCompletion, rejectCompletion } = useCompletionStore();
+  const pendingCompletions = completions.filter((c) => c.status === 'pending');
+  const pendingCount = pendingCompletions.length;
   const pendingRedemptions = useRewardStore((s) => s.redemptions.filter((r) => r.status === 'pending').length);
   
   // Championship hooks
@@ -48,10 +52,10 @@ export default function ParentHomeScreen() {
       id: task.id,
       name: task.name,
       goals: task.starValue || 1,
-      taskType: (task.isBonus ? 'bonus' : 'routine') as 'routine' | 'bonus',
+      taskType: (task.category === 'bonus' ? 'bonus' : 'routine') as 'routine' | 'bonus',
       completed: task.completion?.status === 'approved',
       completedAt: task.completion?.completedAt,
-      scheduledDate: task.completion?.scheduledDate || new Date().toISOString().split('T')[0],
+      scheduledDate: new Date().toISOString().split('T')[0],
     }));
   }, [todayTasks]);
 
@@ -122,6 +126,19 @@ export default function ParentHomeScreen() {
   const handleDismissModal = useCallback(() => {
     setShowClosureModal(false);
   }, []);
+
+  // Handle approvals
+  const handleApprove = useCallback(async (completionId: string) => {
+    if (!familyId || !activePeriod?.id) return;
+    await approveCompletion(familyId, activePeriod.id, completionId);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, [familyId, activePeriod?.id, approveCompletion]);
+
+  const handleReject = useCallback(async (completionId: string, reason: string) => {
+    if (!familyId || !activePeriod?.id) return;
+    await rejectCompletion(familyId, activePeriod.id, completionId, reason);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+  }, [familyId, activePeriod?.id, rejectCompletion]);
 
   if (periodLoading) {
     return <LoadingScreen variant="skeleton-dashboard" />;
@@ -203,9 +220,45 @@ export default function ParentHomeScreen() {
           </Card>
         </Animated.View>
 
+        {/* Pending Approvals Section */}
+        {pendingCount > 0 && (
+          <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                ⏳ Aguardando Aprovação ({pendingCount})
+              </Text>
+              {pendingCount > 2 && (
+                <Button 
+                  mode="text" 
+                  onPress={() => router.push('/(parent)/approvals')}
+                  textColor={ChildColors.starGold}
+                  compact
+                >
+                  Ver Todas
+                </Button>
+              )}
+            </View>
+            <FlatList
+              data={pendingCompletions.slice(0, 2)} // Show only first 2 on home screen
+              keyExtractor={(item) => item.id!}
+              renderItem={({ item, index }) => (
+                <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
+                  <ApprovalCard
+                    completion={item}
+                    onApprove={() => handleApprove(item.id!)}
+                    onReject={(reason) => handleReject(item.id!, reason)}
+                  />
+                </Animated.View>
+              )}
+              scrollEnabled={false}
+              style={styles.approvalsList}
+            />
+          </Animated.View>
+        )}
+
         {/* Active Period */}
         {activePeriod && (
-          <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.section}>
+          <Animated.View entering={FadeInUp.delay(250).duration(400)} style={styles.section}>
             <Text variant="titleMedium" style={styles.sectionTitle}>
               Período Atual
             </Text>
@@ -215,7 +268,7 @@ export default function ParentHomeScreen() {
 
         {/* Pending Redemptions */}
         {pendingRedemptions > 0 && (
-          <Animated.View entering={FadeInUp.delay(250).duration(400)}>
+          <Animated.View entering={FadeInUp.delay(300).duration(400)}>
             <AnimatedPressable
               onPress={() => router.push('/(parent)/rewards/history')}
               haptic="light"
@@ -235,7 +288,7 @@ export default function ParentHomeScreen() {
 
         {/* Championship Day Closure */}
         {championship && isMatchOpen && (
-          <Animated.View entering={FadeInUp.delay(250).duration(400)} style={styles.section}>
+          <Animated.View entering={FadeInUp.delay(320).duration(400)} style={styles.section}>
             <Card style={styles.matchCard}>
               <Card.Content style={styles.matchContent}>
                 <View style={styles.matchHeader}>
@@ -276,7 +329,7 @@ export default function ParentHomeScreen() {
         )}
 
         {/* Quick Actions */}
-        <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(350).duration(400)} style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
             Ações Rápidas
           </Text>
@@ -293,12 +346,12 @@ export default function ParentHomeScreen() {
             </Button>
             <Button
               mode="outlined"
-              icon="check-decagram"
-              onPress={() => router.push('/(parent)/approvals')}
+              icon="chart-line"
+              onPress={() => router.push('/(parent)/settings')}
               style={[styles.actionButton, styles.outlinedButton]}
               textColor={ChildColors.starGold}
             >
-              Revisar ({pendingCount})
+              Relatórios
             </Button>
           </View>
           <View style={styles.actionsRow}>
@@ -313,12 +366,12 @@ export default function ParentHomeScreen() {
             </Button>
             <Button
               mode="outlined"
-              icon="chart-line"
-              onPress={() => router.push('/(parent)/analytics')}
+              icon="cog"
+              onPress={() => router.push('/(parent)/settings')}
               style={[styles.actionButton, styles.outlinedButton]}
               textColor={ChildColors.starGold}
             >
-              Relatórios
+              Configurações
             </Button>
           </View>
         </Animated.View>
@@ -394,6 +447,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: ChildColors.textPrimary,
     marginBottom: 12,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  approvalsList: {
+    marginTop: 8,
   },
   pendingRedemptionCard: {
     backgroundColor: ChildColors.cardBackground,

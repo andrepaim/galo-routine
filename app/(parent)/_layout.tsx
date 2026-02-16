@@ -66,59 +66,44 @@ export default function ParentLayout() {
         }}
       />
       <Tabs.Screen
-        name="approvals"
-        options={{
-          title: 'Aprovar',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="check-decagram" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="periods"
-        options={{
-          title: 'Períodos',
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="calendar-range" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="goals"
-        options={{
-          title: 'Metas',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="flag-checkered" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="analytics"
-        options={{
-          title: 'Relatórios',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="chart-line" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="settings"
         options={{
-          title: 'Config',
+          title: 'Configurações',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
               <Icon source="cog" size={ChildSizes.tabIconSize} color={color} />
             </View>
           ),
+        }}
+      />
+      {/* Hidden tabs - keep for routing but don't show in tab bar */}
+      <Tabs.Screen
+        name="approvals"
+        options={{
+          href: null, // Hide from tab bar
+          title: 'Aprovar',
+        }}
+      />
+      <Tabs.Screen
+        name="periods"
+        options={{
+          href: null, // Hide from tab bar
+          title: 'Períodos',
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="goals"
+        options={{
+          href: null, // Hide from tab bar
+          title: 'Metas',
+        }}
+      />
+      <Tabs.Screen
+        name="analytics"
+        options={{
+          href: null, // Hide from tab bar
+          title: 'Relatórios',
         }}
       />
     </Tabs>

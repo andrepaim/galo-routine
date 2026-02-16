@@ -442,6 +442,65 @@ const puppeteer = require('puppeteer');
 });
 
 // ============================================================
+// Cross-Navigation Tests (Child ↔ Parent)
+// ============================================================
+test('Navigation: child screens support parent switch', () => {
+  const childIndexContent = readFile('app/(child)/index.tsx');
+  
+  // Check if child screens have parent navigation capability
+  const hasParentSwitch = childIndexContent.includes('setRole') &&
+                         childIndexContent.includes('parent') &&
+                         childIndexContent.includes('switchToParent');
+  
+  if (!hasParentSwitch) {
+    return 'Child screens missing parent navigation functionality';
+  }
+  return true;
+});
+
+test('Navigation: parent layout supports child switch', () => {
+  const parentLayoutContent = readFile('app/(parent)/_layout.tsx');
+  
+  // Check if parent layout has child switch functionality
+  const hasChildSwitch = parentLayoutContent.includes('child-pin') &&
+                        parentLayoutContent.includes('switchToChild');
+  
+  if (!hasChildSwitch) {
+    return 'Parent layout missing child switch functionality';
+  }
+  return true;
+});
+
+test('Navigation: child-pin route exists', () => {
+  const childPinPath = path.join(ROOT, 'app/(auth)/child-pin.tsx');
+  if (!fs.existsSync(childPinPath)) {
+    return 'Child PIN route missing';
+  }
+  
+  const content = readFile('app/(auth)/child-pin.tsx');
+  const hasPinLogic = content.includes('pin') || content.includes('PIN');
+  
+  if (!hasPinLogic) {
+    return 'Child PIN logic missing';
+  }
+  return true;
+});
+
+test('Navigation: cross-navigation routing is consistent', () => {
+  const authLayout = readFile('app/(auth)/_layout.tsx');
+  const parentIndex = readFile('app/(parent)/index.tsx');
+  
+  // Check for consistent routing patterns
+  const hasConsistentAuth = authLayout.includes('child-pin') ||
+                           parentIndex.includes('child-pin');
+  
+  if (!hasConsistentAuth) {
+    return 'Inconsistent auth routing';
+  }
+  return true;
+});
+
+// ============================================================
 // RESULTS
 // ============================================================
 console.log('\n' + '='.repeat(60));

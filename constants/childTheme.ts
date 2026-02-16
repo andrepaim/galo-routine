@@ -21,9 +21,15 @@ export const ChildColors = {
   accentPurple: '#9B59B6',   // DEPRECATED - use pendingGold
   accentBlue: '#3498DB',     // For info (sparingly)
   
+  // Accent containers (for backgrounds)
+  accentRedContainer: 'rgba(230, 57, 70, 0.2)',
+  accentGreenContainer: 'rgba(46, 204, 113, 0.2)',
+  accentBlueContainer: 'rgba(52, 152, 219, 0.2)',
+  
   // Pending state - muted gold instead of purple
   pendingGold: '#B8960B',    // Darker gold for pending items
   pendingGoldLight: '#D4AF37', // Lighter pending gold
+  pendingGoldContainer: 'rgba(184, 150, 11, 0.2)', // Container for pending gold
   
   // Gradients (for backgrounds)
   gradientStart: '#1A1A1A',
@@ -33,6 +39,7 @@ export const ChildColors = {
   // Soft background for cards (not pure black)
   cardBackground: '#2A2A2A',
   cardBackgroundLight: '#3A3A3A',
+  cardBackgroundVariant: '#353535',
   cardBorder: '#444444',
   
   // Text on dark
