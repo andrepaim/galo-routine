@@ -82,6 +82,8 @@ export default function ChildTodayScreen() {
 
   // Show rival reveal on first load (2 seconds)
   const [showRival, setShowRival] = useState(true);
+  const [progressPressed, setProgressPressed] = useState(false);
+  const [parentPressed, setParentPressed] = useState(false);
   React.useEffect(() => {
     const timer = setTimeout(() => setShowRival(false), 2000);
     return () => clearTimeout(timer);
@@ -183,7 +185,13 @@ export default function ChildTodayScreen() {
             {format(today, "EEEE, d 'de' MMMM", { locale: ptBR })}
           </Text>
         </View>
-        <TouchableOpacity onPress={switchToParent} style={styles.parentButton}>
+        <TouchableOpacity 
+          onPress={switchToParent} 
+          style={[styles.parentButton, parentPressed && styles.parentButtonPressed]}
+          onPressIn={() => setParentPressed(true)}
+          onPressOut={() => setParentPressed(false)}
+          activeOpacity={0.7}
+        >
           <Text style={styles.parentButtonText}>👨‍👩‍👦</Text>
         </TouchableOpacity>
       </View>
@@ -322,8 +330,11 @@ export default function ChildTodayScreen() {
 
       {/* Bottom Nav to Progress */}
       <TouchableOpacity 
-        style={styles.progressButton}
+        style={[styles.progressButton, progressPressed && styles.progressButtonPressed]}
         onPress={() => router.push('/(child)/progress')}
+        onPressIn={() => setProgressPressed(true)}
+        onPressOut={() => setProgressPressed(false)}
+        activeOpacity={0.8}
       >
         <Text style={styles.progressButtonText}>📊 VER PROGRESSO</Text>
       </TouchableOpacity>
@@ -358,6 +369,11 @@ const styles = StyleSheet.create({
   },
   parentButton: {
     padding: 8,
+    borderRadius: 20,
+  },
+  parentButtonPressed: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    transform: [{ scale: 0.9 }],
   },
   parentButtonText: {
     fontSize: 28,
@@ -371,6 +387,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
+  },
+  progressButtonPressed: {
+    backgroundColor: ChildColors.starGoldDark,
+    transform: [{ scale: 0.98 }],
   },
   progressButtonText: {
     fontSize: 16,
@@ -489,7 +509,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   progressBall: {
-    fontSize: 20,
+    fontSize: 24,
   },
   progressBar: {
     height: 12,

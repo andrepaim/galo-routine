@@ -1,7 +1,9 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
-import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import Animated, { FadeInUp, FadeInDown, BounceInLeft, BounceInRight, SlideInUp } from 'react-native-reanimated';
 import { format, subDays, startOfWeek, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChildColors, ChildSizes } from '../../constants';
@@ -47,6 +49,9 @@ const generateWeeklyResults = () => {
 };
 
 export default function ProgressScreen() {
+  const router = useRouter();
+  const [backPressed, setBackPressed] = useState(false);
+  const [hojePressed, setHojePressed] = useState(false);
   const { championship, standings, isLoading } = useChampionship();
   const familyId = useAuthStore((s) => s.familyId);
   const childName = useAuthStore((s) => s.childName);
@@ -74,46 +79,82 @@ export default function ProgressScreen() {
   const weeklyGoals = weeklyResults.reduce((sum, d) => sum + d.goals, 0);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <Animated.View entering={FadeInDown.duration(500)}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Header with Back Navigation */}
+      <Animated.View entering={FadeInDown.duration(500)} style={styles.headerBar}>
+        <TouchableOpacity 
+          style={[styles.backButton, backPressed && styles.backButtonPressed]}
+          onPress={() => router.back()}
+          onPressIn={() => setBackPressed(true)}
+          onPressOut={() => setBackPressed(false)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>⬅️</Text>
+        </TouchableOpacity>
         <Text style={styles.header}>📊 SEU PROGRESSO</Text>
+        <View style={styles.headerSpacer} />
       </Animated.View>
       
-      {/* Weekly View */}
-      <Animated.View entering={FadeInUp.delay(100).duration(500)}>
-        <Text style={styles.sectionTitle}>ESTA SEMANA</Text>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.content}>
+      
+      {/* Simplified Weekly Summary */}
+      <Animated.View entering={BounceInLeft.delay(200).duration(800)}>
+        <Text style={styles.sectionTitle}>🏆 ESTA SEMANA</Text>
         
         <Surface style={styles.weeklyCard} elevation={0}>
-          <View style={styles.weeklyRow}>
-            {weeklyResults.map((day, index) => {
-              const isToday = day.result === 'HOJE';
-              const isFuture = day.result === '-';
+          <View style={styles.simplifiedWeekly}>
+            <View style={styles.weeklyHero}>
+              <Text style={styles.weeklyHeroEmoji}>🔥</Text>
+              <Text style={styles.weeklyHeroTitle}>Suas Vitórias</Text>
+              <Text style={styles.weeklyHeroNumber}>{weeklyWins}</Text>
+              <Text style={styles.weeklyHeroSubtitle}>dias vencidos</Text>
+            </View>
+            
+            <View style={styles.weeklyStats}>
+              <View style={styles.weeklyStatItem}>
+                <Text style={styles.weeklyStatEmoji}>⚽</Text>
+                <Text style={styles.weeklyStatNumber}>{weeklyGoals}</Text>
+                <Text style={styles.weeklyStatLabel}>gols</Text>
+              </View>
+              <View style={styles.weeklyStatItem}>
+                <Text style={styles.weeklyStatEmoji}>⭐</Text>
+                <Text style={styles.weeklyStatNumber}>{totalStars}</Text>
+                <Text style={styles.weeklyStatLabel}>estrelas</Text>
+              </View>
+            </View>
+          </View>
+        </Surface>
+      </Animated.View>
+      
+      {/* Simplified Standings */}
+      <Animated.View entering={BounceInRight.delay(400).duration(800)}>
+        <Text style={styles.sectionTitle}>🏆 SUA POSIÇÃO</Text>
+        
+        <Surface style={styles.standingsCard} elevation={0}>
+          <View style={styles.positionHero}>
+            <Text style={styles.positionHeroEmoji}>
+              {displayStandings.length > 0 && displayStandings.find(t => t.teamId === userId)?.position === 1 ? '🥇' :
+               displayStandings.length > 0 && displayStandings.find(t => t.teamId === userId)?.position === 2 ? '🥈' :
+               displayStandings.length > 0 && displayStandings.find(t => t.teamId === userId)?.position === 3 ? '🥉' : '🏃‍♂️'}
+            </Text>
+            <Text style={styles.positionHeroTitle}>Você está em</Text>
+            <Text style={styles.positionHeroNumber}>
+              {displayStandings.length > 0 ? displayStandings.find(t => t.teamId === userId)?.position || '?' : '1'}º
+            </Text>
+            <Text style={styles.positionHeroSubtitle}>lugar no campeonato</Text>
+          </View>
+          
+          {/* Show just top 3 teams in simplified format */}
+          <View style={styles.simplifiedStandings}>
+            {displayStandings.slice(0, 3).map((team, index) => {
+              const isUser = team.teamId === userId;
               return (
-                <View key={day.day} style={styles.dayColumn}>
-                  <Text style={styles.dayLabel}>{day.day}</Text>
-                  <View style={[
-                    styles.dayResult, 
-                    isToday && styles.todayResult,
-                    isFuture && styles.futureResult
-                  ]}>
-                    <Text style={styles.dayEmoji}>{day.emoji}</Text>
-                    {!isFuture && (
-                      <View style={styles.goalBalls}>
-                        {[1, 2, 3].map((ball) => (
-                          <Text key={ball} style={styles.goalBall}>
-                            {ball <= day.goals ? '⚽' : '⚪'}
-                          </Text>
-                        ))}
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[
-                    styles.resultText, 
-                    isToday && styles.todayText,
-                    isFuture && styles.futureText
-                  ]}>
-                    {day.result}
+                <View key={team.teamId} style={[styles.simplifiedTeam, isUser && styles.simplifiedUserTeam]}>
+                  <Text style={styles.simplifiedTeamEmoji}>
+                    {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                  </Text>
+                  <Text style={[styles.simplifiedTeamName, isUser && styles.simplifiedUserTeamName]}>
+                    {team.teamName}{isUser && ' ⭐'}
                   </Text>
                 </View>
               );
@@ -122,117 +163,81 @@ export default function ProgressScreen() {
         </Surface>
       </Animated.View>
       
-      {/* Mini Standings */}
-      <Animated.View entering={FadeInUp.delay(200).duration(500)}>
-        <Text style={styles.sectionTitle}>CLASSIFICAÇÃO</Text>
+      {/* Motivational Section */}
+      <Animated.View entering={SlideInUp.delay(600).duration(600).springify()}>
+        <Text style={styles.sectionTitle}>🎯 CONTINUE ASSIM!</Text>
         
-        <Surface style={styles.standingsCard} elevation={0}>
-          {displayStandings.slice(0, 5).map((team, index) => {
-            const isUser = team.teamId === userId;
-            const isTopThree = index < 3;
+        <Surface style={styles.motivationCard} elevation={0}>
+          <View style={styles.motivationContent}>
+            <Text style={styles.motivationEmoji}>🚀</Text>
+            <Text style={styles.motivationTitle}>Você está indo muito bem!</Text>
+            <Text style={styles.motivationMessage}>
+              {totalStars >= 80 ? 'Incrível! Você é um campeão!' :
+               totalStars >= 50 ? 'Muito bem! Continue assim!' :
+               'Vamos conseguir mais estrelas!'}
+            </Text>
             
-            return (
-              <View key={team.teamId} style={[styles.teamRow, isUser && styles.userTeamRow]}>
-                <View style={styles.positionSection}>
-                  <Text style={[styles.position, isUser && styles.userPosition]}>
-                    {team.position}
-                  </Text>
-                  {isTopThree && (
-                    <Text style={styles.positionEmoji}>
-                      {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
-                    </Text>
-                  )}
-                </View>
-                
-                <Text 
-                  style={[
-                    styles.teamName, 
-                    isUser && styles.userTeamName
-                  ]} 
-                  numberOfLines={1}
-                >
-                  {team.teamName}
-                  {isUser && ' ⭐'}
-                </Text>
-                
-                <Text style={[styles.points, isUser && styles.userPoints]}>
-                  {team.points} pts
-                </Text>
+            <View style={styles.motivationStats}>
+              <View style={styles.motivationStat}>
+                <Text style={styles.motivationStatEmoji}>⭐</Text>
+                <Text style={styles.motivationStatText}>{totalStars} estrelas coletadas</Text>
               </View>
-            );
-          })}
-          
-          <View style={styles.leagueInfo}>
-            <Text style={styles.leagueText}>🏟️ Série {league} - Rodada {currentRound}</Text>
-          </View>
-        </Surface>
-      </Animated.View>
-      
-      {/* Reward Progress */}
-      <Animated.View entering={FadeInUp.delay(300).duration(500)}>
-        <Text style={styles.sectionTitle}>PRÓXIMA RECOMPENSA</Text>
-        
-        <Surface style={styles.rewardCard} elevation={0}>
-          <View style={styles.rewardHeader}>
-            <Text style={styles.rewardEmoji}>🎁</Text>
-            <View style={styles.rewardInfo}>
-              <Text style={styles.rewardTitle}>Novo Jogo</Text>
-              <Text style={styles.rewardSubtitle}>Faltam {nextRewardAt - totalStars} estrelas</Text>
-            </View>
-            <Text style={styles.rewardPercent}>{Math.round(rewardProgress)}%</Text>
-          </View>
-          
-          <View style={styles.progressBar}>
-            <View 
-              style={[
-                styles.progressFill, 
-                { width: `${rewardProgress}%` }
-              ]} 
-            />
-            <View style={styles.progressStars}>
-              {Array.from({ length: 10 }, (_, i) => (
-                <Text key={i} style={styles.progressStar}>
-                  {i < (rewardProgress / 10) ? '⭐' : '⚫'}
-                </Text>
-              ))}
             </View>
           </View>
         </Surface>
       </Animated.View>
       
-      {/* Stats Summary */}
-      <Animated.View entering={FadeInUp.delay(400).duration(500)}>
-        <Text style={styles.sectionTitle}>ESTATÍSTICAS</Text>
+      {/* Fun Achievement Badges */}
+      <Animated.View entering={BounceInLeft.delay(800).duration(700)}>
+        <Text style={styles.sectionTitle}>🏅 SUAS CONQUISTAS</Text>
         
-        <View style={styles.statsRow}>
-          <Surface style={styles.statCard} elevation={0}>
-            <Text style={styles.statEmoji}>🏆</Text>
-            <Text style={styles.statNumber}>{weeklyWins}</Text>
-            <Text style={styles.statLabel}>Vitórias esta semana</Text>
-          </Surface>
-          
-          <Surface style={styles.statCard} elevation={0}>
-            <Text style={styles.statEmoji}>⚽</Text>
-            <Text style={styles.statNumber}>{weeklyGoals}</Text>
-            <Text style={styles.statLabel}>Gols marcados</Text>
+        <View style={styles.badgeRow}>
+          <Surface style={styles.badgeCard} elevation={0}>
+            <Text style={styles.badgeEmoji}>
+              {weeklyWins >= 5 ? '🏆' : weeklyWins >= 3 ? '🥉' : '⚽'}
+            </Text>
+            <Text style={styles.badgeTitle}>
+              {weeklyWins >= 5 ? 'CAMPEÃO!' : weeklyWins >= 3 ? 'GUERREIRO!' : 'JOGADOR!'}
+            </Text>
+            <Text style={styles.badgeDesc}>
+              {weeklyWins >= 5 ? 'Ganhou quase todos os dias!' : 
+               weeklyWins >= 3 ? 'Várias vitórias esta semana!' : 
+               'Continue jogando!'}
+            </Text>
           </Surface>
         </View>
         
-        <View style={styles.statsRow}>
-          <Surface style={styles.statCard} elevation={0}>
-            <Text style={styles.statEmoji}>🔥</Text>
-            <Text style={styles.statNumber}>{family?.currentStreak || 0}</Text>
-            <Text style={styles.statLabel}>Sequência</Text>
-          </Surface>
-          
-          <Surface style={styles.statCard} elevation={0}>
-            <Text style={styles.statEmoji}>⭐</Text>
-            <Text style={styles.statNumber}>{totalStars}</Text>
-            <Text style={styles.statLabel}>Estrelas totais</Text>
+        <View style={styles.badgeRow}>
+          <Surface style={styles.badgeCard} elevation={0}>
+            <Text style={styles.badgeEmoji}>
+              {totalStars >= 100 ? '⭐' : totalStars >= 50 ? '🌟' : '✨'}
+            </Text>
+            <Text style={styles.badgeTitle}>
+              {totalStars >= 100 ? 'COLETOR DE ESTRELAS!' : 
+               totalStars >= 50 ? 'COLECIONADOR!' : 
+               'COLETANDO!'}
+            </Text>
+            <Text style={styles.badgeDesc}>
+              {totalStars >= 100 ? 'Mais de 100 estrelas!' : 
+               totalStars >= 50 ? 'Muitas estrelas coletadas!' : 
+               `${totalStars} estrelas coletadas`}
+            </Text>
           </Surface>
         </View>
       </Animated.View>
-    </ScrollView>
+      </ScrollView>
+      
+      {/* Bottom Nav to HOJE */}
+      <TouchableOpacity 
+        style={[styles.hojeButton, hojePressed && styles.hojeButtonPressed]}
+        onPress={() => router.push('/(child)')}
+        onPressIn={() => setHojePressed(true)}
+        onPressOut={() => setHojePressed(false)}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.hojeButtonText}>⚽ VOLTAR PARA HOJE</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
@@ -241,253 +246,266 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: ChildColors.galoBlack,
   },
+  
+  // Header with Back Button
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: ChildColors.cardBorder,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: ChildColors.starGold,
+    minWidth: 44,
+    alignItems: 'center',
+  },
+  backButtonPressed: {
+    backgroundColor: ChildColors.starGoldDark,
+    transform: [{ scale: 0.95 }],
+  },
+  backButtonText: {
+    fontSize: 20,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: ChildColors.starGold,
+    textAlign: 'center',
+    flex: 1,
+  },
+  headerSpacer: {
+    width: 60, // Same as back button to center the title
+  },
+  
+  scrollContainer: {
+    flex: 1,
+  },
   content: {
     padding: 16,
     paddingBottom: 100,
   },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: ChildColors.starGold,
-    marginBottom: 24,
-    textAlign: 'center',
-  },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    color: ChildColors.textSecondary,
-    marginBottom: 12,
-    marginTop: 8,
+    color: ChildColors.starGold,
+    marginBottom: 16,
+    marginTop: 16,
   },
   
-  // Weekly View
+  // Simplified Weekly View
   weeklyCard: {
     backgroundColor: ChildColors.cardBackground,
     borderRadius: ChildSizes.cardRadius,
-    padding: 16,
+    padding: 20,
     marginBottom: 24,
     borderWidth: 1,
     borderColor: ChildColors.cardBorder,
   },
-  weeklyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  dayColumn: {
+  simplifiedWeekly: {
     alignItems: 'center',
-    flex: 1,
   },
-  dayLabel: {
-    fontSize: 12,
+  weeklyHero: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  weeklyHeroEmoji: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  weeklyHeroTitle: {
+    fontSize: 16,
     color: ChildColors.textSecondary,
-    marginBottom: 8,
-    fontWeight: '600',
-  },
-  dayResult: {
-    alignItems: 'center',
-    backgroundColor: ChildColors.galoBlack,
-    borderRadius: 12,
-    padding: 8,
-    marginBottom: 8,
-    minHeight: 60,
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: ChildColors.cardBorder,
-  },
-  todayResult: {
-    borderColor: ChildColors.starGold,
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-  },
-  futureResult: {
-    backgroundColor: ChildColors.textMuted,
-    opacity: 0.5,
-  },
-  dayEmoji: {
-    fontSize: 20,
     marginBottom: 4,
   },
-  goalBalls: {
-    flexDirection: 'row',
-    gap: 2,
-  },
-  goalBall: {
-    fontSize: 8,
-  },
-  resultText: {
-    fontSize: 10,
-    color: ChildColors.textSecondary,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  todayText: {
+  weeklyHeroNumber: {
+    fontSize: 40,
+    fontWeight: '800',
     color: ChildColors.starGold,
+    marginBottom: 4,
   },
-  futureText: {
-    color: ChildColors.textMuted,
+  weeklyHeroSubtitle: {
+    fontSize: 14,
+    color: ChildColors.textSecondary,
+  },
+  weeklyStats: {
+    flexDirection: 'row',
+    gap: 30,
+  },
+  weeklyStatItem: {
+    alignItems: 'center',
+  },
+  weeklyStatEmoji: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  weeklyStatNumber: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: ChildColors.textPrimary,
+  },
+  weeklyStatLabel: {
+    fontSize: 12,
+    color: ChildColors.textSecondary,
   },
   
-  // Mini Standings
+  // Simplified Standings
   standingsCard: {
     backgroundColor: ChildColors.cardBackground,
     borderRadius: ChildSizes.cardRadius,
-    padding: 16,
+    padding: 20,
     marginBottom: 24,
     borderWidth: 1,
     borderColor: ChildColors.cardBorder,
   },
-  teamRow: {
+  positionHero: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  positionHeroEmoji: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  positionHeroTitle: {
+    fontSize: 16,
+    color: ChildColors.textSecondary,
+    marginBottom: 4,
+  },
+  positionHeroNumber: {
+    fontSize: 40,
+    fontWeight: '800',
+    color: ChildColors.starGold,
+    marginBottom: 4,
+  },
+  positionHeroSubtitle: {
+    fontSize: 14,
+    color: ChildColors.textSecondary,
+  },
+  simplifiedStandings: {
+    gap: 8,
+  },
+  simplifiedTeam: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: ChildColors.cardBorder,
-  },
-  userTeamRow: {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    paddingHorizontal: 12,
+    backgroundColor: ChildColors.galoBlack,
     borderRadius: 8,
-    paddingHorizontal: 8,
-    borderBottomColor: 'transparent',
   },
-  positionSection: {
-    width: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  position: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: ChildColors.textPrimary,
-    minWidth: 20,
-  },
-  userPosition: {
-    color: ChildColors.starGold,
-  },
-  positionEmoji: {
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  teamName: {
-    flex: 1,
-    fontSize: 16,
-    color: ChildColors.textPrimary,
-    fontWeight: '500',
-  },
-  userTeamName: {
-    color: ChildColors.starGold,
-    fontWeight: '700',
-  },
-  points: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: ChildColors.textSecondary,
-    minWidth: 50,
-    textAlign: 'right',
-  },
-  userPoints: {
-    color: ChildColors.starGold,
-  },
-  leagueInfo: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: ChildColors.cardBorder,
-    alignItems: 'center',
-  },
-  leagueText: {
-    fontSize: 14,
-    color: ChildColors.textSecondary,
-  },
-  
-  // Reward Progress
-  rewardCard: {
-    backgroundColor: ChildColors.cardBackground,
-    borderRadius: ChildSizes.cardRadius,
-    padding: 16,
-    marginBottom: 24,
+  simplifiedUserTeam: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
     borderWidth: 1,
     borderColor: ChildColors.starGold,
   },
-  rewardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  rewardEmoji: {
-    fontSize: 32,
+  simplifiedTeamEmoji: {
+    fontSize: 20,
     marginRight: 12,
   },
-  rewardInfo: {
-    flex: 1,
-  },
-  rewardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+  simplifiedTeamName: {
+    fontSize: 16,
     color: ChildColors.textPrimary,
+    fontWeight: '600',
   },
-  rewardSubtitle: {
-    fontSize: 14,
-    color: ChildColors.textSecondary,
-    marginTop: 2,
-  },
-  rewardPercent: {
-    fontSize: 20,
-    fontWeight: '800',
+  simplifiedUserTeamName: {
     color: ChildColors.starGold,
-  },
-  progressBar: {
-    height: 20,
-    backgroundColor: ChildColors.galoBlack,
-    borderRadius: 10,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: ChildColors.starGold,
-    borderRadius: 10,
-  },
-  progressStars: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-  },
-  progressStar: {
-    fontSize: 12,
+    fontWeight: '700',
   },
   
-  // Stats
-  statsRow: {
-    flexDirection: 'row',
-    gap: 12,
+  // Motivational Section
+  motivationCard: {
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    padding: 24,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: ChildColors.starGold,
+    alignItems: 'center',
+  },
+  motivationContent: {
+    alignItems: 'center',
+  },
+  motivationEmoji: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  motivationTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: ChildColors.starGold,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  motivationMessage: {
+    fontSize: 16,
+    color: ChildColors.textPrimary,
+    textAlign: 'center',
     marginBottom: 16,
   },
-  statCard: {
-    flex: 1,
+  motivationStats: {
+    alignItems: 'center',
+  },
+  motivationStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  motivationStatEmoji: {
+    fontSize: 20,
+  },
+  motivationStatText: {
+    fontSize: 14,
+    color: ChildColors.textSecondary,
+  },
+  
+  // Achievement Badges
+  badgeRow: {
+    marginBottom: 16,
+  },
+  badgeCard: {
     backgroundColor: ChildColors.cardBackground,
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: ChildColors.cardBorder,
   },
-  statEmoji: {
-    fontSize: 24,
+  badgeEmoji: {
+    fontSize: 32,
     marginBottom: 8,
   },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: ChildColors.textPrimary,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: ChildColors.textSecondary,
-    marginTop: 4,
+  badgeTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: ChildColors.starGold,
+    marginBottom: 4,
     textAlign: 'center',
+  },
+  badgeDesc: {
+    fontSize: 14,
+    color: ChildColors.textSecondary,
+    textAlign: 'center',
+  },
+  
+  // Bottom Navigation
+  hojeButton: {
+    backgroundColor: ChildColors.starGold,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  hojeButtonPressed: {
+    backgroundColor: ChildColors.starGoldDark,
+    transform: [{ scale: 0.98 }],
+  },
+  hojeButtonText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: ChildColors.galoBlack,
   },
 });
