@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "scheme": "star-routine",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -14,7 +14,8 @@
       "backgroundColor": "#FFF8E1"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "newArchEnabled": false
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +24,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.starroutine.app"
+      "package": "com.starroutine.app",
+      "newArchEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png",
