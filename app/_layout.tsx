@@ -1,14 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 import { theme } from '../constants/theme';
 import { useAuthStore } from '../lib/stores';
 import { useSubscriptions, useStarBudgetSync } from '../lib/hooks';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
+
+SplashScreen.preventAutoHideAsync();
 
 function AuthGate() {
   const router = useRouter();
@@ -47,12 +51,20 @@ export default function RootLayout() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
+  const [fontsLoaded] = useFonts({});
+
   useEffect(() => {
     const unsubscribe = initAuth();
     return () => unsubscribe();
   }, []);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (fontsLoaded && !isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, isLoading]);
+
+  if (!fontsLoaded || isLoading) {
     return (
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
