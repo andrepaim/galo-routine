@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, FlatList, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, FlatList, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { Text, Icon, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
@@ -15,8 +15,13 @@ import Animated, {
   withRepeat,
   withTiming,
   withSequence,
+  withSpring,
+  runOnJS,
+  interpolate,
 } from 'react-native-reanimated';
 import { ChildColors, ChildSizes, GALO_EMOJI, STAR_EMOJI, Layout } from '../../constants';
+
+const { width } = Dimensions.get('window');
 
 // Galo Volpi mascot image (white version for dark background)
 const GaloVolpiImage = require('../../assets/images/mascot/galo-volpi-white.png');
@@ -72,27 +77,49 @@ export default function ChildTodayScreen() {
     }
   }, [isChampionshipLoading, championship, familyId]);
 
-  // Animated rooster bounce
-  const roosterBounce = useSharedValue(0);
-  React.useEffect(() => {
-    roosterBounce.value = withRepeat(
-      withSequence(
-        withTiming(-8, { duration: 500 }),
-        withTiming(0, { duration: 500 })
-      ),
-      -1,
-      true
-    );
-  }, []);
-
-  const roosterStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: roosterBounce.value }],
-  }));
+  // Animation values
+  const celebrationScale = useSharedValue(0);
+  const ballFly = useSharedValue(0);
+  const netShake = useSharedValue(0);
+  const [showVictory, setShowVictory] = useState(false);
 
   const handleComplete = async (task: typeof todayTasks[0]) => {
     if (!familyId || !activePeriod?.id) return;
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    // Goal animation sequence!
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    
+    // 1. Ball flies to goal
+    ballFly.value = withSequence(
+      withTiming(1, { duration: 600 }),
+      withTiming(0, { duration: 0 })
+    );
+    
+    // 2. Net shakes
+    setTimeout(() => {
+      netShake.value = withSequence(
+        withTiming(10, { duration: 100 }),
+        withTiming(-10, { duration: 100 }),
+        withTiming(10, { duration: 100 }),
+        withTiming(0, { duration: 100 })
+      );
+    }, 500);
+    
     await markTaskDone(familyId, activePeriod.id, task);
+    
+    // Check for victory
+    const newCompletedCount = todayTasks.filter(t => 
+      t.completion?.status === 'approved' || t.completion?.status === 'pending'
+    ).length + 1;
+    
+    if (newCompletedCount === todayTasks.length && todayTasks.length > 0) {
+      // Victory celebration!
+      setTimeout(() => {
+        setShowVictory(true);
+        celebrationScale.value = withSpring(1, { damping: 8, stiffness: 100 });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }, 800);
+    }
   };
 
   // Skip loading screen in dev mode
@@ -111,16 +138,84 @@ export default function ChildTodayScreen() {
     .reduce((sum, t) => sum + (t.starValue || 1), 0);
   const totalGoals = todayTasks.reduce((sum, t) => sum + (t.starValue || 1), 0);
 
+  // Show rival reveal on first load (2 seconds)
+  const [showRival, setShowRival] = useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => setShowRival(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const ballAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { 
+        translateY: interpolate(ballFly.value, [0, 1], [0, -200]) 
+      },
+      { 
+        translateX: interpolate(ballFly.value, [0, 1], [0, 100]) 
+      },
+      { 
+        scale: interpolate(ballFly.value, [0, 0.5, 1], [1, 0.7, 0.3]) 
+      },
+    ],
+    opacity: interpolate(ballFly.value, [0, 0.8, 1], [0, 1, 0]),
+  }));
+
+  const netAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: netShake.value }],
+  }));
+
+  const celebrationAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: celebrationScale.value }],
+    opacity: celebrationScale.value,
+  }));
+
   return (
     <View style={styles.container}>
-      {/* Live Scoreboard at top */}
-      <LiveScoreboard
-        userName={childName || 'Vitor'}
-        userGoals={completedGoals}
-        opponentName={displayOpponentName}
-        opponentGoals={displayOpponentGoals}
-        isLive={displayIsLive}
-      />
+      {/* Rival Reveal (inline, 2s) */}
+      {showRival && (
+        <Animated.View 
+          entering={FadeInDown.duration(300)} 
+          exiting={FadeInUp.duration(300)}
+          style={styles.rivalReveal}
+        >
+          <Text style={styles.rivalText}>
+            🔥 HOJE VOCÊ ENFRENTA: {displayOpponentName.toUpperCase()} 🔥
+          </Text>
+        </Animated.View>
+      )}
+
+      {/* Inline Live Score */}
+      <Animated.View entering={FadeInDown.delay(showRival ? 2000 : 0).duration(500)}>
+        <Surface style={styles.liveScoreCard} elevation={0}>
+          {displayIsLive && (
+            <View style={styles.liveBadge}>
+              <Text style={styles.liveText}>AO VIVO</Text>
+            </View>
+          )}
+          
+          <View style={styles.scoreRow}>
+            <View style={styles.teamSection}>
+              <Text style={styles.teamName} numberOfLines={1}>
+                {childName || 'Vitor'}
+              </Text>
+            </View>
+            
+            <View style={styles.scoreSection}>
+              <Text style={styles.score}>{completedGoals}</Text>
+              <Animated.View style={netAnimatedStyle}>
+                <Text style={styles.ballEmoji}>🥅</Text>
+              </Animated.View>
+              <Text style={styles.score}>{displayOpponentGoals}</Text>
+            </View>
+            
+            <View style={styles.teamSection}>
+              <Text style={[styles.teamName, styles.opponentName]} numberOfLines={1}>
+                {displayOpponentName}
+              </Text>
+            </View>
+          </View>
+        </Surface>
+      </Animated.View>
       
       <FlatList
         data={todayTasks}
@@ -128,70 +223,37 @@ export default function ChildTodayScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>
-            {/* Greeting with Animated Rooster */}
-            <Animated.View entering={FadeInLeft.duration(500)} style={styles.greetingRow}>
-              <Animated.View style={[styles.mascotContainer, roosterStyle]}>
-                <Image 
-                  source={GaloVolpiImage} 
-                  style={styles.mascotImage}
-                  resizeMode="contain"
-                />
-                {/* Speech bubble */}
-                <View style={styles.speechBubble}>
-                  <Text style={styles.speechText}>Bora!</Text>
-                </View>
-              </Animated.View>
-              <View style={styles.greetingText}>
-                <Text style={styles.greeting}>
-                  E aí, {childName || 'Campeão'}!
-                </Text>
-                <Text style={styles.date}>
-                  {format(today, "EEEE, d 'de' MMMM", { locale: ptBR })}
-                </Text>
-              </View>
-            </Animated.View>
-
-            {/* Goal Summary Card (Championship Mode) */}
+            {/* Progress Bar with Soccer Balls */}
             <Animated.View entering={FadeInUp.delay(200).duration(500)}>
-              <Surface style={styles.starCard} elevation={0}>
-                <GaloGoalCounter
-                  scored={completedGoals}
-                  possible={totalGoals}
-                  pending={starProgress?.pending || 0}
-                  opponentName={displayOpponentName}
-                  opponentGoals={displayOpponentGoals}
-                />
-              </Surface>
-            </Animated.View>
-
-            {/* Stats Row */}
-            <Animated.View entering={FadeInUp.delay(300).duration(500)} style={styles.statsRow}>
-              {/* Goals */}
-              <Surface style={styles.statCard} elevation={0}>
-                <Text style={styles.statEmoji}>⚽</Text>
-                <Text style={styles.statNumber}>{completedGoals}</Text>
-                <Text style={styles.statLabel}>Gols Hoje</Text>
-              </Surface>
-              
-              {/* Streak */}
-              <Surface style={styles.statCard} elevation={0}>
-                <Text style={styles.statEmoji}>🔥</Text>
-                <Text style={styles.statNumber}>{family?.currentStreak ?? 0}</Text>
-                <Text style={styles.statLabel}>Dias seguidos</Text>
-              </Surface>
-
-              {/* Progress */}
-              <Surface style={styles.statCard} elevation={0}>
-                <Text style={styles.statEmoji}>📊</Text>
-                <Text style={styles.statNumber}>{Math.round(progress)}%</Text>
-                <Text style={styles.statLabel}>Completo</Text>
+              <Surface style={styles.progressCard} elevation={0}>
+                <View style={styles.progressHeader}>
+                  <Text style={styles.progressTitle}>Progresso de Hoje</Text>
+                  <Text style={styles.progressPercent}>{Math.round(progress)}%</Text>
+                </View>
+                
+                <View style={styles.ballProgress}>
+                  {Array.from({ length: totalGoals }, (_, i) => (
+                    <Text key={i} style={styles.progressBall}>
+                      {i < completedGoals ? '⚽' : '⚪'}
+                    </Text>
+                  ))}
+                </View>
+                
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[
+                      styles.progressFill, 
+                      { width: `${progress}%` }
+                    ]} 
+                  />
+                </View>
               </Surface>
             </Animated.View>
 
             {/* Tasks Header */}
             <Animated.View entering={FadeInLeft.delay(400).duration(400)} style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>
-                Tarefas de Hoje
+                ⚽ SUAS JOGADAS
               </Text>
               <View style={styles.taskCount}>
                 <Text style={styles.taskCountText}>
@@ -221,6 +283,25 @@ export default function ChildTodayScreen() {
         }
         contentContainerStyle={styles.list}
       />
+      
+      {/* Flying Ball Animation */}
+      <Animated.View style={[styles.flyingBall, ballAnimatedStyle]} pointerEvents="none">
+        <Text style={styles.flyingBallEmoji}>⚽</Text>
+      </Animated.View>
+      
+      {/* Victory Celebration */}
+      {showVictory && (
+        <Animated.View style={[styles.victoryOverlay, celebrationAnimatedStyle]} pointerEvents="none">
+          <Text style={styles.victoryGalo}>🐓</Text>
+          <Text style={styles.victoryText}>VITÓRIA! 🏆</Text>
+          <Text style={styles.victorySubtext}>Todas as tarefas completadas!</Text>
+          <View style={styles.fireworks}>
+            <Text style={styles.firework}>🎆</Text>
+            <Text style={styles.firework}>✨</Text>
+            <Text style={styles.firework}>🎆</Text>
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -230,93 +311,137 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: ChildColors.galoBlack,
   },
+  
+  // Rival Reveal
+  rivalReveal: {
+    backgroundColor: ChildColors.accentRed,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    margin: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  rivalText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: ChildColors.textPrimary,
+    textAlign: 'center',
+  },
+  
+  // Inline Live Score
+  liveScoreCard: {
+    backgroundColor: ChildColors.cardBackground,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: ChildColors.starGold,
+    position: 'relative',
+  },
+  liveBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#E74C3C',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  liveText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  teamSection: {
+    flex: 1,
+  },
+  teamName: {
+    color: ChildColors.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  opponentName: {
+    textAlign: 'right',
+  },
+  scoreSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  score: {
+    color: ChildColors.starGold,
+    fontSize: 32,
+    fontWeight: '800',
+    minWidth: 40,
+    textAlign: 'center',
+  },
+  ballEmoji: {
+    fontSize: 24,
+    marginHorizontal: 8,
+  },
+  
+  // Content
   header: {
     paddingBottom: ChildSizes.sectionGap,
   },
-  greetingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: ChildSizes.sectionGap,
-  },
-  mascotContainer: {
-    alignItems: 'center',
-    position: 'relative',
-  },
-  mascotImage: {
-    width: 60,
-    height: 100,
-  },
-  speechBubble: {
-    position: 'absolute',
-    top: -8,
-    right: -20,
-    backgroundColor: ChildColors.starGold,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    transform: [{ rotate: '8deg' }],
-  },
-  speechText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: ChildColors.galoBlack,
-  },
-  greetingText: {
-    flex: 1,
-  },
-  greeting: {
-    fontSize: ChildSizes.titleSize,
-    fontWeight: '800',
-    color: ChildColors.textPrimary,
-  },
-  date: {
-    fontSize: ChildSizes.bodySize,
-    color: ChildColors.textSecondary,
-    marginTop: 4,
-    textTransform: 'capitalize',
-  },
-  starCard: {
+  
+  // Progress Card
+  progressCard: {
     backgroundColor: ChildColors.cardBackground,
     borderRadius: ChildSizes.cardRadius,
-    padding: ChildSizes.cardPadding,
+    padding: 20,
     marginBottom: ChildSizes.itemGap,
-    borderWidth: 1,
-    borderColor: ChildColors.starGold,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: ChildSizes.sectionGap,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: ChildColors.cardBackground,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: ChildColors.cardBorder,
   },
-  statEmoji: {
-    fontSize: 24,
-    marginBottom: 8,
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: '800',
+  progressTitle: {
+    fontSize: 18,
+    fontWeight: '700',
     color: ChildColors.textPrimary,
   },
-  statLabel: {
-    fontSize: 12,
-    color: ChildColors.textSecondary,
-    marginTop: 4,
+  progressPercent: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: ChildColors.starGold,
   },
+  ballProgress: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  progressBall: {
+    fontSize: 20,
+  },
+  progressBar: {
+    height: 12,
+    backgroundColor: ChildColors.galoBlack,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: ChildColors.starGold,
+    borderRadius: 6,
+  },
+  
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 20,
@@ -359,5 +484,53 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: ChildColors.textSecondary,
     textAlign: 'center',
+  },
+  
+  // Animations
+  flyingBall: {
+    position: 'absolute',
+    top: '50%',
+    left: '20%',
+    zIndex: 1000,
+  },
+  flyingBallEmoji: {
+    fontSize: 32,
+  },
+  
+  // Victory Overlay
+  victoryOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1001,
+  },
+  victoryGalo: {
+    fontSize: 100,
+    marginBottom: 20,
+  },
+  victoryText: {
+    fontSize: 48,
+    fontWeight: '800',
+    color: ChildColors.starGold,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  victorySubtext: {
+    fontSize: 20,
+    color: ChildColors.textPrimary,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  fireworks: {
+    flexDirection: 'row',
+    gap: 40,
+  },
+  firework: {
+    fontSize: 48,
   },
 });
