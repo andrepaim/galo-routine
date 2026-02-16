@@ -15,12 +15,16 @@ import { RewardCard } from '../../components/rewards/RewardCard';
 
 const { width } = Dimensions.get('window');
 
-// Mock data for development
+// Mock data for development — Série D teams (small clubs, not Série A giants)
 const mockStandings: Standing[] = [
   { teamId: 'vitor', teamName: 'Vitor', isUser: true, played: 5, won: 4, drawn: 1, lost: 0, goalsFor: 18, goalsAgainst: 6, goalDifference: 12, points: 13, position: 1 },
-  { teamId: 'palmeiras', teamName: 'Palmeiras', isUser: false, played: 5, won: 3, drawn: 1, lost: 1, goalsFor: 12, goalsAgainst: 8, goalDifference: 4, points: 10, position: 2 },
-  { teamId: 'flamengo', teamName: 'Flamengo', isUser: false, played: 5, won: 3, drawn: 0, lost: 2, goalsFor: 10, goalsAgainst: 9, goalDifference: 1, points: 9, position: 3 },
-  { teamId: 'santos', teamName: 'Santos', isUser: false, played: 5, won: 2, drawn: 2, lost: 1, goalsFor: 8, goalsAgainst: 7, goalDifference: 1, points: 8, position: 4 },
+  { teamId: 'tombense', teamName: 'Tombense', isUser: false, played: 5, won: 3, drawn: 1, lost: 1, goalsFor: 12, goalsAgainst: 8, goalDifference: 4, points: 10, position: 2 },
+  { teamId: 'pouso-alegre', teamName: 'Pouso Alegre', isUser: false, played: 5, won: 3, drawn: 0, lost: 2, goalsFor: 10, goalsAgainst: 9, goalDifference: 1, points: 9, position: 3 },
+  { teamId: 'patrocinense', teamName: 'Patrocinense', isUser: false, played: 5, won: 2, drawn: 2, lost: 1, goalsFor: 8, goalsAgainst: 7, goalDifference: 1, points: 8, position: 4 },
+  { teamId: 'uberlandia', teamName: 'Uberlândia', isUser: false, played: 5, won: 2, drawn: 1, lost: 2, goalsFor: 7, goalsAgainst: 8, goalDifference: -1, points: 7, position: 5 },
+  { teamId: 'caldense', teamName: 'Caldense', isUser: false, played: 5, won: 1, drawn: 2, lost: 2, goalsFor: 6, goalsAgainst: 10, goalDifference: -4, points: 5, position: 6 },
+  { teamId: 'tupi', teamName: 'Tupi', isUser: false, played: 5, won: 1, drawn: 1, lost: 3, goalsFor: 5, goalsAgainst: 11, goalDifference: -6, points: 4, position: 7 },
+  { teamId: 'democrata', teamName: 'Democrata', isUser: false, played: 5, won: 0, drawn: 2, lost: 3, goalsFor: 4, goalsAgainst: 12, goalDifference: -8, points: 2, position: 8 },
 ];
 
 // Generate weekly results based on current date
@@ -151,18 +155,34 @@ export default function ProgressScreen() {
             <Text style={styles.positionHeroSubtitle}>lugar no campeonato</Text>
           </View>
           
-          {/* Show just top 3 teams in simplified format */}
-          <View style={styles.simplifiedStandings}>
-            {displayStandings.slice(0, 3).map((team, index) => {
+          {/* Full standings table */}
+          <View style={styles.standingsTable}>
+            {/* Table header */}
+            <View style={styles.standingsRow}>
+              <Text style={[styles.standingsCell, styles.standingsPos]}>#</Text>
+              <Text style={[styles.standingsCell, styles.standingsName]}>Time</Text>
+              <Text style={[styles.standingsCell, styles.standingsStat]}>V</Text>
+              <Text style={[styles.standingsCell, styles.standingsStat]}>E</Text>
+              <Text style={[styles.standingsCell, styles.standingsStat]}>D</Text>
+              <Text style={[styles.standingsCell, styles.standingsStat]}>SG</Text>
+              <Text style={[styles.standingsCell, styles.standingsPts]}>Pts</Text>
+            </View>
+            
+            {displayStandings.map((team, index) => {
               const isUser = team.teamId === userId;
               return (
-                <View key={team.teamId} style={[styles.simplifiedTeam, isUser && styles.simplifiedUserTeam]}>
-                  <Text style={styles.simplifiedTeamEmoji}>
-                    {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                <View key={team.teamId} style={[styles.standingsRow, isUser && styles.standingsUserRow]}>
+                  <Text style={[styles.standingsCell, styles.standingsPos]}>
+                    {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}º`}
                   </Text>
-                  <Text style={[styles.simplifiedTeamName, isUser && styles.simplifiedUserTeamName]}>
-                    {team.teamName}{isUser && ' ⭐'}
+                  <Text style={[styles.standingsCell, styles.standingsName, isUser && styles.standingsUserName]} numberOfLines={1}>
+                    {team.teamName}{isUser ? ' ⭐' : ''}
                   </Text>
+                  <Text style={[styles.standingsCell, styles.standingsStat, styles.standingsWin]}>{team.won}</Text>
+                  <Text style={[styles.standingsCell, styles.standingsStat, styles.standingsDraw]}>{team.drawn}</Text>
+                  <Text style={[styles.standingsCell, styles.standingsStat, styles.standingsLoss]}>{team.lost}</Text>
+                  <Text style={[styles.standingsCell, styles.standingsStat]}>{team.goalDifference > 0 ? `+${team.goalDifference}` : team.goalDifference}</Text>
+                  <Text style={[styles.standingsCell, styles.standingsPts, isUser && styles.standingsUserPts]}>{team.points}</Text>
                 </View>
               );
             })}
@@ -455,34 +475,63 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: ChildColors.textSecondary,
   },
-  simplifiedStandings: {
-    gap: 8,
+  standingsTable: {
+    gap: 2,
   },
-  simplifiedTeam: {
+  standingsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: ChildColors.galoBlack,
-    borderRadius: 8,
+    paddingHorizontal: 4,
+    borderRadius: 6,
   },
-  simplifiedUserTeam: {
+  standingsUserRow: {
     backgroundColor: 'rgba(255, 215, 0, 0.1)',
     borderWidth: 1,
     borderColor: ChildColors.starGold,
   },
-  simplifiedTeamEmoji: {
-    fontSize: 20,
-    marginRight: 12,
+  standingsCell: {
+    fontSize: 13,
+    color: ChildColors.textSecondary,
+    textAlign: 'center',
   },
-  simplifiedTeamName: {
-    fontSize: 16,
-    color: ChildColors.textPrimary,
+  standingsPos: {
+    width: 30,
+    fontSize: 14,
+  },
+  standingsName: {
+    flex: 1,
+    textAlign: 'left',
+    fontSize: 14,
     fontWeight: '600',
+    color: ChildColors.textPrimary,
   },
-  simplifiedUserTeamName: {
+  standingsUserName: {
     color: ChildColors.starGold,
     fontWeight: '700',
+  },
+  standingsStat: {
+    width: 28,
+    fontSize: 13,
+  },
+  standingsWin: {
+    color: ChildColors.accentGreen,
+  },
+  standingsDraw: {
+    color: ChildColors.textSecondary,
+  },
+  standingsLoss: {
+    color: ChildColors.accentRed,
+  },
+  standingsPts: {
+    width: 32,
+    fontSize: 15,
+    fontWeight: '700',
+    color: ChildColors.starGold,
+  },
+  standingsUserPts: {
+    fontSize: 16,
+    fontWeight: '800',
   },
   
   // Motivational Section
