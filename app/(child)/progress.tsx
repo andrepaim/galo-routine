@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,9 +8,10 @@ import { format, subDays, startOfWeek, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChildColors, ChildSizes } from '../../constants';
 import { useChampionship } from '../../lib/hooks';
-import { useAuthStore } from '../../lib/stores';
+import { useAuthStore, useRewardStore } from '../../lib/stores';
 import { Standing } from '../../lib/types/championship';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
+import { RewardCard } from '../../components/rewards/RewardCard';
 
 const { width } = Dimensions.get('window');
 
@@ -54,6 +55,16 @@ export default function ProgressScreen() {
   const { championship, standings, isLoading } = useChampionship();
   const familyId = useAuthStore((s) => s.familyId);
   const family = useAuthStore((s) => s.family);
+  const rewards = useRewardStore((s) => s.rewards);
+  const redeemReward = useRewardStore((s) => s.redeemReward);
+  const subscribeRewards = useRewardStore((s) => s.subscribeRewards);
+
+  // Subscribe to rewards
+  useEffect(() => {
+    if (!familyId) return;
+    const unsubscribe = subscribeRewards(familyId);
+    return unsubscribe;
+  }, [familyId, subscribeRewards]);
   
   // Loading state
   if (isLoading) {
@@ -181,6 +192,69 @@ export default function ProgressScreen() {
             </View>
           </View>
         </Surface>
+      </Animated.View>
+      
+      {/* Rewards Section */}
+      <Animated.View entering={SlideInUp.delay(700).duration(600).springify()}>
+        <Text style={styles.sectionTitle}>🎁 SEUS PRÊMIOS</Text>
+        
+        {rewards.filter(r => r.isActive).length > 0 ? (
+          <View style={styles.rewardsContainer}>
+            {rewards
+              .filter(r => r.isActive)
+              .slice(0, 3) // Show max 3 rewards for simplicity
+              .map((reward) => {
+                const canAfford = totalStars >= reward.starCost;
+                const isAvailable = reward.availability === 'unlimited' || (reward.quantity ?? 0) > 0;
+                
+                return (
+                  <Surface key={reward.id} style={styles.rewardCard} elevation={0}>
+                    <View style={styles.rewardContent}>
+                      <View style={styles.rewardIconContainer}>
+                        <Text style={styles.rewardIcon}>{reward.icon}</Text>
+                      </View>
+                      <View style={styles.rewardInfo}>
+                        <Text style={styles.rewardName}>{reward.name}</Text>
+                        <View style={styles.rewardCostRow}>
+                          <Text style={styles.rewardStarIcon}>⭐</Text>
+                          <Text style={styles.rewardCost}>{reward.starCost}</Text>
+                        </View>
+                      </View>
+                      <TouchableOpacity
+                        style={[
+                          styles.redeemButton, 
+                          !canAfford && styles.redeemButtonDisabled,
+                          !isAvailable && styles.redeemButtonUnavailable
+                        ]}
+                        onPress={async () => {
+                          if (canAfford && isAvailable && familyId) {
+                            await redeemReward(familyId, reward);
+                          }
+                        }}
+                        disabled={!canAfford || !isAvailable}
+                      >
+                        <Text style={[
+                          styles.redeemButtonText,
+                          !canAfford && styles.redeemButtonTextDisabled,
+                          !isAvailable && styles.redeemButtonTextUnavailable
+                        ]}>
+                          Resgatar
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </Surface>
+                );
+              })}
+          </View>
+        ) : (
+          <Surface style={styles.noRewardsCard} elevation={0}>
+            <Text style={styles.noRewardsEmoji}>🎁</Text>
+            <Text style={styles.noRewardsTitle}>Nenhum prêmio disponível</Text>
+            <Text style={styles.noRewardsMessage}>
+              Seus pais ainda não criaram prêmios para você!
+            </Text>
+          </Surface>
+        )}
       </Animated.View>
       
       {/* Fun Achievement Badges */}
@@ -455,6 +529,107 @@ const styles = StyleSheet.create({
   motivationStatText: {
     fontSize: 14,
     color: ChildColors.textSecondary,
+  },
+  
+  // Rewards Section
+  rewardsContainer: {
+    gap: 16,
+    marginBottom: 24,
+  },
+  rewardCard: {
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
+  },
+  rewardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  rewardIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: ChildColors.galoDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rewardIcon: {
+    fontSize: 24,
+  },
+  rewardInfo: {
+    flex: 1,
+  },
+  rewardName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: ChildColors.textPrimary,
+    marginBottom: 4,
+  },
+  rewardCostRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  rewardStarIcon: {
+    fontSize: 16,
+    color: ChildColors.starGold,
+  },
+  rewardCost: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: ChildColors.starGold,
+  },
+  redeemButton: {
+    backgroundColor: ChildColors.starGold,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  redeemButtonDisabled: {
+    backgroundColor: ChildColors.textMuted,
+  },
+  redeemButtonUnavailable: {
+    backgroundColor: ChildColors.textMuted,
+    opacity: 0.5,
+  },
+  redeemButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: ChildColors.galoBlack,
+  },
+  redeemButtonTextDisabled: {
+    color: ChildColors.textSecondary,
+  },
+  redeemButtonTextUnavailable: {
+    color: ChildColors.textSecondary,
+  },
+  noRewardsCard: {
+    backgroundColor: ChildColors.cardBackground,
+    borderRadius: ChildSizes.cardRadius,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
+    marginBottom: 24,
+  },
+  noRewardsEmoji: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  noRewardsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: ChildColors.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  noRewardsMessage: {
+    fontSize: 14,
+    color: ChildColors.textSecondary,
+    textAlign: 'center',
   },
   
   // Achievement Badges

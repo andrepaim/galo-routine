@@ -40,12 +40,12 @@ export default function EditTaskScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete Task',
-      `Are you sure you want to delete "${task.name}"?`,
+      'Excluir Tarefa',
+      `Tem certeza que deseja excluir "${task.name}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Delete',
+          text: 'Excluir',
           style: 'destructive',
           onPress: async () => {
             if (!familyId) return;
@@ -78,7 +78,7 @@ export default function EditTaskScreen() {
         onSubmit={handleSubmit}
         onCancel={() => router.back()}
         isLoading={loading}
-        submitLabel="Save Changes"
+        submitLabel="Salvar"
       />
       <View style={styles.footer}>
         <Button
@@ -87,7 +87,7 @@ export default function EditTaskScreen() {
           onPress={handleToggle}
           style={styles.footerBtn}
         >
-          {task.isActive ? 'Deactivate' : 'Activate'}
+          {task.isActive ? 'Desativar' : 'Ativar'}
         </Button>
         <Button
           mode="outlined"
@@ -96,7 +96,7 @@ export default function EditTaskScreen() {
           onPress={handleDelete}
           style={styles.footerBtn}
         >
-          Delete
+          Excluir
         </Button>
       </View>
     </SafeAreaView>

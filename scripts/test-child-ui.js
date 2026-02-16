@@ -500,6 +500,31 @@ test('Navigation: cross-navigation routing is consistent', () => {
   return true;
 });
 
+test('Rewards: child progress screen includes rewards section', () => {
+  const progressContent = readFile('app/(child)/progress.tsx');
+  
+  // Check if rewards functionality is present
+  const hasRewardsImport = progressContent.includes('useRewardStore');
+  const hasRewardsSection = progressContent.includes('🎁 SEUS PRÊMIOS');
+  const hasRedeemButton = progressContent.includes('Resgatar');
+  const hasRewardsSubscription = progressContent.includes('subscribeRewards');
+  
+  if (!hasRewardsImport) {
+    return 'Missing useRewardStore import';
+  }
+  if (!hasRewardsSection) {
+    return 'Missing rewards section in Portuguese';
+  }
+  if (!hasRedeemButton) {
+    return 'Missing redeem button functionality';
+  }
+  if (!hasRewardsSubscription) {
+    return 'Missing rewards store subscription';
+  }
+  
+  return true;
+});
+
 // ============================================================
 // RESULTS
 // ============================================================
