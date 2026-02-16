@@ -7,11 +7,10 @@ import Animated, { FadeInUp, FadeInDown, BounceInLeft, BounceInRight, SlideInUp 
 import { format, subDays, startOfWeek, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChildColors, ChildSizes } from '../../constants';
-import { StandingsTable } from '../../components/championship';
 import { useChampionship } from '../../lib/hooks';
 import { useAuthStore } from '../../lib/stores';
 import { Standing } from '../../lib/types/championship';
-import { LeagueId } from '../../constants/leagueConfig';
+import { LoadingScreen } from '../../components/ui/LoadingScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -54,25 +53,22 @@ export default function ProgressScreen() {
   const [hojePressed, setHojePressed] = useState(false);
   const { championship, standings, isLoading } = useChampionship();
   const familyId = useAuthStore((s) => s.familyId);
-  const childName = useAuthStore((s) => s.childName);
   const family = useAuthStore((s) => s.family);
   
-  // Check if in dev mode
-  const isDevMode = typeof window !== 'undefined' && window.location.search.includes('dev=');
-  
+  // Loading state
+  if (isLoading) {
+    return <LoadingScreen message="Carregando progresso..." />;
+  }
+
   // Generate weekly data
   const weeklyResults = generateWeeklyResults();
   
-  // Use real data if available, otherwise fall back to mock in dev mode
-  const displayStandings = standings.length > 0 ? standings : (isDevMode ? mockStandings : []);
-  const league: LeagueId = championship?.league || 'D';
-  const userId = championship?.childId || (isDevMode ? 'vitor' : familyId || '');
-  const currentRound = championship?.currentRound || (isDevMode ? 2 : 1);
+  // Use real data if available, otherwise fall back to mock
+  const displayStandings = standings.length > 0 ? standings : mockStandings;
+  const userId = championship?.childId || familyId || 'vitor';
   
   // Calculate current stats
-  const totalStars = family?.starBalance || 87;
-  const nextRewardAt = 100; // Mock value
-  const rewardProgress = Math.min((totalStars / nextRewardAt) * 100, 100);
+  const totalStars = family?.starBalance || 0;
   
   // Calculate weekly stats
   const weeklyWins = weeklyResults.filter(d => d.result === 'VITÓRIA').length;

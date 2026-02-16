@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { Text, Icon, Surface } from 'react-native-paper';
+import { View, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { Text, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { format } from 'date-fns';
@@ -24,17 +24,12 @@ import { ChildColors, ChildSizes, GALO_EMOJI, STAR_EMOJI, Layout } from '../../c
 
 const { width } = Dimensions.get('window');
 
-// Galo Volpi mascot image (white version for dark background)
-const GaloVolpiImage = require('../../assets/images/mascot/galo-volpi-white.png');
 import { useAuthStore, useCompletionStore } from '../../lib/stores';
 import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
-import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
 import { useChampionship, useMatch } from '../../lib/hooks';
 import { GaloTaskCard } from '../../components/tasks/GaloTaskCard';
-import { GaloStarCounter } from '../../components/stars/GaloStarCounter';
-import { GaloGoalCounter, LiveScoreboard } from '../../components/championship';
-import { StreakDisplay } from '../../components/streaks/StreakDisplay';
+import { GaloGoalCounter } from '../../components/championship';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 
@@ -45,7 +40,6 @@ export default function ChildTodayScreen() {
   const family = useAuthStore((s) => s.family);
   const setRole = useAuthStore((s) => s.setRole);
   const { activePeriod } = useCurrentPeriod();
-  const starProgress = useStarBudget();
   const { todayTasks, isLoading } = useTodayTasks();
   const markTaskDone = useCompletionStore((s) => s.markTaskDone);
   
