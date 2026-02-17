@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
-import { Text, Surface } from 'react-native-paper';
+import { Text, Surface, Icon } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { format } from 'date-fns';
@@ -66,8 +66,16 @@ export default function ChildTodayScreen() {
             onPress={() => !isCompleted && handleCompleteTask(item)}
             disabled={isCompleted}
           >
-            <Text style={styles.icon}>{isCompleted ? '✅' : item.icon || '📝'}</Text>
-            <Text style={[styles.taskName, isCompleted && styles.taskNameCompleted]}>{item.name}</Text>
+            <View style={styles.iconWrap}>
+              {isCompleted ? (
+                <Text style={styles.iconEmoji}>✅</Text>
+              ) : item.icon && item.icon.length > 2 ? (
+                <Icon source={item.icon} size={28} color={ChildColors.starGold} />
+              ) : (
+                <Text style={styles.iconEmoji}>{item.icon || '📝'}</Text>
+              )}
+            </View>
+            <Text style={[styles.taskName, isCompleted && styles.taskNameCompleted]} numberOfLines={2}>{item.name}</Text>
             <View style={styles.points}>
               <Text style={styles.pointsText}>⭐ {item.starValue || 1}</Text>
             </View>
@@ -84,9 +92,15 @@ export default function ChildTodayScreen() {
       <Animated.View entering={FadeInDown.duration(400)}>
         <Surface style={styles.rewardCard} elevation={0}>
           <View style={styles.cardContent}>
-            <Text style={styles.icon}>{item.icon}</Text>
+            <View style={styles.iconWrap}>
+              {item.icon && item.icon.length > 2 ? (
+                <Icon source={item.icon} size={28} color={ChildColors.starGold} />
+              ) : (
+                <Text style={styles.iconEmoji}>{item.icon || '🎁'}</Text>
+              )}
+            </View>
             <View style={styles.rewardInfo}>
-              <Text style={styles.rewardName}>{item.name}</Text>
+              <Text style={styles.rewardName} numberOfLines={2}>{item.name}</Text>
               <Text style={styles.cost}>⭐ {item.starCost}</Text>
             </View>
             <TouchableOpacity
@@ -200,7 +214,8 @@ const styles = StyleSheet.create({
   taskCardCompleted: { backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: '#22C55E' },
   rewardCard: { backgroundColor: ChildColors.cardBackground, borderRadius: 12, borderWidth: 1, borderColor: ChildColors.cardBorder },
   cardContent: { flexDirection: 'row', alignItems: 'center', padding: 16 },
-  icon: { fontSize: 24, marginRight: 12 },
+  iconWrap: { width: 36, height: 36, alignItems: 'center' as const, justifyContent: 'center' as const, marginRight: 12 },
+  iconEmoji: { fontSize: 24 },
   taskName: { flex: 1, fontSize: 16, fontWeight: '600', color: ChildColors.textPrimary },
   taskNameCompleted: { color: ChildColors.textSecondary },
   rewardName: { fontSize: 16, fontWeight: '600', color: ChildColors.textPrimary, marginBottom: 4 },
