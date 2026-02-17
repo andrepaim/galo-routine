@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Text, Surface, Button } from 'react-native-paper';
+import { Text, Surface, Button, Icon } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -88,7 +88,13 @@ export default function ParentTodayScreen() {
                   <Surface style={styles.approvalCard} elevation={0}>
                     <View style={styles.approvalContent}>
                       <View style={styles.approvalLeft}>
-                        <Text style={styles.approvalIcon}>{task.icon || '📝'}</Text>
+                        <View style={styles.iconWrap}>
+                          {task.icon && task.icon.length > 2 ? (
+                            <Icon source={task.icon} size={28} color={ChildColors.starGold} />
+                          ) : (
+                            <Text style={styles.approvalIcon}>{task.icon || '📝'}</Text>
+                          )}
+                        </View>
                         <View style={styles.approvalInfo}>
                           <Text style={styles.approvalTaskName}>{task.name}</Text>
                           <Text style={styles.approvalReward}>⭐ {task.starValue || 1} estrelas</Text>
@@ -164,7 +170,13 @@ export default function ParentTodayScreen() {
                   isPending && styles.taskCardPending
                 ]} elevation={0}>
                   <View style={styles.taskContent}>
-                    <Text style={styles.taskIcon}>{task.icon || '📝'}</Text>
+                    <View style={styles.iconWrap}>
+                      {task.icon && task.icon.length > 2 ? (
+                        <Icon source={task.icon} size={24} color={ChildColors.starGold} />
+                      ) : (
+                        <Text style={styles.taskIcon}>{task.icon || '📝'}</Text>
+                      )}
+                    </View>
                     <View style={styles.taskInfo}>
                       <Text style={styles.taskName}>{task.name}</Text>
                       <Text style={styles.taskReward}>⭐ {task.starValue || 1}</Text>
@@ -220,7 +232,8 @@ const styles = StyleSheet.create({
   approvalCard: { backgroundColor: ChildColors.cardBackground, borderWidth: 1, borderColor: ChildColors.starGold, borderRadius: 12, marginBottom: 12 },
   approvalContent: { flexDirection: 'row', alignItems: 'center', padding: 16 },
   approvalLeft: { flex: 1, flexDirection: 'row', alignItems: 'center' },
-  approvalIcon: { fontSize: 24, marginRight: 12 },
+  iconWrap: { width: 36, height: 36, alignItems: 'center' as const, justifyContent: 'center' as const, marginRight: 12 },
+  approvalIcon: { fontSize: 24 },
   approvalInfo: { flex: 1 },
   approvalTaskName: { fontSize: 16, fontWeight: '600', color: ChildColors.textPrimary, marginBottom: 4 },
   approvalReward: { fontSize: 14, color: ChildColors.starGold, marginBottom: 2 },
