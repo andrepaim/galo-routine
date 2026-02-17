@@ -1,10 +1,7 @@
 import { Tabs, useRouter } from 'expo-router';
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { ChildColors, ChildSizes } from '../../constants';
-
-// Galo shield image
-const GaloShield = require('../../assets/images/mascot/galo-shield.png');
 
 export default function ParentLayout() {
   const router = useRouter();
@@ -25,7 +22,7 @@ export default function ParentLayout() {
         headerTitleStyle: styles.headerTitle,
         headerRight: () => (
           <TouchableOpacity onPress={switchToChild} style={styles.headerRightContainer}>
-            <Image source={GaloShield} style={styles.headerShield} resizeMode="contain" />
+            <Icon source="account-child" size={24} color={ChildColors.textPrimary} />
           </TouchableOpacity>
         ),
       }}
@@ -33,77 +30,66 @@ export default function ParentLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Início',
+          title: 'Hoje',
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="home" size={ChildSizes.tabIconSize} color={color} />
-            </View>
+            <Icon source="clipboard-list" size={ChildSizes.tabIconSize} color={color} />
           ),
         }}
       />
       <Tabs.Screen
+        name="manage"
+        options={{
+          title: 'Gerenciar',
+          tabBarIcon: ({ color, focused }) => (
+            <Icon source="cog" size={ChildSizes.tabIconSize} color={color} />
+          ),
+        }}
+      />
+      
+      {/* Hidden routes - keep for deep linking but don't show in tab bar */}
+      <Tabs.Screen
         name="tasks"
         options={{
-          title: 'Tarefas',
+          href: null,
           headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="format-list-checks" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
         }}
       />
       <Tabs.Screen
         name="rewards"
         options={{
-          title: 'Prêmios',
+          href: null,
           headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="gift" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Configurações',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Icon source="cog" size={ChildSizes.tabIconSize} color={color} />
-            </View>
-          ),
+          href: null,
         }}
       />
-      {/* Hidden tabs - keep for routing but don't show in tab bar */}
       <Tabs.Screen
         name="approvals"
         options={{
-          href: null, // Hide from tab bar
-          title: 'Aprovar',
+          href: null,
         }}
       />
       <Tabs.Screen
         name="periods"
         options={{
-          href: null, // Hide from tab bar
-          title: 'Períodos',
+          href: null,
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="goals"
         options={{
-          href: null, // Hide from tab bar
-          title: 'Metas',
+          href: null,
         }}
       />
       <Tabs.Screen
         name="analytics"
         options={{
-          href: null, // Hide from tab bar
-          title: 'Relatórios',
+          href: null,
         }}
       />
     </Tabs>
@@ -128,13 +114,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 2,
   },
-  tabIconContainer: {
-    padding: 4,
-    borderRadius: 12,
-  },
-  tabIconActive: {
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-  },
   header: {
     backgroundColor: ChildColors.galoBlack,
     elevation: 0,
@@ -148,9 +127,5 @@ const styles = StyleSheet.create({
   headerRightContainer: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-  },
-  headerShield: {
-    width: 28,
-    height: 36,
   },
 });

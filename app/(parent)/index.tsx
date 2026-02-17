@@ -1,327 +1,230 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Image, Alert, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { Text, Card, Button, Icon } from 'react-native-paper';
-import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInLeft, FadeInUp, FadeInDown } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
+import Animated, { FadeInUp, FadeInLeft } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { ChildColors, ChildSizes } from '../../constants/childTheme';
-import { useAuthStore, useCompletionStore, useRewardStore } from '../../lib/stores';
+
+import { ChildColors } from '../../constants';
+import { useAuthStore, useCompletionStore, useTaskStore } from '../../lib/stores';
 import { useCurrentPeriod } from '../../lib/hooks/useCurrentPeriod';
-import { useStarBudget } from '../../lib/hooks/useStarBudget';
 import { useTodayTasks } from '../../lib/hooks/useTodayTasks';
-import { useChampionship, useMatch } from '../../lib/hooks';
-import { StarCounter } from '../../components/stars/StarCounter';
-import { PeriodSummary } from '../../components/periods/PeriodSummary';
-import { LoadingScreen } from '../../components/ui/LoadingScreen';
-import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
-import { DayClosureModal } from '../../components/championship/DayClosureModal';
 import { ApprovalCard } from '../../components/tasks/ApprovalCard';
-import { EmptyState } from '../../components/ui/EmptyState';
-import type { ChampionshipTask, MatchResult } from '../../lib/types/championship';
+import { LoadingScreen } from '../../components/ui/LoadingScreen';
 
-// Galo mascot
-const GaloVolpi = require('../../assets/images/mascot/galo-volpi-white.png');
+// Default tasks to create if none exist
+const DEFAULT_TASKS = [
+  { name: 'Escovar os dentes (manhã)', description: '', starValue: 1, icon: '🦷', recurrenceType: 'daily' as const, days: [], category: 'routine' },
+  { name: 'Escovar os dentes (noite)', description: '', starValue: 1, icon: '🦷', recurrenceType: 'daily' as const, days: [], category: 'routine' },
+  { name: 'Fazer lição de casa', description: '', starValue: 3, icon: '📚', recurrenceType: 'daily' as const, days: [], category: 'routine' },
+  { name: 'Arrumar a cama', description: '', starValue: 1, icon: '🛏️', recurrenceType: 'daily' as const, days: [], category: 'routine' },
+  { name: 'Ler 20 minutos', description: '', starValue: 2, icon: '📖', recurrenceType: 'daily' as const, days: [], category: 'routine' },
+  { name: 'Guardar os brinquedos', description: '', starValue: 1, icon: '🧸', recurrenceType: 'daily' as const, days: [], category: 'routine' },
+];
 
-export default function ParentHomeScreen() {
+export default function ParentTodayScreen() {
   const router = useRouter();
-  const parentName = useAuthStore((s) => s.parentName);
+  const [quickTaskName, setQuickTaskName] = useState('');
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  
   const childName = useAuthStore((s) => s.childName);
   const family = useAuthStore((s) => s.family);
   const familyId = useAuthStore((s) => s.familyId);
   const { activePeriod, isLoading: periodLoading } = useCurrentPeriod();
-  const starProgress = useStarBudget();
-  const { completions, isLoading: completionsLoading, approveCompletion, rejectCompletion } = useCompletionStore();
+  const { todayTasks, isLoading: tasksLoading } = useTodayTasks();
+  const { completions, approveCompletion, rejectCompletion } = useCompletionStore();
+  const { addTask } = useTaskStore();
+
+  // Get pending completions
   const pendingCompletions = completions.filter((c) => c.status === 'pending');
-  const pendingCount = pendingCompletions.length;
-  const pendingRedemptions = useRewardStore((s) => s.redemptions.filter((r) => r.status === 'pending').length);
   
-  // Championship hooks
-  const { championship, isLoading: champLoading } = useChampionship();
-  const { match, opponentName, isOpen: isMatchOpen, closeDay } = useMatch();
-  const { todayTasks } = useTodayTasks();
-  
-  // Day closure modal state
-  const [showClosureModal, setShowClosureModal] = useState(false);
-  const [closureResult, setClosureResult] = useState<MatchResult | null>(null);
-  const [isClosingDay, setIsClosingDay] = useState(false);
-
-  // Convert today tasks to championship format
-  const convertToChampionshipTasks = useCallback((): ChampionshipTask[] => {
-    return todayTasks.map(task => ({
-      id: task.id,
-      name: task.name,
-      goals: task.starValue || 1,
-      taskType: (task.category === 'bonus' ? 'bonus' : 'routine') as 'routine' | 'bonus',
-      completed: task.completion?.status === 'approved',
-      completedAt: task.completion?.completedAt,
-      scheduledDate: new Date().toISOString().split('T')[0],
-    }));
-  }, [todayTasks]);
-
-  // Handle day closure
-  const handleCloseDay = useCallback(async () => {
-    // Confirm before closing
-    Alert.alert(
-      '⚽ Encerrar Partida',
-      `Tem certeza que deseja encerrar a partida de hoje contra ${opponentName}?\n\nEsta ação não pode ser desfeita.`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Encerrar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setIsClosingDay(true);
-              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-              
-              const tasks = convertToChampionshipTasks();
-              const result = await closeDay(tasks);
-              
-              // Calculate user goals from tasks
-              const userGoals = tasks.filter(t => t.completed).reduce((sum, t) => sum + t.goals, 0);
-              const routineMissed = tasks.filter(t => !t.completed && t.taskType === 'routine').reduce((sum, t) => sum + t.goals, 0);
-              
-              // Get standing info
-              const previousPosition = match?.result ? 1 : 1; // Will be updated by closeDay
-              
-              const matchResult: MatchResult = {
-                userGoals,
-                opponentGoals: routineMissed + Math.floor(Math.random() * 3), // Simulated
-                opponentName,
-                result: result.result,
-                points: result.result === 'W' ? 3 : result.result === 'D' ? 1 : 0,
-                previousPosition,
-                newPosition: result.newPosition,
-                positionChange: previousPosition - result.newPosition,
-              };
-              
-              setClosureResult(matchResult);
-              setShowClosureModal(true);
-              
-              await Haptics.notificationAsync(
-                result.result === 'W' 
-                  ? Haptics.NotificationFeedbackType.Success 
-                  : Haptics.NotificationFeedbackType.Warning
-              );
-            } catch (error) {
-              console.error('Error closing day:', error);
-              Alert.alert('Erro', 'Não foi possível encerrar a partida. Tente novamente.');
-            } finally {
-              setIsClosingDay(false);
-            }
-          },
-        },
-      ]
-    );
-  }, [opponentName, closeDay, convertToChampionshipTasks, match]);
-
-  // Handle view table after closure
-  const handleViewTable = useCallback(() => {
-    setShowClosureModal(false);
-    router.push('/(child)/table');
-  }, [router]);
-
-  // Handle modal dismiss
-  const handleDismissModal = useCallback(() => {
-    setShowClosureModal(false);
-  }, []);
+  // Calculate stats
+  const completedCount = todayTasks.filter(t => t.completion?.status === 'approved').length;
+  const totalTasks = todayTasks.length;
+  const starBalance = family?.starBalance || 0;
 
   // Handle approvals
-  const handleApprove = useCallback(async (completionId: string) => {
+  const handleApprove = async (completionId: string) => {
     if (!familyId || !activePeriod?.id) return;
     await approveCompletion(familyId, activePeriod.id, completionId);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, [familyId, activePeriod?.id, approveCompletion]);
+  };
 
-  const handleReject = useCallback(async (completionId: string, reason: string) => {
+  const handleReject = async (completionId: string, reason: string) => {
     if (!familyId || !activePeriod?.id) return;
     await rejectCompletion(familyId, activePeriod.id, completionId, reason);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-  }, [familyId, activePeriod?.id, rejectCompletion]);
+  };
 
-  if (periodLoading) {
+  // Handle quick task creation
+  const handleCreateQuickTask = async () => {
+    if (!quickTaskName.trim() || !familyId || !activePeriod?.id) return;
+    
+    setIsCreatingTask(true);
+    try {
+      await addTask(familyId, {
+        name: quickTaskName.trim(),
+        description: '',
+        starValue: 2,
+        icon: '⚡',
+        recurrenceType: 'once',
+        days: [],
+        category: 'bonus',
+      });
+      
+      setQuickTaskName('');
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Sucesso!', `Tarefa "${quickTaskName.trim()}" criada com sucesso.`);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível criar a tarefa.');
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
+
+  // Initialize default tasks if none exist
+  const initializeDefaultTasks = async () => {
+    if (!familyId) return;
+    
+    Alert.alert(
+      'Criar Tarefas Padrão',
+      'Deseja criar algumas tarefas básicas para começar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Criar',
+          onPress: async () => {
+            try {
+              for (const task of DEFAULT_TASKS) {
+                await addTask(familyId, task);
+              }
+              Alert.alert('Sucesso!', 'Tarefas padrão criadas com sucesso!');
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível criar as tarefas padrão.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  if (periodLoading || tasksLoading) {
     return <LoadingScreen variant="skeleton-dashboard" />;
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header with mascot */}
-        <Animated.View entering={FadeInLeft.duration(400)} style={styles.headerRow}>
-          <View style={styles.headerText}>
-            <Text variant="headlineSmall" style={styles.greeting}>
-              Olá, {parentName || 'Pai/Mãe'}!
-            </Text>
-            <Text variant="bodyLarge" style={styles.subtitle}>
-              Gerenciando a rotina de {childName || 'seu filho'}
-            </Text>
-          </View>
-          <Image source={GaloVolpi} style={styles.headerMascot} resizeMode="contain" />
-        </Animated.View>
-
-        {/* Quick Stats */}
-        <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.statsRow}>
-          <AnimatedPressable
-            onPress={() => router.push('/(parent)/approvals')}
-            haptic="light"
-            style={styles.statCardWrapper}
-          >
+        {/* Header Stats */}
+        <Animated.View entering={FadeInUp.duration(400)} style={styles.statsContainer}>
+          <View style={styles.statsRow}>
             <Card style={styles.statCard}>
               <Card.Content style={styles.statContent}>
-                <Icon source="clock-outline" size={32} color={ChildColors.starGold} />
-                <Text variant="headlineMedium" style={styles.statNumber}>
-                  {pendingCount}
-                </Text>
-                <Text variant="bodySmall" style={styles.statLabel}>
-                  Pendentes
-                </Text>
+                <View style={styles.statIcon}>
+                  <Icon source="star" size={24} color={ChildColors.starGold} />
+                </View>
+                <View style={styles.statInfo}>
+                  <Text style={styles.statNumber}>{starBalance}</Text>
+                  <Text style={styles.statLabel}>Estrelas de {childName || 'Vitor'}</Text>
+                </View>
               </Card.Content>
             </Card>
-          </AnimatedPressable>
-
-          <Card style={[styles.statCard, styles.statCardWrapper]}>
-            <Card.Content style={styles.statContent}>
-              {starProgress && (
-                <StarCounter
-                  earned={starProgress.earned}
-                  budget={starProgress.budget}
-                  pending={starProgress.pending}
-                />
-              )}
-            </Card.Content>
-          </Card>
+            
+            <Card style={styles.statCard}>
+              <Card.Content style={styles.statContent}>
+                <View style={styles.statIcon}>
+                  <Icon source="format-list-checks" size={24} color={ChildColors.starGold} />
+                </View>
+                <View style={styles.statInfo}>
+                  <Text style={styles.statNumber}>{completedCount}/{totalTasks}</Text>
+                  <Text style={styles.statLabel}>Tarefas de hoje</Text>
+                </View>
+              </Card.Content>
+            </Card>
+          </View>
         </Animated.View>
 
-        {/* Star Balance & Streak */}
-        <Animated.View entering={FadeInUp.delay(150).duration(400)} style={styles.statsRow}>
-          <Card style={[styles.statCard, styles.statCardWrapper]}>
-            <Card.Content style={styles.statContent}>
-              <Icon source="star" size={28} color={ChildColors.starGold} />
-              <Text variant="headlineSmall" style={styles.statNumber}>
-                {family?.starBalance ?? 0}
-              </Text>
-              <Text variant="bodySmall" style={styles.statLabel}>
-                Saldo de Estrelas
-              </Text>
-            </Card.Content>
-          </Card>
-
-          <Card style={[styles.statCard, styles.statCardWrapper]}>
-            <Card.Content style={styles.statContent}>
-              <Icon source="fire" size={28} color={(family?.currentStreak ?? 0) > 0 ? ChildColors.accentRed : ChildColors.textMuted} />
-              <Text variant="headlineSmall" style={styles.statNumber}>
-                {family?.currentStreak ?? 0}
-              </Text>
-              <Text variant="bodySmall" style={styles.statLabel}>
-                Dias Seguidos
-              </Text>
-            </Card.Content>
-          </Card>
-        </Animated.View>
-
-        {/* Pending Approvals Section */}
-        {pendingCount > 0 && (
-          <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text variant="titleMedium" style={styles.sectionTitle}>
-                ⏳ Aguardando Aprovação ({pendingCount})
-              </Text>
-              {pendingCount > 2 && (
-                <Button 
-                  mode="text" 
-                  onPress={() => router.push('/(parent)/approvals')}
-                  textColor={ChildColors.starGold}
-                  compact
+        {/* Pending Approvals */}
+        {pendingCompletions.length > 0 && (
+          <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              ⏳ Aguardando Aprovação ({pendingCompletions.length})
+            </Text>
+            <View style={styles.approvalsList}>
+              {pendingCompletions.map((completion, index) => (
+                <Animated.View 
+                  key={completion.id} 
+                  entering={FadeInLeft.delay(index * 100).duration(400)}
                 >
-                  Ver Todas
-                </Button>
-              )}
-            </View>
-            <FlatList
-              data={pendingCompletions.slice(0, 2)} // Show only first 2 on home screen
-              keyExtractor={(item) => item.id!}
-              renderItem={({ item, index }) => (
-                <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
                   <ApprovalCard
-                    completion={item}
-                    onApprove={() => handleApprove(item.id!)}
-                    onReject={(reason) => handleReject(item.id!, reason)}
+                    completion={completion}
+                    onApprove={() => handleApprove(completion.id!)}
+                    onReject={(reason) => handleReject(completion.id!, reason)}
                   />
                 </Animated.View>
-              )}
-              scrollEnabled={false}
-              style={styles.approvalsList}
-            />
+              ))}
+            </View>
           </Animated.View>
         )}
 
-        {/* Active Period */}
-        {activePeriod && (
-          <Animated.View entering={FadeInUp.delay(250).duration(400)} style={styles.section}>
-            <Text variant="titleMedium" style={styles.sectionTitle}>
-              Período Atual
-            </Text>
-            <PeriodSummary period={activePeriod} />
-          </Animated.View>
-        )}
-
-        {/* Pending Redemptions */}
-        {pendingRedemptions > 0 && (
-          <Animated.View entering={FadeInUp.delay(300).duration(400)}>
-            <AnimatedPressable
-              onPress={() => router.push('/(parent)/rewards/history')}
-              haptic="light"
-            >
-              <Card style={styles.pendingRedemptionCard}>
-                <Card.Content style={styles.pendingRedemptionContent}>
-                  <Icon source="gift-outline" size={24} color={ChildColors.starGold} />
-                  <Text variant="bodyMedium" style={styles.pendingRedemptionText}>
-                    {pendingRedemptions} {pendingRedemptions === 1 ? 'resgate pendente' : 'resgates pendentes'}
+        {/* Quick Add Task */}
+        <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.section}>
+          <Text style={styles.sectionTitle}>⚡ Tarefa Rápida</Text>
+          <Card style={styles.quickAddCard}>
+            <Card.Content style={styles.quickAddContent}>
+              <View style={styles.quickAddInput}>
+                <Icon source="plus-circle" size={20} color={ChildColors.starGold} />
+                <TouchableOpacity
+                  style={styles.quickAddButton}
+                  onPress={() => {
+                    Alert.prompt(
+                      'Nova Tarefa',
+                      'Digite o nome da tarefa para hoje:',
+                      [
+                        { text: 'Cancelar', style: 'cancel' },
+                        {
+                          text: 'Criar',
+                          onPress: (text?: string) => {
+                            if (text?.trim()) {
+                              setQuickTaskName(text.trim());
+                              handleCreateQuickTask();
+                            }
+                          }
+                        }
+                      ],
+                      'plain-text',
+                      quickTaskName
+                    );
+                  }}
+                >
+                  <Text style={styles.quickAddButtonText}>
+                    Adicionar tarefa para hoje
                   </Text>
-                  <Icon source="chevron-right" size={20} color={ChildColors.textSecondary} />
-                </Card.Content>
-              </Card>
-            </AnimatedPressable>
-          </Animated.View>
-        )}
+                </TouchableOpacity>
+              </View>
+            </Card.Content>
+          </Card>
+        </Animated.View>
 
-        {/* Championship Day Closure */}
-        {championship && isMatchOpen && (
-          <Animated.View entering={FadeInUp.delay(320).duration(400)} style={styles.section}>
-            <Card style={styles.matchCard}>
-              <Card.Content style={styles.matchContent}>
-                <View style={styles.matchHeader}>
-                  <Text style={styles.matchEmoji}>⚽</Text>
-                  <View style={styles.matchInfo}>
-                    <Text variant="titleMedium" style={styles.matchTitle}>
-                      Partida de Hoje
-                    </Text>
-                    <Text variant="bodyMedium" style={styles.matchOpponent}>
-                      vs {opponentName}
-                    </Text>
-                  </View>
-                  <View style={styles.matchStatusBadge}>
-                    <Text style={styles.matchStatusText}>AO VIVO</Text>
-                  </View>
-                </View>
-                <View style={styles.matchScorePreview}>
-                  <Text style={styles.matchScoreLabel}>Placar atual:</Text>
-                  <Text style={styles.matchScore}>
-                    {todayTasks.filter(t => t.completion?.status === 'approved').reduce((sum, t) => sum + (t.starValue || 1), 0)} ⚽ ? 
-                  </Text>
-                </View>
+        {/* Empty State for Tasks */}
+        {totalTasks === 0 && (
+          <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.section}>
+            <Card style={styles.emptyCard}>
+              <Card.Content style={styles.emptyContent}>
+                <Text style={styles.emptyEmoji}>📝</Text>
+                <Text style={styles.emptyTitle}>Nenhuma tarefa criada</Text>
+                <Text style={styles.emptySubtitle}>
+                  Crie algumas tarefas para {childName || 'seu filho'} começar a ganhar estrelas!
+                </Text>
                 <Button
                   mode="contained"
-                  icon="whistle"
-                  onPress={handleCloseDay}
-                  loading={isClosingDay}
-                  disabled={isClosingDay}
-                  style={styles.closeDayButton}
-                  buttonColor="#E74C3C"
-                  textColor="#FFFFFF"
+                  onPress={initializeDefaultTasks}
+                  style={styles.emptyButton}
+                  buttonColor={ChildColors.starGold}
+                  textColor={ChildColors.galoBlack}
                 >
-                  {isClosingDay ? 'Encerrando...' : 'Encerrar Partida'}
+                  Criar Tarefas Padrão
                 </Button>
               </Card.Content>
             </Card>
@@ -329,61 +232,29 @@ export default function ParentHomeScreen() {
         )}
 
         {/* Quick Actions */}
-        <Animated.View entering={FadeInUp.delay(350).duration(400)} style={styles.section}>
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            Ações Rápidas
-          </Text>
-          <View style={styles.actionsRow}>
-            <Button
-              mode="contained"
-              icon="plus"
-              onPress={() => router.push('/(parent)/tasks/new')}
-              style={styles.actionButton}
-              buttonColor={ChildColors.starGold}
-              textColor={ChildColors.galoBlack}
+        <Animated.View entering={FadeInUp.delay(400).duration(400)} style={styles.section}>
+          <Text style={styles.sectionTitle}>⚙️ Ações Rápidas</Text>
+          <View style={styles.actionsGrid}>
+            <TouchableOpacity 
+              style={styles.actionCard}
+              onPress={() => router.push('/(parent)/manage')}
             >
-              Nova Tarefa
-            </Button>
-            <Button
-              mode="outlined"
-              icon="chart-line"
-              onPress={() => router.push('/(parent)/settings')}
-              style={[styles.actionButton, styles.outlinedButton]}
-              textColor={ChildColors.starGold}
+              <Icon source="format-list-bulleted" size={32} color={ChildColors.starGold} />
+              <Text style={styles.actionTitle}>Gerenciar Tarefas</Text>
+              <Text style={styles.actionSubtitle}>Criar, editar e organizar</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.actionCard}
+              onPress={() => router.push('/(parent)/manage')}
             >
-              Relatórios
-            </Button>
-          </View>
-          <View style={styles.actionsRow}>
-            <Button
-              mode="outlined"
-              icon="gift"
-              onPress={() => router.push('/(parent)/rewards')}
-              style={[styles.actionButton, styles.outlinedButton]}
-              textColor={ChildColors.starGold}
-            >
-              Prêmios
-            </Button>
-            <Button
-              mode="outlined"
-              icon="cog"
-              onPress={() => router.push('/(parent)/settings')}
-              style={[styles.actionButton, styles.outlinedButton]}
-              textColor={ChildColors.starGold}
-            >
-              Configurações
-            </Button>
+              <Icon source="gift" size={32} color={ChildColors.starGold} />
+              <Text style={styles.actionTitle}>Gerenciar Prêmios</Text>
+              <Text style={styles.actionSubtitle}>Criar e editar recompensas</Text>
+            </TouchableOpacity>
           </View>
         </Animated.View>
       </ScrollView>
-      {/* Day Closure Modal */}
-      <DayClosureModal
-        visible={showClosureModal}
-        result={closureResult}
-        userName={childName || 'Jogador'}
-        onViewTable={handleViewTable}
-        onDismiss={handleDismissModal}
-      />
     </SafeAreaView>
   );
 }
@@ -396,155 +267,143 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+
+  // Stats
+  statsContainer: {
     marginBottom: 24,
-  },
-  headerText: {
-    flex: 1,
-  },
-  headerMascot: {
-    width: 50,
-    height: 80,
-  },
-  greeting: {
-    fontWeight: 'bold',
-    color: ChildColors.textPrimary,
-  },
-  subtitle: {
-    color: ChildColors.textSecondary,
   },
   statsRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 12,
-  },
-  statCardWrapper: {
-    flex: 1,
   },
   statCard: {
+    flex: 1,
     backgroundColor: ChildColors.cardBackground,
     borderWidth: 1,
     borderColor: ChildColors.cardBorder,
-    borderRadius: ChildSizes.cardRadius,
   },
   statContent: {
+    flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
   },
+  statIcon: {
+    marginRight: 12,
+  },
+  statInfo: {
+    flex: 1,
+  },
   statNumber: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: ChildColors.textPrimary,
   },
   statLabel: {
+    fontSize: 12,
     color: ChildColors.textSecondary,
   },
+
+  // Sections
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    fontWeight: 'bold',
-    color: ChildColors.textPrimary,
-    marginBottom: 12,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  approvalsList: {
-    marginTop: 8,
-  },
-  pendingRedemptionCard: {
-    backgroundColor: ChildColors.cardBackground,
-    borderWidth: 1,
-    borderColor: ChildColors.starGold,
-    borderRadius: ChildSizes.cardRadius,
-    marginBottom: 16,
-  },
-  pendingRedemptionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  pendingRedemptionText: {
-    flex: 1,
-    color: ChildColors.textPrimary,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 8,
-  },
-  actionButton: {
-    flex: 1,
-    borderRadius: 12,
-  },
-  outlinedButton: {
-    borderColor: ChildColors.starGold,
-  },
-  // Match/Championship styles
-  matchCard: {
-    backgroundColor: ChildColors.cardBackground,
-    borderWidth: 2,
-    borderColor: '#E74C3C',
-    borderRadius: ChildSizes.cardRadius,
-  },
-  matchContent: {
-    padding: 16,
-  },
-  matchHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  matchEmoji: {
-    fontSize: 32,
-    marginRight: 12,
-  },
-  matchInfo: {
-    flex: 1,
-  },
-  matchTitle: {
-    fontWeight: 'bold',
-    color: ChildColors.textPrimary,
-  },
-  matchOpponent: {
-    color: ChildColors.textSecondary,
-  },
-  matchStatusBadge: {
-    backgroundColor: '#E74C3C',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  matchStatusText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-  },
-  matchScorePreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-  },
-  matchScoreLabel: {
-    color: ChildColors.textSecondary,
-    marginRight: 8,
-  },
-  matchScore: {
-    color: ChildColors.starGold,
     fontSize: 18,
     fontWeight: 'bold',
+    color: ChildColors.textPrimary,
+    marginBottom: 12,
   },
-  closeDayButton: {
+
+  // Approvals
+  approvalsList: {
+    gap: 12,
+  },
+
+  // Quick Add
+  quickAddCard: {
+    backgroundColor: ChildColors.cardBackground,
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
+  },
+  quickAddContent: {
+    padding: 16,
+  },
+  quickAddInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  quickAddButton: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: ChildColors.starGold,
+    borderStyle: 'dashed',
+  },
+  quickAddButtonText: {
+    color: ChildColors.starGold,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+
+  // Empty State
+  emptyCard: {
+    backgroundColor: ChildColors.cardBackground,
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
+  },
+  emptyContent: {
+    padding: 32,
+    alignItems: 'center',
+  },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: ChildColors.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: ChildColors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  emptyButton: {
+    borderRadius: 8,
+  },
+
+  // Actions
+  actionsGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionCard: {
+    flex: 1,
+    backgroundColor: ChildColors.cardBackground,
+    borderWidth: 1,
+    borderColor: ChildColors.cardBorder,
     borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  actionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: ChildColors.textPrimary,
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  actionSubtitle: {
+    fontSize: 12,
+    color: ChildColors.textSecondary,
+    textAlign: 'center',
   },
 });
