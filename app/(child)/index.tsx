@@ -23,8 +23,9 @@ export default function ChildTodayScreen() {
   const { activePeriod } = useCurrentPeriod();
   const { todayTasks, isLoading } = useTodayTasks();
   const markTaskDone = useCompletionStore((s) => s.markTaskDone);
-  const rewards = useRewardStore((s) => s.rewards.filter(r => r.isActive));
+  const allRewards = useRewardStore((s) => s.rewards);
   const redeemReward = useRewardStore((s) => s.redeemReward);
+  const rewards = React.useMemo(() => allRewards.filter(r => r.isActive), [allRewards]);
 
   const starBalance = family?.starBalance || 0;
 
