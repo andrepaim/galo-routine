@@ -12,7 +12,6 @@ import { TaskCard } from '../../components/tasks/TaskCard';
 import { RewardCard } from '../../components/rewards/RewardCard';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 
-// Default rewards to create if none exist
 const DEFAULT_REWARDS = [
   { name: '30min de videogame', description: '', starCost: 5, icon: '🎮', availability: 'unlimited' as const, requiresApproval: false },
   { name: 'Escolher o filme', description: '', starCost: 8, icon: '🎬', availability: 'unlimited' as const, requiresApproval: false },
@@ -27,10 +26,9 @@ export default function ManageScreen() {
   
   const familyId = useAuthStore((s) => s.familyId);
   const childName = useAuthStore((s) => s.childName);
-  const { tasks, isLoading: tasksLoading, subscribe: subscribeTasks, addTask, toggleTask } = useTaskStore();
-  const { rewards, isLoading: rewardsLoading, subscribeRewards, addReward, toggleReward } = useRewardStore();
+  const { tasks, isLoading: tasksLoading, subscribe: subscribeTasks } = useTaskStore();
+  const { rewards, isLoading: rewardsLoading, subscribeRewards, addReward } = useRewardStore();
 
-  // Subscribe to data
   useEffect(() => {
     if (!familyId) return;
     
@@ -43,37 +41,17 @@ export default function ManageScreen() {
     };
   }, [familyId, subscribeTasks, subscribeRewards]);
 
-  // Filter active items
   const activeTasks = tasks.filter(t => t.isActive);
   const activeRewards = rewards.filter(r => r.isActive);
 
-  // Handle task actions
   const handleTaskEdit = (taskId: string) => {
     router.push(`/(parent)/tasks/${taskId}`);
   };
 
-  const handleTaskToggle = async (taskId: string) => {
-    if (!familyId) return;
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-    await toggleTask(familyId, taskId, !task.isActive);
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  // Handle reward actions
   const handleRewardEdit = (rewardId: string) => {
     router.push(`/(parent)/rewards/${rewardId}`);
   };
 
-  const handleRewardToggle = async (rewardId: string) => {
-    if (!familyId) return;
-    const reward = rewards.find(r => r.id === rewardId);
-    if (!reward) return;
-    await toggleReward(familyId, rewardId, !reward.isActive);
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  // Initialize default rewards
   const initializeDefaultRewards = async () => {
     if (!familyId) return;
     
@@ -226,10 +204,7 @@ export default function ManageScreen() {
                       style={styles.rewardWrapper}
                     >
                       <TouchableOpacity onPress={() => handleRewardEdit(reward.id!)}>
-                        <RewardCard
-                          reward={reward}
-                          starBalance={0}
-                        />
+                        <RewardCard reward={reward} starBalance={0} />
                       </TouchableOpacity>
                     </Animated.View>
                   ))}
@@ -257,7 +232,7 @@ export default function ManageScreen() {
           )}
         </Animated.View>
 
-        {/* Stats Summary */}
+        {/* Stats */}
         <Animated.View entering={FadeInUp.delay(400).duration(400)} style={styles.section}>
           <Card style={styles.statsCard}>
             <Card.Content style={styles.statsContent}>
@@ -287,129 +262,30 @@ export default function ManageScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: ChildColors.galoBlack,
-  },
-  content: {
-    padding: 16,
-  },
-
-  // Sections
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: ChildColors.cardBackground,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: ChildColors.cardBorder,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: ChildColors.textPrimary,
-  },
-  sectionContent: {
-    marginTop: 12,
-  },
-  sectionActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  addButton: {
-    flex: 1,
-    borderRadius: 8,
-  },
-  manageButton: {
-    flex: 1,
-    borderRadius: 8,
-    borderColor: ChildColors.starGold,
-  },
-
-  // Items Lists
-  itemsList: {
-    gap: 12,
-  },
-  taskWrapper: {
-    // TaskCard styling handled by component
-  },
-  rewardWrapper: {
-    // RewardCard styling handled by component
-  },
-
-  // Empty States
-  emptyCard: {
-    backgroundColor: ChildColors.cardBackground,
-    borderWidth: 1,
-    borderColor: ChildColors.cardBorder,
-  },
-  emptyContent: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  emptyEmoji: {
-    fontSize: 32,
-    marginBottom: 12,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: ChildColors.textPrimary,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: ChildColors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  emptyButton: {
-    borderColor: ChildColors.starGold,
-  },
-
-  // Stats Summary
-  statsCard: {
-    backgroundColor: ChildColors.cardBackground,
-    borderWidth: 1,
-    borderColor: ChildColors.cardBorder,
-  },
-  statsContent: {
-    padding: 16,
-  },
-  statsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: ChildColors.textPrimary,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: ChildColors.starGold,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: ChildColors.textSecondary,
-    textAlign: 'center',
-  },
+  container: { flex: 1, backgroundColor: ChildColors.galoBlack },
+  content: { padding: 16 },
+  section: { marginBottom: 24 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: ChildColors.cardBackground, borderRadius: 12, borderWidth: 1, borderColor: ChildColors.cardBorder },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: ChildColors.textPrimary },
+  sectionContent: { marginTop: 12 },
+  sectionActions: { flexDirection: 'row', gap: 12, marginBottom: 16 },
+  addButton: { flex: 1, borderRadius: 8 },
+  manageButton: { flex: 1, borderRadius: 8, borderColor: ChildColors.starGold },
+  itemsList: { gap: 12 },
+  taskWrapper: {},
+  rewardWrapper: {},
+  emptyCard: { backgroundColor: ChildColors.cardBackground, borderWidth: 1, borderColor: ChildColors.cardBorder },
+  emptyContent: { padding: 24, alignItems: 'center' },
+  emptyEmoji: { fontSize: 32, marginBottom: 12 },
+  emptyTitle: { fontSize: 16, fontWeight: 'bold', color: ChildColors.textPrimary, marginBottom: 8, textAlign: 'center' },
+  emptySubtitle: { fontSize: 14, color: ChildColors.textSecondary, textAlign: 'center', marginBottom: 16 },
+  emptyButton: { borderColor: ChildColors.starGold },
+  statsCard: { backgroundColor: ChildColors.cardBackground, borderWidth: 1, borderColor: ChildColors.cardBorder },
+  statsContent: { padding: 16 },
+  statsTitle: { fontSize: 16, fontWeight: 'bold', color: ChildColors.textPrimary, marginBottom: 16, textAlign: 'center' },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  statItem: { alignItems: 'center' },
+  statNumber: { fontSize: 24, fontWeight: 'bold', color: ChildColors.starGold },
+  statLabel: { fontSize: 12, color: ChildColors.textSecondary, textAlign: 'center' },
 });

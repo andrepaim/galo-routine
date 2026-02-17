@@ -27,11 +27,12 @@ export default function ParentLayout() {
         ),
       }}
     >
+      {/* Main Tabs */}
       <Tabs.Screen
         name="index"
         options={{
           title: 'Hoje',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color }) => (
             <Icon source="clipboard-list" size={ChildSizes.tabIconSize} color={color} />
           ),
         }}
@@ -40,7 +41,7 @@ export default function ParentLayout() {
         name="manage"
         options={{
           title: 'Gerenciar',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color }) => (
             <Icon source="cog" size={ChildSizes.tabIconSize} color={color} />
           ),
         }}

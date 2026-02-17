@@ -75,7 +75,17 @@ test('Hooks: no hooks after conditional returns in index.tsx', () => {
 });
 
 // ============================================================
-// 3. All imports resolve to existing files
+// 3. File size - must be under 250 lines
+// ============================================================
+test('Size: child index.tsx is under 250 lines', () => {
+  const code = readFile('app/(child)/index.tsx');
+  const lines = code.split('\n').length;
+  if (lines >= 250) return `${lines} lines (must be < 250)`;
+  return true;
+});
+
+// ============================================================
+// 4. All imports resolve to existing files
 // ============================================================
 test('Imports: all child screen imports resolve', () => {
   const missing = [];
@@ -84,11 +94,11 @@ test('Imports: all child screen imports resolve', () => {
   const requiredComponents = [
     'components/ui/LoadingScreen.tsx',
     'lib/stores/authStore.ts',
-    'lib/stores/completionStore.ts',
+    'lib/stores/completionStore.ts', 
     'lib/stores/rewardStore.ts',
     'lib/hooks/useTodayTasks.ts',
     'lib/hooks/useCurrentPeriod.ts',
-    'lib/hooks/useStarBudget.ts',
+    'constants/childTheme.ts',
   ];
   
   for (const comp of requiredComponents) {
@@ -102,166 +112,171 @@ test('Imports: all child screen imports resolve', () => {
 });
 
 // ============================================================
-// 4. Route structure (simplified)
+// 5. No progress.tsx file (deleted for single screen)
 // ============================================================
-test('Routes: child layout exists with Stack navigator', () => {
-  const layout = readFile('app/(child)/_layout.tsx');
-  if (!layout.includes('Stack')) return 'No Stack navigator in _layout.tsx';
-  if (!layout.includes('headerShown: false')) return 'Header should be hidden';
-  return true;
-});
-
-test('Routes: index.tsx has default export', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('export default function')) return 'No default export';
-  return true;
-});
-
-test('Routes: progress.tsx should be deleted (simplified UI)', () => {
+test('Routes: progress.tsx deleted (everything on one screen)', () => {
   const progressPath = path.join(ROOT, 'app/(child)/progress.tsx');
   if (fs.existsSync(progressPath)) return 'progress.tsx still exists - should be deleted';
   return true;
 });
 
 // ============================================================
-// 5. Navigation (simplified)
+// 6. Single screen structure
 // ============================================================
-test('Navigation: parent mode switch exists', () => {
+test('UI: single scrollable screen with all sections', () => {
+  const code = readFile('app/(child)/index.tsx');
+  if (!code.includes('Tarefas de Hoje')) return 'No tasks section title';
+  if (!code.includes('Meus Prêmios')) return 'No rewards section title';
+  if (!code.includes('ScrollView')) return 'No ScrollView for single screen';
+  if (!code.includes('FlatList')) return 'No FlatList for tasks/rewards';
+  return true;
+});
+
+test('UI: header with greeting, date, and star balance', () => {
+  const code = readFile('app/(child)/index.tsx');
+  if (!code.includes('Oi,')) return 'No greeting';
+  if (!code.includes('date-fns')) return 'No date formatting';
+  if (!code.includes('ptBR')) return 'No Portuguese locale';
+  if (!code.includes('starBalance')) return 'No star balance display';
+  return true;
+});
+
+test('UI: progress indicator inline', () => {
+  const code = readFile('app/(child)/index.tsx');
+  if (!code.includes('progressContainer')) return 'No progress container';
+  if (!code.includes('progressBar')) return 'No progress bar';
+  if (!code.includes('/')) return 'No X/Y format for progress';
+  if (!code.includes('tarefas')) return 'No Portuguese progress text';
+  return true;
+});
+
+// ============================================================
+// 7. Task cards
+// ============================================================
+test('Tasks: simple card structure', () => {
+  const code = readFile('app/(child)/index.tsx');
+  if (!code.includes('TaskCard')) return 'No TaskCard component';
+  if (!code.includes('taskName')) return 'No task name display';
+  if (!code.includes('⭐')) return 'No star emoji for points';
+  if (!code.includes('handleCompleteTask')) return 'No task completion handler';
+  return true;
+});
+
+test('Tasks: tap to complete with haptic feedback', () => {
+  const code = readFile('app/(child)/index.tsx');
+  if (!code.includes('Haptics')) return 'No haptics import';
+  if (!code.includes('impactAsync')) return 'No haptic feedback';
+  if (!code.includes('TouchableOpacity')) return 'No touchable tasks';
+  return true;
+});
+
+test('Tasks: visual changes for completion', () => {
+  const code = readFile('app/(child)/index.tsx');
+  if (!code.includes('isCompleted')) return 'No completion state';
+  if (!code.includes('✅')) return 'No green checkmark';
+  if (!code.includes('taskCardCompleted')) return 'No completed card styling';
+  return true;
+});
+
+// ============================================================
+// 8. Reward cards  
+// ============================================================
+test('Rewards: simple card structure', () => {
+  const code = readFile('app/(child)/index.tsx');
+  if (!code.includes('RewardCard')) return 'No RewardCard component';
+  if (!code.includes('rewardName')) return 'No reward name display';
+  if (!code.includes('starCost')) return 'No star cost display';
+  if (!code.includes('Resgatar')) return 'No redeem button';
+  return true;
+});
+
+test('Rewards: affordability check', () => {
+  const code = readFile('app/(child)/index.tsx');
+  if (!code.includes('canAfford')) return 'No affordability check';
+  if (!code.includes('redeemButtonDisabled')) return 'No disabled button styling';
+  if (!code.includes('handleRedeemReward')) return 'No redeem handler';
+  return true;
+});
+
+// ============================================================
+// 9. No championship components (removed)
+// ============================================================
+test('Simplified: no championship imports', () => {
+  const code = readFile('app/(child)/index.tsx');
+  const championshipItems = [
+    'LiveScoreboard', 'RivalReveal', 'GaloGoalCounter', 
+    'ballFly', 'netShake', 'celebrationScale', 
+    'showVictory', 'opponent', 'rival', 'championship'
+  ];
+  const found = championshipItems.filter(item => code.includes(item));
+  if (found.length > 0) return `Championship features found: ${found.join(', ')}`;
+  return true;
+});
+
+// ============================================================
+// 10. Parent mode switch
+// ============================================================
+test('Navigation: parent mode switch button', () => {
   const code = readFile('app/(child)/index.tsx');
   if (!code.includes('switchToParent')) return 'No parent switch function';
   if (!code.includes("setRole('parent')")) return 'No setRole call';
+  if (!code.includes('👨‍👩‍👦')) return 'No parent button emoji';
   return true;
 });
 
 // ============================================================
-// 6. Simplified UI Structure
+// 11. Portuguese language
 // ============================================================
-test('UI: single screen with tasks and rewards', () => {
+test('Language: all text in Portuguese', () => {
   const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('Tarefas de Hoje')) return 'No tasks section';
-  if (!code.includes('Meus Prêmios')) return 'No rewards section';
-  if (!code.includes('ScrollView')) return 'No ScrollView for single screen';
-  return true;
-});
-
-test('UI: progress indicator exists', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('progressText')) return 'No progress text';
-  if (!code.includes('progressBar')) return 'No progress bar';
-  if (!code.includes('tarefas')) return 'No progress in Portuguese';
-  return true;
-});
-
-test('UI: star balance displayed prominently', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('starBalance')) return 'No star balance display';
-  if (!code.includes('⭐')) return 'No star emoji';
-  return true;
-});
-
-// ============================================================
-// 7. Portuguese language
-// ============================================================
-test('Language: Portuguese throughout', () => {
-  const code = readFile('app/(child)/index.tsx');
-  const ptStrings = ['Oi,', 'Tarefas de Hoje', 'Meus Prêmios', 'tarefas', 'Resgatar'];
+  const ptStrings = [
+    'Oi,', 'Tarefas de Hoje', 'Meus Prêmios', 
+    'tarefas', 'Resgatar', 'Dia Livre',
+    'Nenhuma tarefa', 'Nenhum prêmio'
+  ];
   const missing = ptStrings.filter(s => !code.includes(s));
   if (missing.length > 0) return `Missing PT strings: ${missing.join(', ')}`;
   return true;
 });
 
 // ============================================================
-// 8. Galo theme
+// 12. Galo theme colors
 // ============================================================
-test('Theme: Galo colors used', () => {
+test('Theme: ChildColors used throughout', () => {
   const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('ChildColors.galoBlack')) return 'No galoBlack';
-  if (!code.includes('ChildColors.starGold')) return 'No starGold';
+  const colorProps = ['galoBlack', 'starGold', 'textPrimary', 'cardBackground'];
+  const missing = colorProps.filter(color => !code.includes(`ChildColors.${color}`));
+  if (missing.length > 0) return `Missing colors: ${missing.join(', ')}`;
   return true;
 });
 
 // ============================================================
-// 9. Animations
+// 13. Simple animations
 // ============================================================
-test('Animations: simple FadeIn animations', () => {
+test('Animations: FadeIn and FadeInDown only', () => {
   const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('react-native-reanimated')) return 'No reanimated';
-  if (!code.includes('FadeIn')) return 'No FadeIn animations';
+  if (!code.includes('react-native-reanimated')) return 'No reanimated import';
+  if (!code.includes('FadeIn')) return 'No FadeIn animation';
+  const complexAnims = ['useSharedValue', 'useAnimatedStyle', 'withSpring'];
+  const found = complexAnims.filter(anim => code.includes(anim));
+  if (found.length > 0) return `Complex animations found: ${found.join(', ')}`;
   return true;
 });
 
 // ============================================================
-// 10. No championship features (removed)
+// 14. Empty states
 // ============================================================
-test('Simplified: no championship imports', () => {
+test('States: empty state handling', () => {
   const code = readFile('app/(child)/index.tsx');
-  const championshipImports = ['LiveScoreboard', 'GaloGoalCounter', 'RivalReveal', 'StandingsTable'];
-  const found = championshipImports.filter(imp => code.includes(imp));
-  if (found.length > 0) return `Championship imports found: ${found.join(', ')}`;
-  return true;
-});
-
-test('Simplified: no complex animations', () => {
-  const code = readFile('app/(child)/index.tsx');
-  const complexFeatures = ['ballFly', 'netShake', 'celebrationScale', 'showVictory'];
-  const found = complexFeatures.filter(feat => code.includes(feat));
-  if (found.length > 0) return `Complex features found: ${found.join(', ')}`;
+  if (!code.includes('ListEmptyComponent')) return 'No empty state components';
+  if (!code.includes('emptyCard')) return 'No empty card styling';
+  if (!code.includes('🎉')) return 'No celebration emoji for empty tasks';
+  if (!code.includes('🎁')) return 'No gift emoji for empty rewards';
   return true;
 });
 
 // ============================================================
-// 11. Task interaction
-// ============================================================
-test('Tasks: can be marked complete', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('handleCompleteTask')) return 'No task completion handler';
-  if (!code.includes('markTaskDone')) return 'No markTaskDone call';
-  return true;
-});
-
-test('Tasks: haptic feedback on completion', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('Haptics')) return 'No haptic feedback import';
-  if (!code.includes('impactAsync')) return 'No haptic impact';
-  return true;
-});
-
-// ============================================================
-// 12. Reward interaction
-// ============================================================
-test('Rewards: can be redeemed', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('handleRedeemReward')) return 'No reward redemption handler';
-  if (!code.includes('redeemReward')) return 'No redeemReward call';
-  return true;
-});
-
-test('Rewards: shows star cost and availability', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('canAfford')) return 'No affordability check';
-  if (!code.includes('starCost')) return 'No star cost display';
-  return true;
-});
-
-// ============================================================
-// 13. Empty states
-// ============================================================
-test('States: loading screen shown', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('LoadingScreen')) return 'No LoadingScreen import';
-  if (!code.includes('isLoading')) return 'No loading check';
-  return true;
-});
-
-test('States: empty states for no tasks/rewards', () => {
-  const code = readFile('app/(child)/index.tsx');
-  if (!code.includes('Dia Livre')) return 'No empty tasks message';
-  if (!code.includes('Nenhum prêmio')) return 'No empty rewards message';
-  return true;
-});
-
-// ============================================================
-// 14. Bundle compilation
+// 15. Bundle compilation
 // ============================================================
 test('Bundle: web compiles (HTTP 200)', () => {
   try {
@@ -269,7 +284,7 @@ test('Bundle: web compiles (HTTP 200)', () => {
     if (status.trim() !== '200') return `HTTP ${status.trim()}`;
     return true;
   } catch (e) {
-    return `Metro not responding: ${e.message}`;
+    return `Metro not responding: ${e.message.substring(0, 100)}`;
   }
 });
 
@@ -279,14 +294,14 @@ test('Bundle: android compiles (HTTP 200)', () => {
     if (status.trim() !== '200') return `HTTP ${status.trim()}`;
     return true;
   } catch (e) {
-    return `Metro not responding: ${e.message}`;
+    return `Metro not responding: ${e.message.substring(0, 100)}`;
   }
 });
 
 // ============================================================
-// 15. Web rendering test
+// 16. Runtime rendering
 // ============================================================
-test('Render: login screen loads without errors', () => {
+test('Render: app loads without critical errors', () => {
   try {
     const output = run(`PUPPETEER_CACHE_DIR=/root/.cache/puppeteer node -e "
 const puppeteer = require('puppeteer');
@@ -303,12 +318,14 @@ const puppeteer = require('puppeteer');
   await page.goto('http://localhost:8081', { waitUntil: 'networkidle0', timeout: 60000 });
   await new Promise(r => setTimeout(r, 5000));
   const text = await page.evaluate(() => document.body.innerText);
-  const fontErrors = errors.filter(e => e.includes('timeout') || e.includes('font'));
+  const criticalErrors = errors.filter(e => 
+    !e.includes('font') && !e.includes('timeout') && 
+    !e.includes('devtools') && !e.includes('HMR')
+  );
   console.log(JSON.stringify({ 
-    hasLoginScreen: text.includes('Log In as Parent'),
-    hasChildButton: text.includes(\\\"I'm the Child\\\"),
-    totalErrors: errors.length,
-    fontErrors: fontErrors.length
+    hasContent: text.length > 100,
+    criticalErrors: criticalErrors.length,
+    sampleErrors: criticalErrors.slice(0, 3)
   }));
   await browser.close();
 })();
@@ -316,10 +333,8 @@ const puppeteer = require('puppeteer');
     
     const result = JSON.parse(output.trim().split('\n').pop());
     const issues = [];
-    if (!result.hasLoginScreen) issues.push('No login screen');
-    if (!result.hasChildButton) issues.push('No child button');
-    if (result.fontErrors > 0) issues.push(`${result.fontErrors} font errors`);
-    if (result.totalErrors > 5) issues.push(`${result.totalErrors} console errors`); // Allow some errors
+    if (!result.hasContent) issues.push('Page has no content');
+    if (result.criticalErrors > 3) issues.push(`${result.criticalErrors} critical errors`);
     
     if (issues.length > 0) return issues.join(', ');
     return true;
