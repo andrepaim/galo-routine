@@ -92,7 +92,7 @@ export function useMatchSync(): void {
     // Calculate goals from completed tasks
     const completedGoals = todayTasks
       .filter(t => t.completion?.status === 'approved')
-      .reduce((sum, t) => sum + (t.goals || 1), 0);
+      .reduce((sum, t) => sum + (t.goals ?? 1), 0);
 
     // Only update if different
     if (completedGoals !== match.userGoals) {

@@ -47,7 +47,7 @@ export default function ParentHomeScreen() {
     return todayTasks.map(task => ({
       id: task.id,
       name: task.name,
-      goals: task.goals || 1,
+      goals: task.goals ?? 1,
       taskType: (task.isBonus ? 'bonus' : 'routine') as 'routine' | 'bonus',
       completed: task.completion?.status === 'approved',
       completedAt: task.completion?.completedAt,
@@ -255,7 +255,7 @@ export default function ParentHomeScreen() {
                 <View style={styles.matchScorePreview}>
                   <Text style={styles.matchScoreLabel}>Placar atual:</Text>
                   <Text style={styles.matchScore}>
-                    {todayTasks.filter(t => t.completion?.status === 'approved').reduce((sum, t) => sum + (t.goals || 1), 0)} ⚽ ?
+                    {todayTasks.filter(t => t.completion?.status === 'approved').reduce((sum, t) => sum + (t.goals ?? 1), 0)} ⚽ ?
                   </Text>
                 </View>
                 <Button

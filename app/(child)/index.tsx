@@ -112,8 +112,8 @@ export default function ChildTodayScreen() {
   // Calculate goals from completed tasks
   const completedGoals = todayTasks
     .filter(t => t.completion?.status === 'approved' || t.completion?.status === 'pending')
-    .reduce((sum, t) => sum + (t.goals || 1), 0);
-  const totalGoals = todayTasks.reduce((sum, t) => sum + (t.goals || 1), 0);
+    .reduce((sum, t) => sum + (t.goals ?? 1), 0);
+  const totalGoals = todayTasks.reduce((sum, t) => sum + (t.goals ?? 1), 0);
 
   // Date label for section header
   const sectionLabel = isSelectedToday
