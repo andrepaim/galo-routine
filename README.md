@@ -8,6 +8,10 @@ A self-hosted routine and reward app for kids, themed around Atlético Mineiro (
 |:---:|:---:|:---:|
 | ![Child screen](screenshots/child.png) | ![Parent screen](screenshots/parent.png) | ![Manage screen](screenshots/manage.png) |
 
+| Rewards | Celebration | Galo News |
+|:---:|:---:|:---:|
+| ![Rewards](screenshots/rewards.png) | ![Celebration](screenshots/celebration.png) | ![Galo News](screenshots/news.png) |
+
 ---
 
 ## What is this?
