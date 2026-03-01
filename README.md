@@ -2,10 +2,6 @@
 
 A self-hosted routine and reward app for kids, themed around Atlético Mineiro (Galo).
 
-**Production:** https://rotinadoatleticano.duckdns.org
-
----
-
 ## Screenshots
 
 | Child | Parent | Manage |
