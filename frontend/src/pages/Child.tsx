@@ -133,7 +133,7 @@ export default function Child() {
               className="cursor-default select-none text-4xl leading-none"
               aria-hidden="true"
             >
-              ⚽
+              🐔
             </span>
           </div>
           <p className="text-sm text-text-secondary capitalize mb-3">
