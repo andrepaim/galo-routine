@@ -1,6 +1,7 @@
 'use strict';
 
 process.env.DB_PATH = ':memory:';
+process.env.FAMILY_ID = 'test-family-id';
 jest.resetModules();
 
 const request = require('supertest');
