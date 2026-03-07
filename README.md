@@ -123,7 +123,10 @@ cd galo-routine
 
 ```bash
 cp .env.example .env
-# Edit .env and set FAMILY_ID
+# Edit .env and set FAMILY_ID and DB_PATH
+
+# Also set VITE_FAMILY_ID in the frontend env:
+echo "VITE_FAMILY_ID=your-family-id" >> frontend/.env
 ```
 
 ### 3. Backend
