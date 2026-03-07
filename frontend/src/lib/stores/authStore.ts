@@ -5,7 +5,7 @@ import { apiFetch } from '../api/client';
 import { getSSE } from '../api/sse';
 
 const ROLE_KEY = 'star_routine_role';
-const FAMILY_ID = 'EXmCPl8hrnOYDzrPewHoXlGa5762';
+const FAMILY_ID = import.meta.env.VITE_FAMILY_ID as string;
 
 interface AuthStore extends AuthState {
   family: Family | null;
