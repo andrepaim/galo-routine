@@ -81,7 +81,7 @@ galo-routine/
 ## Tech Stack
 
 **Frontend (`frontend/`)**
-- React 18 + TypeScript + Vite
+- React 19 + TypeScript + Vite
 - Tailwind CSS — Galo theme (`galoBlack: #1A1A1A`, `starGold: #FFD700`)
 - React Router v6
 - Zustand — global state (auth, tasks, completions, rewards)
@@ -142,7 +142,7 @@ node src/index.js   # http://127.0.0.1:3200
 ```bash
 cd frontend
 npm install
-npm run dev         # http://localhost:5174
+npm run dev         # http://localhost:5173
 ```
 
 ### 5. Deploy (production)
@@ -208,7 +208,9 @@ A Telegram alert fires if the next home match is within 7 days.
 | Script | What it does |
 |---|---|
 | `scripts/galo-matches.mjs` | Daily cron — ESPN + News → backend; Telegram alert if home match ≤ 7 days |
+| `scripts/backup-db.sh` | Daily cron — backs up the SQLite database |
 | `scripts/import-tasks-admin.mjs` | One-shot admin import of the full task list |
+| `scripts/import-tasks.mjs` | One-shot task import utility |
 | `scripts/migrate-from-firebase.mjs` | One-shot migration from Firebase Firestore to SQLite |
 
 ---
