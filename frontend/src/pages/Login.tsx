@@ -10,10 +10,16 @@ export default function Login() {
       gap: 24,
       padding: 24,
     }}>
-      <img src="/atletico-badge.svg" alt="Atlético" style={{ width: 80, opacity: 0.9 }} />
+      <div style={{
+        width: 100, height: 100, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(255,204,0,0.25) 0%, transparent 70%)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <img src="/atletico-badge.svg" alt="Atlético" style={{ width: 72 }} />
+      </div>
       <div style={{ textAlign: 'center' }}>
         <h1 style={{ color: '#FFCC00', fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>
-          Rotina do Atlético
+          Galo Stars ⭐
         </h1>
         <p style={{ color: '#9ca3af', fontSize: 15, marginTop: 8 }}>
           Complete tarefas, ganhe estrelas, conquiste recompensas!
