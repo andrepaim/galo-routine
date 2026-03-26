@@ -1,0 +1,149 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1774520425376,
+  "projectRoot": "/root/galo-routine",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "scripts"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "backend": {
+      "path": "backend",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1774520425234,
+      "keyFiles": [
+        "galo-routine.db",
+        "galo-routine.db-shm",
+        "galo-routine.db-wal",
+        "package-lock.json",
+        "package.json"
+      ]
+    },
+    "backups": {
+      "path": "backups",
+      "purpose": null,
+      "fileCount": 27,
+      "lastAccessed": 1774520425257,
+      "keyFiles": [
+        "backup.log",
+        "galo-routine-2026-03-01.db",
+        "galo-routine-2026-03-02.db",
+        "galo-routine-2026-03-03.db",
+        "galo-routine-2026-03-04.db"
+      ]
+    },
+    "frontend": {
+      "path": "frontend",
+      "purpose": null,
+      "fileCount": 14,
+      "lastAccessed": 1774520425271,
+      "keyFiles": [
+        "README.md",
+        "eslint.config.js",
+        "index.html",
+        "package-lock.json",
+        "package.json"
+      ]
+    },
+    "screenshots": {
+      "path": "screenshots",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1774520425278,
+      "keyFiles": [
+        "celebration.png",
+        "child.png",
+        "manage.png",
+        "news.png",
+        "parent.png"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 5,
+      "lastAccessed": 1774520425287,
+      "keyFiles": [
+        "backup-db.sh",
+        "galo-matches.mjs",
+        "import-tasks-admin.mjs",
+        "import-tasks.mjs",
+        "migrate-from-firebase.mjs"
+      ]
+    },
+    "backend/__tests__": {
+      "path": "backend/__tests__",
+      "purpose": "Test files",
+      "fileCount": 10,
+      "lastAccessed": 1774520425294,
+      "keyFiles": [
+        "auth.test.js",
+        "completions.test.js",
+        "family.test.js"
+      ]
+    },
+    "backend/node_modules": {
+      "path": "backend/node_modules",
+      "purpose": "Dependencies",
+      "fileCount": 1,
+      "lastAccessed": 1774520425331,
+      "keyFiles": []
+    },
+    "backend/src": {
+      "path": "backend/src",
+      "purpose": "Source code",
+      "fileCount": 4,
+      "lastAccessed": 1774520425331,
+      "keyFiles": [
+        "app.js",
+        "db.js",
+        "index.js"
+      ]
+    },
+    "frontend/dist": {
+      "path": "frontend/dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 11,
+      "lastAccessed": 1774520425336,
+      "keyFiles": [
+        "apple-touch-icon.png",
+        "atletico-badge.png",
+        "atletico-badge.svg"
+      ]
+    },
+    "frontend/node_modules": {
+      "path": "frontend/node_modules",
+      "purpose": "Dependencies",
+      "fileCount": 1,
+      "lastAccessed": 1774520425375,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

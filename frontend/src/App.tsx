@@ -60,37 +60,49 @@ function AppRoutes() {
         <Route
           path="/parent"
           element={
-            isAuthenticated && role === 'parent' ? <Parent /> : <Navigate to="/login" replace />
+            !isAuthenticated ? <Navigate to="/login" replace />
+            : role === 'parent' ? <Parent />
+            : <Navigate to="/child" replace />
           }
         />
         <Route
           path="/parent/manage"
           element={
-            isAuthenticated && role === 'parent' ? <Manage /> : <Navigate to="/login" replace />
+            !isAuthenticated ? <Navigate to="/login" replace />
+            : role === 'parent' ? <Manage />
+            : <Navigate to="/child" replace />
           }
         />
         <Route
           path="/parent/tasks/new"
           element={
-            isAuthenticated && role === 'parent' ? <NewTask /> : <Navigate to="/login" replace />
+            !isAuthenticated ? <Navigate to="/login" replace />
+            : role === 'parent' ? <NewTask />
+            : <Navigate to="/child" replace />
           }
         />
         <Route
           path="/parent/tasks/:id"
           element={
-            isAuthenticated && role === 'parent' ? <EditTask /> : <Navigate to="/login" replace />
+            !isAuthenticated ? <Navigate to="/login" replace />
+            : role === 'parent' ? <EditTask />
+            : <Navigate to="/child" replace />
           }
         />
         <Route
           path="/parent/rewards/new"
           element={
-            isAuthenticated && role === 'parent' ? <NewReward /> : <Navigate to="/login" replace />
+            !isAuthenticated ? <Navigate to="/login" replace />
+            : role === 'parent' ? <NewReward />
+            : <Navigate to="/child" replace />
           }
         />
         <Route
           path="/parent/rewards/:id"
           element={
-            isAuthenticated && role === 'parent' ? <EditReward /> : <Navigate to="/login" replace />
+            !isAuthenticated ? <Navigate to="/login" replace />
+            : role === 'parent' ? <EditReward />
+            : <Navigate to="/child" replace />
           }
         />
         <Route
