@@ -82,6 +82,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   initAuth: () => {
     const storedRole = (localStorage.getItem(ROLE_KEY) as UserRole) ?? 'child';
 
+    // Safety timeout — never stay stuck on loading screen
+    const timeout = setTimeout(() => {
+      const { isLoading } = useAuthStore.getState();
+      if (isLoading) {
+        console.warn('[auth] initAuth timed out, forcing isLoading=false');
+        set({ isAuthenticated: false, isLoading: false });
+      }
+    }, 5000);
+
     // Check if logged in via Google
     apiFetch<GoogleUser>('/auth/me')
       .then(async (gUser) => {
@@ -126,7 +135,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       .catch(() => {
         // Not logged in — show login page
         set({ isAuthenticated: false, isLoading: false });
-      });
+      })
+      .finally(() => clearTimeout(timeout));
 
     let cleanup = () => {};
     return () => cleanup();
