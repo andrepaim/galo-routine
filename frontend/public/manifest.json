@@ -1,7 +1,7 @@
 {
-  "name": "Galo Routine",
-  "short_name": "Galo Routine",
-  "description": "Rotina diária com tarefas e prêmios de estrelas para atleticanos!",
+  "name": "Galo Stars",
+  "short_name": "Galo Stars",
+  "description": "Complete tarefas, ganhe estrelas e conquiste recompensas — para atleticanos!",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
