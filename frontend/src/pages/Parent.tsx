@@ -67,7 +67,7 @@ export default function Parent() {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => { setRole('child'); navigate('/child', { replace: true }); }}
+              onClick={() => { navigate('/child', { replace: true }); setRole('child'); }}
               className="border border-star-gold text-star-gold px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-star-gold/10 transition-colors active:scale-95"
             >
               👶 Filho
