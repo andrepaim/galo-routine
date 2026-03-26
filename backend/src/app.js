@@ -7,6 +7,9 @@ const { authMiddleware } = require('./middleware/auth');
 
 const app = express();
 
+// Trust Apache reverse proxy (needed for req.secure and X-Forwarded-Proto)
+app.set('trust proxy', 1);
+
 // ── Middleware ────────────────────────────────────────────────────
 app.use(cors({
   origin: process.env.PUBLIC_URL || 'https://rotinadoatleticano.duckdns.org',

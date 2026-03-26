@@ -42,7 +42,8 @@ router.get('/google', (req, res) => {
     scope: ['openid', 'email', 'profile'],
     state,
   });
-  res.cookie('oauth_state', state, { maxAge: 600_000, httpOnly: true, secure: true, sameSite: 'lax' });
+  const isSecure = req.headers['x-forwarded-proto'] === 'https' || req.secure;
+  res.cookie('oauth_state', state, { maxAge: 600_000, httpOnly: true, secure: isSecure, sameSite: 'lax' });
   res.redirect(url);
 });
 
@@ -108,8 +109,9 @@ router.get('/google/callback', async (req, res) => {
       familyId: user.family_id || null,
     });
 
+    const isSecure = req.headers['x-forwarded-proto'] === 'https' || req.secure;
     res
-      .cookie(COOKIE, token, { maxAge: MAX_AGE * 1000, httpOnly: true, secure: true, sameSite: 'lax', path: '/' })
+      .cookie(COOKIE, token, { maxAge: MAX_AGE * 1000, httpOnly: true, secure: isSecure, sameSite: 'lax', path: '/' })
       .clearCookie('oauth_state')
       .redirect('/');
   } catch (err) {

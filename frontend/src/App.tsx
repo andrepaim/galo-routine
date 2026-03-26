@@ -28,6 +28,7 @@ function AppRoutes() {
   const role = useAuthStore((s) => s.role);
   const needsOnboarding = useAuthStore((s) => s.needsOnboarding);
 
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-galo-black flex items-center justify-center">

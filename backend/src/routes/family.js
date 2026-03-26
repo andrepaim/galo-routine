@@ -61,7 +61,8 @@ router.post('/', (req, res) => {
     picture: req.user.picture,
     familyId,
   });
-  res.cookie(COOKIE, newToken, { maxAge: MAX_AGE * 1000, httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
+  const isSecure = req.headers['x-forwarded-proto'] === 'https' || req.secure;
+  res.cookie(COOKIE, newToken, { maxAge: MAX_AGE * 1000, httpOnly: true, secure: isSecure, sameSite: 'lax', path: '/' });
 
   const row = db.prepare('SELECT * FROM families WHERE id = ?').get(familyId);
   res.json(rowToFamily(row));
