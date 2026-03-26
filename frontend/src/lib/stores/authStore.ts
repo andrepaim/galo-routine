@@ -88,12 +88,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         set({ googleUser: gUser, email: gUser.email, uid: gUser.userId });
 
         if (!gUser.familyId) {
-          // Logged in but no family yet — need onboarding
           set({ isAuthenticated: true, isLoading: false, needsOnboarding: true, role: 'parent' });
           return;
         }
 
-        // Fetch family data
         try {
           const family = await apiFetch<Family>('/family');
           set({
@@ -109,25 +107,28 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         } catch {
           set({ isAuthenticated: true, isLoading: false, familyId: gUser.familyId, role: storedRole });
         }
+
+        // Only subscribe to SSE when authenticated
+        const es = getSSE();
+        const handler = (e: MessageEvent) => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'invalidate' && msg.collection === 'family') {
+              apiFetch<Family>('/family').then((family) => {
+                useAuthStore.setState({ family });
+              });
+            }
+          } catch { /* ignore */ }
+        };
+        es.addEventListener('message', handler);
+        cleanup = () => es.removeEventListener('message', handler);
       })
       .catch(() => {
         // Not logged in — show login page
         set({ isAuthenticated: false, isLoading: false });
       });
 
-    // Subscribe to family updates via SSE
-    const es = getSSE();
-    const handler = (e: MessageEvent) => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.type === 'invalidate' && msg.collection === 'family') {
-          apiFetch<Family>('/family').then((family) => {
-            useAuthStore.setState({ family });
-          });
-        }
-      } catch { /* ignore */ }
-    };
-    es.addEventListener('message', handler);
-    return () => es.removeEventListener('message', handler);
+    let cleanup = () => {};
+    return () => cleanup();
   },
 }));
