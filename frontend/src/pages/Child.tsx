@@ -9,6 +9,7 @@ import { useGaloSchedule, pickNextNews } from '../lib/hooks/useGaloSchedule';
 import { getGaloNewsState, addShownNewsId } from '../lib/api/db';
 import { GaloCelebration } from '../components/galo/GaloCelebration';
 import { GaloNewsCard } from '../components/galo/GaloNewsCard';
+import { CanguruBonusModal } from '../components/canguru/CanguruBonusModal';
 import type { TodayTask, GaloNewsItem } from '../lib/types';
 import type { Reward } from '../lib/types';
 import { GaloBadge } from '../components/galo/GaloBadge';
@@ -32,6 +33,7 @@ export default function Child() {
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [rewardsShowAll, setRewardsShowAll] = useState(false);
   const [celebrationTask, setCelebrationTask] = useState<{ name: string; stars: number } | null>(null);
+  const [canguruBonus, setCanguruBonus] = useState(false);
   const [newsItem, setNewsItem] = useState<GaloNewsItem | null>(null);
   const { schedule } = useGaloSchedule();
 
@@ -56,8 +58,13 @@ export default function Child() {
     setCelebrationTask({ name: taskName, stars });
   };
 
-  const handleCelebrationDone = async () => {
+  const handleCelebrationDone = () => {
     setCelebrationTask(null);
+    setCanguruBonus(true);
+  };
+
+  const handleCanguruBonusDone = async () => {
+    setCanguruBonus(false);
     if (!familyId || !schedule?.news?.length) return;
     try {
       const shownIds = await getGaloNewsState(familyId);
@@ -225,6 +232,37 @@ export default function Child() {
           )}
         </div>
 
+        {/* Canguru Section */}
+        {(() => {
+          const examDate = new Date('2026-03-19T12:00:00');
+          const daysLeft = Math.ceil((examDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          if (daysLeft <= 0 || daysLeft > 30) return null;
+          return (
+            <div className="mb-6 animate-fade-in-up">
+              <div className="bg-card-bg border border-star-gold rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🦘</span>
+                    <span className="text-lg font-bold text-text-primary">Treino Canguru</span>
+                  </div>
+                  <span className="text-xs font-bold text-star-gold bg-star-gold/10 px-2 py-1 rounded-full">
+                    {daysLeft === 1 ? '1 dia!' : `${daysLeft} dias!`}
+                  </span>
+                </div>
+                <p className="text-sm text-text-secondary mb-3">
+                  Nível E (Ecolier). Bora treinar! 💪
+                </p>
+                <button
+                  onClick={() => navigate('/child/canguru')}
+                  className="w-full py-3 bg-star-gold text-galo-black font-bold rounded-xl active:scale-95 transition-all"
+                >
+                  Treinar agora →
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Rewards Section */}
         <div className="mb-6 animate-fade-in-up">
           <button
@@ -341,6 +379,11 @@ export default function Child() {
           stars={celebrationTask.stars}
           onDone={handleCelebrationDone}
         />
+      )}
+
+      {/* Canguru bonus challenge */}
+      {canguruBonus && (
+        <CanguruBonusModal onDone={handleCanguruBonusDone} />
       )}
 
       {/* Galo News card */}

@@ -6,7 +6,7 @@ const db = require('../db');
 const { broadcast } = require('../sse');
 const { nanoid } = require('nanoid');
 
-const FAMILY_ID = process.env.FAMILY_ID;
+
 
 function rowToReward(row) {
   return {
@@ -25,7 +25,7 @@ function rowToReward(row) {
 
 // GET /api/rewards
 router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM rewards WHERE family_id = ?').all(FAMILY_ID);
+  const rows = db.prepare('SELECT * FROM rewards WHERE family_id = ?').all(req.user.familyId);
   res.json(rows.map(rowToReward));
 });
 
@@ -37,7 +37,7 @@ router.post('/', (req, res) => {
     INSERT INTO rewards (id, family_id, name, description, star_cost, icon, is_active, availability, quantity, requires_approval)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    id, FAMILY_ID,
+    id, req.user.familyId,
     r.name || '',
     r.description || '',
     r.starCost ?? r.star_cost ?? 1,
@@ -80,7 +80,7 @@ router.put('/:id', (req, res) => {
 
 // DELETE /api/rewards/:id
 router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM rewards WHERE id = ? AND family_id = ?').run(req.params.id, FAMILY_ID);
+  db.prepare('DELETE FROM rewards WHERE id = ? AND family_id = ?').run(req.params.id, req.user.familyId);
   broadcast('rewards');
   res.json({ ok: true });
 });

@@ -4,8 +4,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { broadcast } = require('../sse');
-
-const FAMILY_ID = process.env.FAMILY_ID;
+const { createToken, COOKIE, MAX_AGE } = require('../middleware/auth');
 
 function rowToFamily(row) {
   if (!row) return null;
@@ -23,19 +22,56 @@ function rowToFamily(row) {
   };
 }
 
-// GET /api/family
+function getFamilyId(req) {
+  return req.user?.familyId;
+}
+
+// GET /api/family — returns family, or null if user has no family yet
 router.get('/', (req, res) => {
-  let row = db.prepare('SELECT * FROM families WHERE id = ?').get(FAMILY_ID);
-  if (!row) {
-    // Bootstrap empty family row
-    db.prepare(`INSERT INTO families (id) VALUES (?)`).run(FAMILY_ID);
-    row = db.prepare('SELECT * FROM families WHERE id = ?').get(FAMILY_ID);
+  const familyId = getFamilyId(req);
+  if (!familyId) return res.json(null);
+
+  let row = db.prepare('SELECT * FROM families WHERE id = ?').get(familyId);
+  if (!row) return res.json(null);
+  res.json(rowToFamily(row));
+});
+
+// POST /api/family — create a new family for this user (onboarding)
+router.post('/', (req, res) => {
+  const { parentName, childName, childPin } = req.body;
+  if (!parentName || !childName || !childPin) {
+    return res.status(400).json({ error: 'parentName, childName, childPin required' });
   }
+
+  const { nanoid } = require('nanoid');
+  const familyId = nanoid();
+
+  db.prepare(`INSERT INTO families (id, parent_name, child_name, child_pin) VALUES (?, ?, ?, ?)`)
+    .run(familyId, parentName, childName, childPin);
+
+  // Link family to user
+  db.prepare('UPDATE users SET family_id = ? WHERE id = ?')
+    .run(familyId, req.user.userId);
+
+  // Re-issue JWT with familyId
+  const newToken = createToken({
+    userId: req.user.userId,
+    email: req.user.email,
+    name: req.user.name,
+    picture: req.user.picture,
+    familyId,
+  });
+  res.cookie(COOKIE, newToken, { maxAge: MAX_AGE * 1000, httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
+
+  const row = db.prepare('SELECT * FROM families WHERE id = ?').get(familyId);
   res.json(rowToFamily(row));
 });
 
 // PUT /api/family
 router.put('/', (req, res) => {
+  const familyId = getFamilyId(req);
+  if (!familyId) return res.status(401).json({ error: 'No family' });
+
   const data = req.body;
   const updates = [];
   const params = [];
@@ -52,20 +88,19 @@ router.put('/', (req, res) => {
 
   if (updates.length === 0) return res.json({ ok: true });
 
-  params.push(FAMILY_ID);
+  params.push(familyId);
   db.prepare(`UPDATE families SET ${updates.join(', ')} WHERE id = ?`).run(...params);
   broadcast('family');
-  const row = db.prepare('SELECT * FROM families WHERE id = ?').get(FAMILY_ID);
+  const row = db.prepare('SELECT * FROM families WHERE id = ?').get(familyId);
   res.json(rowToFamily(row));
 });
 
 // PUT /api/family/increment
 router.put('/increment', (req, res) => {
+  const familyId = getFamilyId(req);
+  if (!familyId) return res.status(401).json({ error: 'No family' });
+
   const { field, amount } = req.body;
-  const ALLOWED = ['star_balance', 'starBalance', 'lifetime_stars_earned', 'lifetimeStarsEarned',
-                   'current_streak', 'currentStreak', 'best_streak', 'bestStreak'];
-  
-  // Map camelCase to snake_case
   const fieldMap = {
     starBalance: 'star_balance',
     lifetimeStarsEarned: 'lifetime_stars_earned',
@@ -73,16 +108,12 @@ router.put('/increment', (req, res) => {
     bestStreak: 'best_streak',
   };
   const col = fieldMap[field] || field;
-  
-  if (!ALLOWED.includes(field) && !Object.values(fieldMap).includes(col)) {
-    return res.status(400).json({ error: 'Invalid field' });
-  }
   const validCols = ['star_balance', 'lifetime_stars_earned', 'current_streak', 'best_streak'];
   if (!validCols.includes(col)) return res.status(400).json({ error: 'Invalid field' });
 
-  db.prepare(`UPDATE families SET ${col} = ${col} + ? WHERE id = ?`).run(amount, FAMILY_ID);
+  db.prepare(`UPDATE families SET ${col} = ${col} + ? WHERE id = ?`).run(amount, familyId);
   broadcast('family');
-  const row = db.prepare('SELECT * FROM families WHERE id = ?').get(FAMILY_ID);
+  const row = db.prepare('SELECT * FROM families WHERE id = ?').get(familyId);
   res.json(rowToFamily(row));
 });
 

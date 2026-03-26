@@ -6,7 +6,7 @@ const db = require('../db');
 const { broadcast } = require('../sse');
 const { nanoid } = require('nanoid');
 
-const FAMILY_ID = process.env.FAMILY_ID;
+
 
 function rowToTask(row) {
   return {
@@ -27,7 +27,7 @@ function rowToTask(row) {
 
 // GET /api/tasks
 router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM tasks WHERE family_id = ?').all(FAMILY_ID);
+  const rows = db.prepare('SELECT * FROM tasks WHERE family_id = ?').all(req.user.familyId);
   res.json(rows.map(rowToTask));
 });
 
@@ -39,7 +39,7 @@ router.post('/', (req, res) => {
     INSERT INTO tasks (id, family_id, name, description, star_value, icon, is_active, recurrence, start_time, end_time, category, requires_proof)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    id, FAMILY_ID,
+    id, req.user.familyId,
     t.name || '',
     t.description || '',
     t.starValue ?? t.star_value ?? 1,
@@ -86,7 +86,7 @@ router.put('/:id', (req, res) => {
 
 // DELETE /api/tasks/:id
 router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM tasks WHERE id = ? AND family_id = ?').run(req.params.id, FAMILY_ID);
+  db.prepare('DELETE FROM tasks WHERE id = ? AND family_id = ?').run(req.params.id, req.user.familyId);
   broadcast('tasks');
   res.json({ ok: true });
 });

@@ -1,21 +1,30 @@
 import { create } from 'zustand';
 import type { UserRole, AuthState, Family } from '../types';
-import { verifyChildPin } from '../firebase/auth';
 import { apiFetch } from '../api/client';
 import { getSSE } from '../api/sse';
 
 const ROLE_KEY = 'star_routine_role';
-const FAMILY_ID = import.meta.env.VITE_FAMILY_ID as string;
+
+interface GoogleUser {
+  userId: string;
+  email: string;
+  name: string;
+  picture: string;
+  familyId: string | null;
+}
 
 interface AuthStore extends AuthState {
   family: Family | null;
+  googleUser: GoogleUser | null;
+  needsOnboarding: boolean;
   logout: () => Promise<void>;
   setRole: (role: UserRole) => Promise<void>;
   checkChildPin: (pin: string) => Promise<boolean>;
   initAuth: () => () => void;
+  createFamily: (parentName: string, childName: string, childPin: string) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   uid: null,
   email: null,
   familyId: null,
@@ -25,10 +34,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isLoading: true,
   isAuthenticated: false,
   family: null,
+  googleUser: null,
+  needsOnboarding: false,
 
   logout: async () => {
-    localStorage.removeItem(ROLE_KEY);
-    set({ role: 'child' });
+    await apiFetch('/auth/logout', { method: 'POST' }).catch(() => {});
+    window.location.href = '/';
   },
 
   setRole: async (role: UserRole) => {
@@ -41,101 +52,67 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   checkChildPin: async (pin: string) => {
-    return verifyChildPin(FAMILY_ID, pin);
+    try {
+      const { valid } = await apiFetch<{ valid: boolean }>('/auth/verify-pin', {
+        method: 'POST',
+        body: JSON.stringify({ pin }),
+      });
+      return valid;
+    } catch {
+      return false;
+    }
+  },
+
+  createFamily: async (parentName: string, childName: string, childPin: string) => {
+    const family = await apiFetch<Family>('/family', {
+      method: 'POST',
+      body: JSON.stringify({ parentName, childName, childPin }),
+    });
+    const gUser = get().googleUser;
+    set({
+      family,
+      familyId: gUser?.familyId ?? null,
+      parentName: family.parentName,
+      childName: family.childName,
+      needsOnboarding: false,
+      uid: gUser?.userId ?? 'local',
+    });
   },
 
   initAuth: () => {
-    // DEV MODE: Check for ?dev=child or ?dev=parent in URL
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const devMode = params.get('dev');
-      if (devMode === 'child' || devMode === 'parent') {
-        console.log('[DEV] Mocking auth state for role:', devMode);
-        set({
-          uid: 'dev-user-123',
-          email: 'dev@test.com',
-          familyId: 'dev-family-123',
-          role: devMode,
-          childName: 'Vitor',
-          parentName: 'Andre',
-          isAuthenticated: true,
-          isLoading: false,
-          family: {
-            childPin: 'mock-hashed-pin',
-            parentName: 'Andre',
-            childName: 'Vitor',
-            starBalance: 42,
-            lifetimeStarsEarned: 150,
-            currentStreak: 7,
-            bestStreak: 14,
-            settings: {
-              rewardThresholdPercent: 80,
-              penaltyThresholdPercent: 50,
-              rewardDescription: 'Parabéns!',
-              penaltyDescription: 'Tente mais amanhã',
-              periodType: 'weekly',
-              periodStartDay: 0,
-              autoRollPeriods: true,
-              onTimeBonusEnabled: true,
-              onTimeBonusStars: 1,
-              perfectDayBonusEnabled: true,
-              perfectDayBonusStars: 3,
-              earlyFinishBonusEnabled: false,
-              earlyFinishBonusStars: 2,
-              earlyFinishCutoff: '12:00',
-              streakFreezeCost: 5,
-              maxStreakFreezesPerPeriod: 1,
-              taskReminderLeadMinutes: 5,
-              morningNotificationTime: '07:00',
-              quietHoursStart: '21:00',
-              quietHoursEnd: '07:00',
-              notificationsEnabled: {
-                taskStarting: true,
-                morningSummary: true,
-                streakReminder: true,
-                taskApproved: true,
-                goalMilestone: true,
-                pendingApprovals: true,
-                periodEnding: true,
-                streakAtRisk: true,
-              },
-            },
-          },
-        });
-        return () => {};
-      }
-    }
-
-    // Single-family app: always authenticated, always parent by default
     const storedRole = (localStorage.getItem(ROLE_KEY) as UserRole) ?? 'child';
 
-    apiFetch<Family>('/family')
-      .then((family) => {
-        set({
-          uid: 'local',
-          email: null,
-          familyId: FAMILY_ID,
-          role: storedRole,
-          childName: family?.childName ?? null,
-          parentName: family?.parentName ?? null,
-          isAuthenticated: true,
-          isLoading: false,
-          family,
-        });
+    // Check if logged in via Google
+    apiFetch<GoogleUser>('/auth/me')
+      .then(async (gUser) => {
+        set({ googleUser: gUser, email: gUser.email, uid: gUser.userId });
+
+        if (!gUser.familyId) {
+          // Logged in but no family yet — need onboarding
+          set({ isAuthenticated: true, isLoading: false, needsOnboarding: true, role: 'parent' });
+          return;
+        }
+
+        // Fetch family data
+        try {
+          const family = await apiFetch<Family>('/family');
+          set({
+            isAuthenticated: true,
+            isLoading: false,
+            familyId: gUser.familyId,
+            role: storedRole,
+            childName: family?.childName ?? null,
+            parentName: family?.parentName ?? null,
+            family,
+            needsOnboarding: false,
+          });
+        } catch {
+          set({ isAuthenticated: true, isLoading: false, familyId: gUser.familyId, role: storedRole });
+        }
       })
       .catch(() => {
-        // API not yet ready — still mark as authenticated
-        set({
-          uid: 'local',
-          familyId: FAMILY_ID,
-          role: storedRole,
-          email: null,
-          childName: null,
-          parentName: null,
-          isAuthenticated: true,
-          isLoading: false,
-          family: null,
-        });
+        // Not logged in — show login page
+        set({ isAuthenticated: false, isLoading: false });
       });
 
     // Subscribe to family updates via SSE

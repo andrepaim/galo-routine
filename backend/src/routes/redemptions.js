@@ -6,7 +6,7 @@ const db = require('../db');
 const { broadcast } = require('../sse');
 const { nanoid } = require('nanoid');
 
-const FAMILY_ID = process.env.FAMILY_ID;
+
 
 function rowToRedemption(row) {
   return {
@@ -31,7 +31,7 @@ function toIso(val) {
 
 // GET /api/redemptions
 router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM redemptions WHERE family_id = ? ORDER BY redeemed_at DESC').all(FAMILY_ID);
+  const rows = db.prepare('SELECT * FROM redemptions WHERE family_id = ? ORDER BY redeemed_at DESC').all(req.user.familyId);
   res.json(rows.map(rowToRedemption));
 });
 
@@ -43,7 +43,7 @@ router.post('/', (req, res) => {
     INSERT INTO redemptions (id, family_id, reward_id, reward_name, star_cost, redeemed_at, status, fulfilled_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    id, FAMILY_ID,
+    id, req.user.familyId,
     r.rewardId ?? r.reward_id,
     r.rewardName ?? r.reward_name ?? '',
     r.starCost ?? r.star_cost ?? 0,

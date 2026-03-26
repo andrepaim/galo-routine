@@ -2,15 +2,25 @@
 
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const { authMiddleware } = require('./middleware/auth');
 
 const app = express();
 
 // ── Middleware ────────────────────────────────────────────────────
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+  origin: process.env.PUBLIC_URL || 'https://rotinadoatleticano.duckdns.org',
+  credentials: true,
+}));
 app.use(express.json({ limit: '2mb' }));
+app.use(cookieParser());
+app.use(authMiddleware);
 
 // ── Routes ────────────────────────────────────────────────────────
 const { sseHandler } = require('./sse');
+
+// Auth (public routes inside handle their own auth check)
+app.use('/api/auth', require('./routes/auth'));
 
 // SSE event stream
 app.get('/api/events', sseHandler);
@@ -37,8 +47,8 @@ app.use('/api/redemptions', require('./routes/redemptions'));
 // Galo
 app.use('/api/galo', require('./routes/galo'));
 
-// Auth
-app.use('/api/auth', require('./routes/auth'));
+// Canguru
+app.use('/api/canguru', require('./routes/canguru'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true, ts: new Date().toISOString() }));

@@ -5,7 +5,7 @@ const router = express.Router({ mergeParams: true });
 const db = require('../db');
 const { broadcast } = require('../sse');
 
-const FAMILY_ID = process.env.FAMILY_ID;
+
 
 function rowToCompletion(row) {
   return {
@@ -36,7 +36,7 @@ function toIso(val) {
 router.get('/', (req, res) => {
   const rows = db.prepare(
     'SELECT * FROM completions WHERE family_id = ? AND period_id = ? ORDER BY completed_at DESC'
-  ).all(FAMILY_ID, req.params.periodId);
+  ).all(req.user.familyId, req.params.periodId);
   res.json(rows.map(rowToCompletion));
 });
 
@@ -51,7 +51,7 @@ router.post('/', (req, res) => {
       (id, family_id, period_id, task_id, task_name, task_star_value, date, status, completed_at, reviewed_at, rejection_reason, on_time_bonus)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    id, FAMILY_ID, req.params.periodId,
+    id, req.user.familyId, req.params.periodId,
     c.taskId ?? c.task_id,
     c.taskName ?? c.task_name ?? '',
     c.taskStarValue ?? c.task_star_value ?? 1,

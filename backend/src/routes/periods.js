@@ -6,7 +6,7 @@ const db = require('../db');
 const { broadcast } = require('../sse');
 const { nanoid } = require('nanoid');
 
-const FAMILY_ID = process.env.FAMILY_ID;
+
 
 function rowToPeriod(row) {
   return {
@@ -25,13 +25,13 @@ function rowToPeriod(row) {
 
 // GET /api/periods/active  — must come before /:id
 router.get('/active', (req, res) => {
-  const row = db.prepare("SELECT * FROM periods WHERE family_id = ? AND status = 'active' ORDER BY start_date DESC LIMIT 1").get(FAMILY_ID);
+  const row = db.prepare("SELECT * FROM periods WHERE family_id = ? AND status = 'active' ORDER BY start_date DESC LIMIT 1").get(req.user.familyId);
   res.json(row ? rowToPeriod(row) : null);
 });
 
 // GET /api/periods
 router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM periods WHERE family_id = ? ORDER BY start_date DESC').all(FAMILY_ID);
+  const rows = db.prepare('SELECT * FROM periods WHERE family_id = ? ORDER BY start_date DESC').all(req.user.familyId);
   res.json(rows.map(rowToPeriod));
 });
 
@@ -53,7 +53,7 @@ router.post('/', (req, res) => {
     INSERT INTO periods (id, family_id, start_date, end_date, status, star_budget, stars_earned, stars_pending, thresholds, outcome)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    id, FAMILY_ID,
+    id, req.user.familyId,
     toIso(p.startDate ?? p.start_date),
     toIso(p.endDate ?? p.end_date),
     p.status || 'active',

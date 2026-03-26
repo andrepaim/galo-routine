@@ -103,6 +103,20 @@ CREATE TABLE IF NOT EXISTS galo_news_state (
   family_id TEXT PRIMARY KEY,
   shown_ids TEXT NOT NULL DEFAULT '[]'
 );
+
+CREATE TABLE IF NOT EXISTS canguru_sessions (
+  id TEXT PRIMARY KEY,
+  family_id TEXT NOT NULL,
+  date TEXT NOT NULL,
+  mode TEXT NOT NULL,
+  total_questions INTEGER NOT NULL DEFAULT 0,
+  correct INTEGER NOT NULL DEFAULT 0,
+  wrong INTEGER NOT NULL DEFAULT 0,
+  skipped INTEGER NOT NULL DEFAULT 0,
+  score INTEGER NOT NULL DEFAULT 0,
+  stars_earned INTEGER NOT NULL DEFAULT 0,
+  completed_at TEXT NOT NULL
+);
 `);
 
 module.exports = db;

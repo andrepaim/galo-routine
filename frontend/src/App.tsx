@@ -6,6 +6,7 @@ import { useSubscriptions } from './lib/hooks/useSubscriptions';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Onboarding from './pages/Onboarding';
 import ParentPin from './pages/ParentPin';
 import Child from './pages/Child';
 import Parent from './pages/Parent';
@@ -14,6 +15,7 @@ import NewTask from './pages/tasks/New';
 import EditTask from './pages/tasks/Edit';
 import NewReward from './pages/rewards/New';
 import EditReward from './pages/rewards/Edit';
+import Canguru from './pages/Canguru';
 
 function DataSubscriptions() {
   useSubscriptions();
@@ -24,6 +26,7 @@ function AppRoutes() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isLoading = useAuthStore((s) => s.isLoading);
   const role = useAuthStore((s) => s.role);
+  const needsOnboarding = useAuthStore((s) => s.needsOnboarding);
 
   if (isLoading) {
     return (
@@ -32,6 +35,8 @@ function AppRoutes() {
       </div>
     );
   }
+
+  if (needsOnboarding) return <Onboarding />;
 
   return (
     <>
@@ -46,6 +51,10 @@ function AppRoutes() {
         <Route
           path="/child"
           element={isAuthenticated ? <Child /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/child/canguru"
+          element={isAuthenticated ? <Canguru /> : <Navigate to="/login" replace />}
         />
         <Route
           path="/parent"
