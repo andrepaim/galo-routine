@@ -1,7 +1,7 @@
 {
   "name": "Galo Routine",
-  "short_name": "Galo",
-  "description": "Rotina di\u00e1ria do Vitor com pr\u00eamios de estrelas",
+  "short_name": "Galo Routine",
+  "description": "Rotina diária com tarefas e prêmios de estrelas para atleticanos!",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
