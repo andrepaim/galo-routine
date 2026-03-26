@@ -9,6 +9,7 @@ export default function Parent() {
 
   const childName = useAuthStore((s) => s.childName);
   const setRole = useAuthStore((s) => s.setRole);
+  const logout = useAuthStore((s) => s.logout);
   const family = useAuthStore((s) => s.family);
   const familyId = useAuthStore((s) => s.familyId);
   const { activePeriod } = useCurrentPeriod();
@@ -77,6 +78,13 @@ export default function Parent() {
               className="bg-card-bg border border-card-border px-4 py-2 rounded-xl text-text-secondary text-sm hover:border-star-gold hover:text-star-gold transition-colors active:scale-95"
             >
               ⚙️ Gerenciar
+            </button>
+            <button
+              onClick={() => { if (confirm('Sair da conta?')) logout(); }}
+              className="bg-card-bg border border-card-border px-3 py-2 rounded-xl text-text-secondary text-sm hover:border-red-500 hover:text-red-400 transition-colors active:scale-95"
+              title="Sair"
+            >
+              🚪
             </button>
           </div>
         </div>
