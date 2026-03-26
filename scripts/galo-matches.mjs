@@ -19,9 +19,9 @@ const ESPN_ATLETICO_ID = '7632';
 const ESPN_LEAGUES = ['bra.1', 'conmebol.libertadores', 'conmebol.sudamericana'];
 const BRT_OFFSET_MS = -3 * 60 * 60 * 1000;
 
-const TG_TOKEN   = 'REDACTED';
-const TG_CHAT    = '8592602749';
-const FAMILY_ID  = 'EXmCPl8hrnOYDzrPewHoXlGa5762';
+const TG_TOKEN   = process.env.TELEGRAM_BOT_TOKEN;
+const TG_CHAT    = process.env.TELEGRAM_CHAT_ID || '8592602749';
+const FAMILY_ID  = process.env.FAMILY_ID || 'EXmCPl8hrnOYDzrPewHoXlGa5762';
 
 // ── HTTP helpers ──────────────────────────────────────────────────────────────
 
