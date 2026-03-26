@@ -11,11 +11,11 @@ export default function Login() {
       padding: 24,
     }}>
       <div style={{
-        width: 100, height: 100, borderRadius: '50%',
+        width: 160, height: 160, borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(255,204,0,0.25) 0%, transparent 70%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        <img src="/atletico-badge.svg" alt="Atlético" style={{ width: 72 }} />
+        <img src="/atletico-badge.svg" alt="Atlético" style={{ width: 120 }} />
       </div>
       <div style={{ textAlign: 'center' }}>
         <h1 style={{ color: '#FFCC00', fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>
