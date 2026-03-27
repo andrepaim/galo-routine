@@ -113,7 +113,9 @@ router.get('/google/callback', async (req, res) => {
     res
       .cookie(COOKIE, token, { maxAge: MAX_AGE * 1000, httpOnly: true, secure: isSecure, sameSite: 'lax', path: '/' })
       .clearCookie('oauth_state')
-      .redirect('/');
+      .send(`<!DOCTYPE html><html><head><meta charset="utf-8">
+<script>window.location.replace('/');</script>
+</head><body><p>Redirecting...</p></body></html>`);
   } catch (err) {
     console.error('[auth] OAuth callback error:', err);
     res.status(500).send('Authentication failed');
