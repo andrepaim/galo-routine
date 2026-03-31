@@ -102,23 +102,12 @@ export const useRewardStore = create<RewardStore>((set, get) => ({
   },
 
   fulfillRedemption: async (familyId: string, redemptionId: string) => {
-    const redemption = get().redemptions.find((r) => r.id === redemptionId);
-    await updateRedemption(familyId, redemptionId, {
-      status: 'fulfilled',
-      fulfilledAt: new Date().toISOString(),
-    });
-    // Deduct stars only after parent approval
-    if (redemption) {
-      await incrementFamilyField(familyId, 'starBalance', -redemption.starCost);
-      // Decrement limited quantity
-      const reward = get().rewards.find((r) => r.id === redemption.rewardId);
-      if (reward?.availability === 'limited' && reward.quantity !== undefined && reward.quantity > 0) {
-        await updateReward(familyId, reward.id!, { quantity: reward.quantity - 1 });
-      }
-    }
+    // Bug 3: Backend handles star deduction + quantity atomically in a single transaction
+    await updateRedemption(familyId, redemptionId, { status: 'fulfilled' });
   },
 
   rejectRedemption: async (familyId: string, redemptionId: string) => {
+    // Bug 11: Backend handles quantity restoration on rejection
     await updateRedemption(familyId, redemptionId, { status: 'rejected' });
   },
 }));

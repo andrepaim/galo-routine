@@ -26,7 +26,7 @@ router.put('/schedule', (req, res) => {
     INSERT INTO galo_schedule (family_id, data) VALUES (?, ?)
     ON CONFLICT(family_id) DO UPDATE SET data = excluded.data
   `).run(req.user.familyId, json);
-  broadcast('galoSchedule');
+  broadcast('galoSchedule', req.user.familyId);
   res.json({ ok: true });
 });
 
@@ -49,7 +49,7 @@ router.put('/news-state', (req, res) => {
     INSERT INTO galo_news_state (family_id, shown_ids) VALUES (?, ?)
     ON CONFLICT(family_id) DO UPDATE SET shown_ids = excluded.shown_ids
   `).run(req.user.familyId, json);
-  broadcast('galoNewsState');
+  broadcast('galoNewsState', req.user.familyId);
   res.json({ ok: true });
 });
 

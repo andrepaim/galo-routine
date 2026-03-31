@@ -19,6 +19,14 @@ router.post('/session', (req, res) => {
     const date = now.slice(0, 10);
     const total = (correct || 0) + (wrong || 0) + (skipped || 0);
 
+    // Bug 8: Deduplication — only one session per mode per day
+    const existing = db.prepare(
+      'SELECT id FROM canguru_sessions WHERE family_id = ? AND date = ? AND mode = ?'
+    ).get(req.user.familyId, date, mode);
+    if (existing) {
+      return res.json({ ok: true, duplicate: true, session: existing });
+    }
+
     db.prepare(`
       INSERT INTO canguru_sessions (id, family_id, date, mode, total_questions, correct, wrong, skipped, score, stars_earned, completed_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -29,7 +37,7 @@ router.post('/session', (req, res) => {
       db.prepare(`
         UPDATE families SET star_balance = star_balance + ?, lifetime_stars_earned = lifetime_stars_earned + ? WHERE id = ?
       `).run(starsEarned, starsEarned, req.user.familyId);
-      broadcast('family');
+      broadcast('family', req.user.familyId);
     }
 
     const session = db.prepare('SELECT * FROM canguru_sessions WHERE id = ?').get(id);

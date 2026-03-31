@@ -51,7 +51,7 @@ router.post('/', (req, res) => {
     t.category ?? null,
     (t.requiresProof ?? t.requires_proof ?? false) ? 1 : 0,
   );
-  broadcast('tasks');
+  broadcast('tasks', req.user.familyId);
   const row = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
   res.status(201).json(rowToTask(row));
 });
@@ -78,7 +78,7 @@ router.put('/:id', (req, res) => {
     params.push(req.params.id);
     db.prepare(`UPDATE tasks SET ${updates.join(', ')} WHERE id = ?`).run(...params);
   }
-  broadcast('tasks');
+  broadcast('tasks', req.user.familyId);
   const row = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Not found' });
   res.json(rowToTask(row));
@@ -87,7 +87,7 @@ router.put('/:id', (req, res) => {
 // DELETE /api/tasks/:id
 router.delete('/:id', (req, res) => {
   db.prepare('DELETE FROM tasks WHERE id = ? AND family_id = ?').run(req.params.id, req.user.familyId);
-  broadcast('tasks');
+  broadcast('tasks', req.user.familyId);
   res.json({ ok: true });
 });
 

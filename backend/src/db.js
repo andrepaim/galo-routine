@@ -27,6 +27,16 @@ CREATE TABLE IF NOT EXISTS families (
   settings TEXT NOT NULL DEFAULT '{}'
 );
 
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  google_id TEXT UNIQUE NOT NULL,
+  email TEXT NOT NULL,
+  name TEXT NOT NULL DEFAULT '',
+  picture TEXT,
+  created_at TEXT NOT NULL,
+  family_id TEXT
+);
+
 CREATE TABLE IF NOT EXISTS tasks (
   id TEXT PRIMARY KEY,
   family_id TEXT NOT NULL,

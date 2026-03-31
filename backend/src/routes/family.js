@@ -118,7 +118,7 @@ router.put('/', (req, res) => {
 
   params.push(familyId);
   db.prepare(`UPDATE families SET ${updates.join(', ')} WHERE id = ?`).run(...params);
-  broadcast('family');
+  broadcast('family', req.user.familyId);
   const row = db.prepare('SELECT * FROM families WHERE id = ?').get(familyId);
   res.json(rowToFamily(row));
 });
@@ -140,7 +140,7 @@ router.put('/increment', (req, res) => {
   if (!validCols.includes(col)) return res.status(400).json({ error: 'Invalid field' });
 
   db.prepare(`UPDATE families SET ${col} = ${col} + ? WHERE id = ?`).run(amount, familyId);
-  broadcast('family');
+  broadcast('family', req.user.familyId);
   const row = db.prepare('SELECT * FROM families WHERE id = ?').get(familyId);
   res.json(rowToFamily(row));
 });

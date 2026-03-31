@@ -72,20 +72,10 @@ export const useCompletionStore = create<CompletionStore>((set, get) => ({
     periodId: string,
     completionId: string,
   ) => {
-    // Find the completion to get its star value
-    const completion = get().completions.find((c) => c.id === completionId);
-    const starValue = completion?.taskStarValue ?? 0;
-
+    // Bug 4: Backend handles star crediting atomically in a single transaction
     await updateCompletion(familyId, periodId, completionId, {
       status: 'approved',
-      reviewedAt: new Date().toISOString(),
     });
-
-    // Increment star balance and lifetime stars
-    if (starValue > 0) {
-      await incrementFamilyField(familyId, 'starBalance', starValue);
-      await incrementFamilyField(familyId, 'lifetimeStarsEarned', starValue);
-    }
   },
 
   rejectCompletion: async (

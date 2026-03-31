@@ -63,7 +63,7 @@ router.post('/', (req, res) => {
     JSON.stringify(p.thresholds || {}),
     p.outcome ?? null,
   );
-  broadcast('periods');
+  broadcast('periods', req.user.familyId);
   const row = db.prepare('SELECT * FROM periods WHERE id = ?').get(id);
   res.status(201).json(rowToPeriod(row));
 });
@@ -99,9 +99,41 @@ router.put('/:id', (req, res) => {
     params.push(req.params.id);
     db.prepare(`UPDATE periods SET ${updates.join(', ')} WHERE id = ?`).run(...params);
   }
-  broadcast('periods');
+  broadcast('periods', req.user.familyId);
   const row = db.prepare('SELECT * FROM periods WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Not found' });
+  res.json(rowToPeriod(row));
+});
+
+// POST /api/periods/:id/complete — atomically complete a period (Bug 9)
+router.post('/:id/complete', (req, res) => {
+  const period = db.prepare(
+    'SELECT * FROM periods WHERE id = ? AND family_id = ?'
+  ).get(req.params.id, req.user.familyId);
+  if (!period) return res.status(404).json({ error: 'Not found' });
+  if (period.status === 'completed') {
+    return res.json(rowToPeriod(period)); // idempotent
+  }
+
+  const completions = db.prepare(
+    "SELECT task_star_value FROM completions WHERE period_id = ? AND family_id = ? AND status = 'approved'"
+  ).all(req.params.id, req.user.familyId);
+
+  const starsEarned = completions.reduce((sum, c) => sum + c.task_star_value, 0);
+  const thresholds = JSON.parse(period.thresholds || '{}');
+  const budget = period.star_budget || 1;
+  const pct = starsEarned / budget;
+
+  let outcome = 'neutral';
+  if (pct >= (thresholds.rewardPercent || 0.8)) outcome = 'reward';
+  else if (pct < (thresholds.penaltyPercent || 0.3)) outcome = 'penalty';
+
+  db.prepare(
+    'UPDATE periods SET status = ?, outcome = ?, stars_earned = ?, stars_pending = 0 WHERE id = ? AND family_id = ?'
+  ).run('completed', outcome, starsEarned, req.params.id, req.user.familyId);
+
+  broadcast('periods', req.user.familyId);
+  const row = db.prepare('SELECT * FROM periods WHERE id = ?').get(req.params.id);
   res.json(rowToPeriod(row));
 });
 

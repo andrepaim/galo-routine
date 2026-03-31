@@ -47,7 +47,7 @@ router.post('/', (req, res) => {
     r.quantity ?? null,
     (r.requiresApproval ?? r.requires_approval ?? true) ? 1 : 0,
   );
-  broadcast('rewards');
+  broadcast('rewards', req.user.familyId);
   const row = db.prepare('SELECT * FROM rewards WHERE id = ?').get(id);
   res.status(201).json(rowToReward(row));
 });
@@ -72,7 +72,7 @@ router.put('/:id', (req, res) => {
     params.push(req.params.id);
     db.prepare(`UPDATE rewards SET ${updates.join(', ')} WHERE id = ?`).run(...params);
   }
-  broadcast('rewards');
+  broadcast('rewards', req.user.familyId);
   const row = db.prepare('SELECT * FROM rewards WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Not found' });
   res.json(rowToReward(row));
@@ -80,8 +80,9 @@ router.put('/:id', (req, res) => {
 
 // DELETE /api/rewards/:id
 router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM rewards WHERE id = ? AND family_id = ?').run(req.params.id, req.user.familyId);
-  broadcast('rewards');
+  // Soft-delete to preserve orphaned redemption references (Bug 12)
+  db.prepare('UPDATE rewards SET is_active = 0 WHERE id = ? AND family_id = ?').run(req.params.id, req.user.familyId);
+  broadcast('rewards', req.user.familyId);
   res.json({ ok: true });
 });
 
