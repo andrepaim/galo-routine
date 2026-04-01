@@ -2,8 +2,8 @@
 # Daily SQLite backup for galo-routine DB
 # Keeps last 30 days of backups
 
-DB="/root/galo-routine/backend/galo-routine.db"
-BACKUP_DIR="/root/galo-routine/backups"
+DB="/home/openclaw/galo-routine/backend/galo-routine.db"
+BACKUP_DIR="/home/openclaw/galo-routine/backups"
 DATE=$(date +%Y-%m-%d)
 
 mkdir -p "$BACKUP_DIR"
