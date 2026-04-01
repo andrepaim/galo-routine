@@ -1,6 +1,6 @@
 # Rotina do Atleticano ⭐
 
-A self-hosted routine and reward app for kids, themed around Atlético Mineiro (Galo).
+A self-hosted routine and reward app for kids, themed around Atlético Mineiro (Galo). Complete your daily tasks, earn stars, redeem rewards — and celebrate every win with the latest Galo news.
 
 ## Screenshots
 
@@ -14,11 +14,15 @@ A self-hosted routine and reward app for kids, themed around Atlético Mineiro (
 
 ---
 
-## What is this?
+## Why I Built This
 
-A daily routine tracker where a child completes tasks to earn stars ⭐, then redeems stars for rewards. Parents approve completions and redemptions. The whole thing is wrapped in an Atlético Mineiro theme — completing your day feels like winning a match.
+Routine apps for kids are easy to find. Most of them work. But they're generic — star charts and task lists that could belong to anyone.
 
-Built for one family. Not a SaaS product.
+My son is an Atleticano. I wanted completing his daily tasks to feel like being part of the club, not filling out a chore chart. So I built it around Galo: every completed task ends with a celebration animation and the latest headline — a transfer rumour, a match result, an upcoming fixture at Arena MRV. The reward isn't just a star. It's a moment of connection to something he actually cares about.
+
+The long-term rewards work the same way. Instead of generic prizes, they're built around the calendar: the next home match, the next late-night weekday game on TV. These rewards are dynamic — pulled every morning from the ESPN API and Google News by a cron job running on the same VPS. No subscription app ships that. It's not a feature you can unlock with a premium plan. It has to be built for one family, around one club.
+
+And it costs nothing beyond the VPS I was already running.
 
 ---
 
