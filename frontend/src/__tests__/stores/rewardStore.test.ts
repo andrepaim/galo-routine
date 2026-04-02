@@ -195,7 +195,7 @@ describe('rewardStore', () => {
   });
 
   describe('fulfillRedemption', () => {
-    it('marks redemption as fulfilled and deducts stars', async () => {
+    it('marks redemption as fulfilled (backend handles star deduction)', async () => {
       useRewardStore.setState({
         redemptions: [
           { id: 'red-1', rewardId: 'r1', rewardName: 'Game Time', starCost: 10, redeemedAt: new Date().toISOString(), status: 'pending' },
@@ -206,20 +206,7 @@ describe('rewardStore', () => {
       expect(mockedUpdateRedemption).toHaveBeenCalledWith(FAMILY_ID, 'red-1', expect.objectContaining({
         status: 'fulfilled',
       }));
-      expect(mockedIncrementFamilyField).toHaveBeenCalledWith(FAMILY_ID, 'starBalance', -10);
-    });
-
-    it('decrements limited quantity on fulfill', async () => {
-      useRewardStore.setState({
-        redemptions: [
-          { id: 'red-2', rewardId: 'r3', rewardName: 'Ice Cream', starCost: 8, redeemedAt: new Date().toISOString(), status: 'pending' },
-        ],
-        rewards: [
-          { id: 'r3', name: 'Ice Cream', description: '', starCost: 8, icon: '🍦', isActive: true, availability: 'limited', quantity: 3, requiresApproval: false },
-        ],
-      });
-      await useRewardStore.getState().fulfillRedemption(FAMILY_ID, 'red-2');
-      expect(mockedUpdateReward).toHaveBeenCalledWith(FAMILY_ID, 'r3', { quantity: 2 });
+      // Star deduction and quantity decrement are now handled atomically by the backend
     });
   });
 

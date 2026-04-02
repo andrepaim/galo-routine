@@ -93,7 +93,7 @@ describe('completionStore', () => {
   });
 
   describe('approveCompletion', () => {
-    it('updates status and increments star balance', async () => {
+    it('updates status (backend handles star crediting)', async () => {
       useCompletionStore.setState({
         completions: [makeCompletion({ id: 'comp-1', taskStarValue: 3 })],
       });
@@ -101,16 +101,7 @@ describe('completionStore', () => {
       expect(mockedUpdateCompletion).toHaveBeenCalledWith(FAMILY_ID, PERIOD_ID, 'comp-1', expect.objectContaining({
         status: 'approved',
       }));
-      expect(mockedIncrementFamilyField).toHaveBeenCalledWith(FAMILY_ID, 'starBalance', 3);
-      expect(mockedIncrementFamilyField).toHaveBeenCalledWith(FAMILY_ID, 'lifetimeStarsEarned', 3);
-    });
-
-    it('does not increment if star value is 0', async () => {
-      useCompletionStore.setState({
-        completions: [makeCompletion({ id: 'comp-0', taskStarValue: 0 })],
-      });
-      await useCompletionStore.getState().approveCompletion(FAMILY_ID, PERIOD_ID, 'comp-0');
-      expect(mockedIncrementFamilyField).not.toHaveBeenCalled();
+      // Star balance is now handled atomically by the backend, not the frontend
     });
 
     it('handles missing completion gracefully', async () => {
