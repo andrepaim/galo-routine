@@ -7,6 +7,7 @@ jest.resetModules();
 const request = require('supertest');
 const app = require('../src/app');
 const db = require('../src/db');
+const { authCookie } = require('./helpers');
 
 const FAMILY_ID = 'test-family-id';
 
@@ -19,7 +20,7 @@ beforeAll(() => {
 describe('Galo API', () => {
   describe('Schedule', () => {
     it('GET /api/galo/schedule returns null when empty', async () => {
-      const res = await request(app).get('/api/galo/schedule');
+      const res = await request(app).get('/api/galo/schedule').set('Cookie', authCookie());
       expect(res.status).toBe(200);
       expect(res.body).toBeNull();
     });
@@ -27,13 +28,14 @@ describe('Galo API', () => {
     it('PUT /api/galo/schedule stores data', async () => {
       const res = await request(app)
         .put('/api/galo/schedule')
+        .set('Cookie', authCookie())
         .send({ data: { matches: [], suggestedRewards: [] } });
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
     });
 
     it('GET /api/galo/schedule after PUT returns the data object', async () => {
-      const res = await request(app).get('/api/galo/schedule');
+      const res = await request(app).get('/api/galo/schedule').set('Cookie', authCookie());
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ matches: [], suggestedRewards: [] });
     });
@@ -41,16 +43,17 @@ describe('Galo API', () => {
     it('PUT /api/galo/schedule twice overwrites (upsert)', async () => {
       await request(app)
         .put('/api/galo/schedule')
+        .set('Cookie', authCookie())
         .send({ data: { matches: [{ id: 1 }], suggestedRewards: [] } });
 
-      const res = await request(app).get('/api/galo/schedule');
+      const res = await request(app).get('/api/galo/schedule').set('Cookie', authCookie());
       expect(res.body.matches).toEqual([{ id: 1 }]);
     });
   });
 
   describe('News State', () => {
     it('GET /api/galo/news-state returns { shownIds: [] } when empty', async () => {
-      const res = await request(app).get('/api/galo/news-state');
+      const res = await request(app).get('/api/galo/news-state').set('Cookie', authCookie());
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ shownIds: [] });
     });
@@ -58,13 +61,14 @@ describe('Galo API', () => {
     it('PUT /api/galo/news-state stores shownIds', async () => {
       const res = await request(app)
         .put('/api/galo/news-state')
+        .set('Cookie', authCookie())
         .send({ shownIds: ['id1', 'id2'] });
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
     });
 
     it('GET /api/galo/news-state after PUT returns the shownIds', async () => {
-      const res = await request(app).get('/api/galo/news-state');
+      const res = await request(app).get('/api/galo/news-state').set('Cookie', authCookie());
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ shownIds: ['id1', 'id2'] });
     });
@@ -72,9 +76,10 @@ describe('Galo API', () => {
     it('PUT /api/galo/news-state twice overwrites', async () => {
       await request(app)
         .put('/api/galo/news-state')
+        .set('Cookie', authCookie())
         .send({ shownIds: ['id3', 'id4', 'id5'] });
 
-      const res = await request(app).get('/api/galo/news-state');
+      const res = await request(app).get('/api/galo/news-state').set('Cookie', authCookie());
       expect(res.body.shownIds).toEqual(['id3', 'id4', 'id5']);
     });
   });

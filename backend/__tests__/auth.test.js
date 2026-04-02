@@ -7,6 +7,7 @@ jest.resetModules();
 const request = require('supertest');
 const app = require('../src/app');
 const db = require('../src/db');
+const { authCookie } = require('./helpers');
 
 const FAMILY_ID = 'test-family-id';
 
@@ -35,6 +36,7 @@ describe('Auth API', () => {
   it('POST /api/auth/verify-pin with correct hashed pin → { valid: true }', async () => {
     const res = await request(app)
       .post('/api/auth/verify-pin')
+      .set('Cookie', authCookie())
       .send({ pin: '1234' });
     expect(res.status).toBe(200);
     expect(res.body.valid).toBe(true);
@@ -43,6 +45,7 @@ describe('Auth API', () => {
   it('POST /api/auth/verify-pin with wrong pin → { valid: false }', async () => {
     const res = await request(app)
       .post('/api/auth/verify-pin')
+      .set('Cookie', authCookie())
       .send({ pin: '9999' });
     expect(res.status).toBe(200);
     expect(res.body.valid).toBe(false);
@@ -54,6 +57,7 @@ describe('Auth API', () => {
 
     const res = await request(app)
       .post('/api/auth/verify-pin')
+      .set('Cookie', authCookie())
       .send({ pin: '5678' });
     expect(res.status).toBe(200);
     expect(res.body.valid).toBe(true);
@@ -65,6 +69,7 @@ describe('Auth API', () => {
   it('POST /api/auth/verify-pin with empty body → { valid: false }', async () => {
     const res = await request(app)
       .post('/api/auth/verify-pin')
+      .set('Cookie', authCookie())
       .send({});
     expect(res.status).toBe(200);
     expect(res.body.valid).toBe(false);

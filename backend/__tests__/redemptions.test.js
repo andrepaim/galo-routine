@@ -7,6 +7,7 @@ jest.resetModules();
 const request = require('supertest');
 const app = require('../src/app');
 const db = require('../src/db');
+const { authCookie } = require('./helpers');
 
 const FAMILY_ID = 'test-family-id';
 
@@ -18,7 +19,7 @@ beforeAll(() => {
 
 describe('Redemptions API', () => {
   it('GET /api/redemptions returns empty array initially', async () => {
-    const res = await request(app).get('/api/redemptions');
+    const res = await request(app).get('/api/redemptions').set('Cookie', authCookie());
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
   });
@@ -28,6 +29,7 @@ describe('Redemptions API', () => {
   it('POST /api/redemptions creates redemption with status=pending and fulfilledAt=null', async () => {
     const res = await request(app)
       .post('/api/redemptions')
+      .set('Cookie', authCookie())
       .send({
         rewardId: 'reward-001',
         rewardName: 'Ice cream',
@@ -45,18 +47,19 @@ describe('Redemptions API', () => {
   });
 
   it('PUT /api/redemptions/:id with status=fulfilled updates fulfilledAt', async () => {
-    const fulfilledAt = '2026-02-11T10:00:00.000Z';
     const res = await request(app)
       .put(`/api/redemptions/${redemptionId}`)
-      .send({ status: 'fulfilled', fulfilledAt });
+      .set('Cookie', authCookie())
+      .send({ status: 'fulfilled' });
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('fulfilled');
-    expect(res.body.fulfilledAt).toBe(fulfilledAt);
+    expect(res.body.fulfilledAt).toBeTruthy(); // server sets fulfilledAt automatically
   });
 
   it('PUT /api/redemptions/:id with status=rejected updates status', async () => {
     const res = await request(app)
       .put(`/api/redemptions/${redemptionId}`)
+      .set('Cookie', authCookie())
       .send({ status: 'rejected' });
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('rejected');
@@ -65,6 +68,7 @@ describe('Redemptions API', () => {
   it('PUT /api/redemptions/nonexistent → 404', async () => {
     const res = await request(app)
       .put('/api/redemptions/nonexistent-id-xyz')
+      .set('Cookie', authCookie())
       .send({ status: 'fulfilled' });
     expect(res.status).toBe(404);
   });

@@ -7,6 +7,7 @@ jest.resetModules();
 const request = require('supertest');
 const app = require('../src/app');
 const db = require('../src/db');
+const { authCookie } = require('./helpers');
 
 const FAMILY_ID = 'test-family-id';
 
@@ -18,13 +19,13 @@ beforeAll(() => {
 
 describe('Periods API', () => {
   it('GET /api/periods returns empty array initially', async () => {
-    const res = await request(app).get('/api/periods');
+    const res = await request(app).get('/api/periods').set('Cookie', authCookie());
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
   });
 
   it('GET /api/periods/active returns null initially', async () => {
-    const res = await request(app).get('/api/periods/active');
+    const res = await request(app).get('/api/periods/active').set('Cookie', authCookie());
     expect(res.status).toBe(200);
     expect(res.body).toBeNull();
   });
@@ -34,6 +35,7 @@ describe('Periods API', () => {
   it('POST /api/periods creates a period with ISO date strings', async () => {
     const res = await request(app)
       .post('/api/periods')
+      .set('Cookie', authCookie())
       .send({
         startDate: '2026-02-01T00:00:00.000Z',
         endDate: '2026-02-28T23:59:59.000Z',
@@ -50,7 +52,7 @@ describe('Periods API', () => {
   });
 
   it('GET /api/periods/active returns the active period', async () => {
-    const res = await request(app).get('/api/periods/active');
+    const res = await request(app).get('/api/periods/active').set('Cookie', authCookie());
     expect(res.status).toBe(200);
     expect(res.body).not.toBeNull();
     expect(res.body.id).toBe(periodId);
@@ -61,13 +63,14 @@ describe('Periods API', () => {
     // Create a completed period
     await request(app)
       .post('/api/periods')
+      .set('Cookie', authCookie())
       .send({
         startDate: '2026-01-01T00:00:00.000Z',
         endDate: '2026-01-31T23:59:59.000Z',
         status: 'completed',
       });
 
-    const res = await request(app).get('/api/periods/active');
+    const res = await request(app).get('/api/periods/active').set('Cookie', authCookie());
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('active');
     expect(res.body.id).toBe(periodId);
@@ -76,6 +79,7 @@ describe('Periods API', () => {
   it('PUT /api/periods/:id updates status and outcome', async () => {
     const res = await request(app)
       .put(`/api/periods/${periodId}`)
+      .set('Cookie', authCookie())
       .send({ status: 'completed', outcome: 'reward' });
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('completed');
@@ -83,7 +87,7 @@ describe('Periods API', () => {
   });
 
   it('GET /api/periods/active returns null after period completed', async () => {
-    const res = await request(app).get('/api/periods/active');
+    const res = await request(app).get('/api/periods/active').set('Cookie', authCookie());
     expect(res.status).toBe(200);
     expect(res.body).toBeNull();
   });

@@ -6,6 +6,7 @@ jest.resetModules();
 const request = require('supertest');
 const app = require('../src/app');
 const http = require('http');
+const { authCookie } = require('./helpers');
 
 describe('SSE /api/events', () => {
   let server;
@@ -24,7 +25,7 @@ describe('SSE /api/events', () => {
   });
 
   it('returns 200 with Content-Type: text/event-stream', (done) => {
-    const req = http.get(`http://127.0.0.1:${port}/api/events`, (res) => {
+    const req = http.get(`http://127.0.0.1:${port}/api/events`, { headers: { Cookie: authCookie() } }, (res) => {
       expect(res.statusCode).toBe(200);
       expect(res.headers['content-type']).toMatch(/text\/event-stream/);
       req.destroy();
@@ -37,7 +38,7 @@ describe('SSE /api/events', () => {
   });
 
   it('response headers include cache-control: no-cache', (done) => {
-    const req = http.get(`http://127.0.0.1:${port}/api/events`, (res) => {
+    const req = http.get(`http://127.0.0.1:${port}/api/events`, { headers: { Cookie: authCookie() } }, (res) => {
       expect(res.headers['cache-control']).toMatch(/no-cache/);
       req.destroy();
       done();
