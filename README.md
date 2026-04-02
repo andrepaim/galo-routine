@@ -1,6 +1,10 @@
 # Rotina do Atleticano ⭐
 
+> A self-hosted routine and reward app for kids, themed around Atlético Mineiro.
+
 A self-hosted routine and reward app for kids, themed around Atlético Mineiro (Galo). Complete your daily tasks, earn stars, redeem rewards — and celebrate every win with the latest Galo news.
+
+---
 
 ## Screenshots
 
@@ -37,18 +41,19 @@ And it costs nothing beyond the VPS I was already running.
 
 ---
 
-## Repo structure
+## Stack
 
-```
-galo-routine/
-├── frontend/        React + Vite + Tailwind PWA
-├── backend/         Express + SQLite API (port 3200)
-├── scripts/         Cron scripts and one-off utilities
-├── screenshots/     App screenshots for this README
-├── deploy.sh        Build frontend + copy to /var/www/
-├── .env             Runtime config (gitignored)
-└── .env.example     Config template
-```
+| Layer | Tech |
+|---|---|
+| Frontend | React 18 + TypeScript + Vite |
+| Styling | Tailwind CSS — Galo theme (`galoBlack: #1A1A1A`, `starGold: #FFD700`) |
+| Routing | React Router v6 |
+| State | Zustand — global state (auth, tasks, completions, rewards) |
+| Auth | Firebase — Google sign-in only (no Firestore) |
+| PWA | `manifest.json` + Vite build |
+| Backend | Express + better-sqlite3 (WAL mode) |
+| Real-time | SSE for real-time push |
+| Process | Systemd service: `galo-routine.service` |
 
 ---
 
@@ -82,74 +87,54 @@ galo-routine/
 
 ---
 
-## Tech Stack
+## Self-hosting
 
-**Frontend (`frontend/`)**
-- React 18 + TypeScript + Vite
-- Tailwind CSS — Galo theme (`galoBlack: #1A1A1A`, `starGold: #FFD700`)
-- React Router v6
-- Zustand — global state (auth, tasks, completions, rewards)
-- Firebase — Google sign-in only (no Firestore)
-- PWA — `manifest.json` + Vite build
-
-**Backend (`backend/`)**
-- Express + better-sqlite3 (WAL mode)
-- SSE for real-time push
-- Systemd service: `galo-routine.service`
-
----
-
-## Screens
-
-| Route | Who | What |
-|---|---|---|
-| `/login` | Both | Google sign-in |
-| `/register` | Parent | First-time family setup |
-| `/child` | Child | Today's tasks + stars + rewards |
-| `/parent` | Parent | Approve completions + redemptions |
-| `/parent/manage` | Parent | Add/edit tasks, rewards, Galo suggestions |
-| `/parent-pin` | Both | PIN entry to switch to parent role |
-
-Default entry is `/child`. Parent access requires PIN.
-
----
-
-## Setup
-
-### 1. Clone
+### Quick start
 
 ```bash
+# 1. Clone
 git clone https://github.com/andrepaim/galo-routine.git
 cd galo-routine
-```
 
-### 2. Configure
-
-```bash
+# 2. Configure
 cp .env.example .env
 # Edit .env and set FAMILY_ID and DB_PATH
 
 # Also set VITE_FAMILY_ID in the frontend env:
 echo "VITE_FAMILY_ID=your-family-id" >> frontend/.env
-```
 
-### 3. Backend
-
-```bash
+# 3. Backend
 cd backend
 npm install
 node src/index.js   # http://127.0.0.1:3200
-```
 
-### 4. Frontend (dev)
-
-```bash
+# 4. Frontend
 cd frontend
 npm install
 npm run dev         # http://localhost:5174
 ```
 
-### 5. Deploy (production)
+### Environment variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `FAMILY_ID` | Yes | Unique identifier for your family |
+| `DB_PATH` | Yes | Path to the SQLite database file |
+| `VITE_FAMILY_ID` | Yes | Family ID for the frontend (set in `frontend/.env`) |
+
+### Development
+
+```bash
+# Backend (port 3200, binds 127.0.0.1)
+cd backend && npm install && node src/index.js
+
+# Frontend (Vite dev server)
+cd frontend && npm install && npm run dev
+```
+
+### Deploy (systemd)
+
+Build and deploy the frontend:
 
 ```bash
 bash deploy.sh
@@ -157,11 +142,7 @@ bash deploy.sh
 
 Builds the frontend and copies `dist/` → `/var/www/rotinadoatleticano/`.
 
----
-
-## Production (systemd)
-
-The backend runs as a persistent service:
+The backend runs as a persistent systemd service:
 
 ```bash
 systemctl status galo-routine.service
@@ -186,6 +167,14 @@ EnvironmentFile=/path/to/galo-routine/.env
 
 [Install]
 WantedBy=multi-user.target
+```
+
+Apache reverse proxy configuration:
+
+```apache
+ProxyPreserveHost On
+ProxyPass /api/ http://127.0.0.1:3200/api/
+ProxyPassReverse /api/ http://127.0.0.1:3200/api/
 ```
 
 ---
@@ -217,14 +206,23 @@ A Telegram alert fires if the next home match is within 7 days.
 
 ---
 
-## Apache Proxy
+## Screens
 
-```apache
-ProxyPreserveHost On
-ProxyPass /api/ http://127.0.0.1:3200/api/
-ProxyPassReverse /api/ http://127.0.0.1:3200/api/
-```
+| Route | Who | What |
+|---|---|---|
+| `/login` | Both | Google sign-in |
+| `/register` | Parent | First-time family setup |
+| `/child` | Child | Today's tasks + stars + rewards |
+| `/parent` | Parent | Approve completions + redemptions |
+| `/parent/manage` | Parent | Add/edit tasks, rewards, Galo suggestions |
+| `/parent-pin` | Both | PIN entry to switch to parent role |
+
+Default entry is `/child`. Parent access requires PIN.
 
 ---
 
-## No blue. Cruzeiro is the arch-rival. The theme is black and gold, always.
+No blue. Cruzeiro is the arch-rival. The theme is black and gold, always.
+
+## License
+
+MIT
