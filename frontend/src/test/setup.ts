@@ -1,12 +1,6 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock firebase config
-vi.mock('../lib/firebase/config', () => ({
-  db: {},
-  auth: {},
-}));
-
 // localStorage mock
 const localStorageMock = (() => {
   let store: Record<string, string> = {};

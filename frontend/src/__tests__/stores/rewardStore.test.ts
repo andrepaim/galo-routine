@@ -96,7 +96,7 @@ describe('rewardStore', () => {
       }));
     });
 
-    it('strips undefined fields before Firestore update', async () => {
+    it('strips undefined fields before API update', async () => {
       await useRewardStore.getState().editReward(FAMILY_ID, 'reward-1', { name: 'Updated' });
       const callArgs = mockedUpdateReward.mock.calls[0][2];
       for (const value of Object.values(callArgs as Record<string, unknown>)) {

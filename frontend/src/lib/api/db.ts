@@ -1,7 +1,6 @@
 /**
  * src/lib/api/db.ts
- * Drop-in replacement for src/lib/firebase/firestore.ts
- * Uses the REST API instead of Firestore.
+ * REST API data layer
  */
 import { apiFetch } from './client';
 import { getSSE } from './sse';
@@ -318,7 +317,7 @@ export function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
   ) as T;
 }
 
-// ── Unused Firebase stubs (kept for TS compatibility) ─────────────────────────
+// ── Stubs (kept for TS compatibility) ────────────────────────────────────────
 export async function createEarnedBadge(_familyId: string, _badge: unknown): Promise<string> {
   return '';
 }

@@ -49,7 +49,7 @@ And it costs nothing beyond the VPS I was already running.
 | Styling | Tailwind CSS — Galo theme (`galoBlack: #1A1A1A`, `starGold: #FFD700`) |
 | Routing | React Router v6 |
 | State | Zustand — global state (auth, tasks, completions, rewards) |
-| Auth | Firebase — Google sign-in only (no Firestore) |
+| Auth | Server-side Google OAuth + JWT cookies |
 | PWA | `manifest.json` + Vite build |
 | Backend | Express + better-sqlite3 (WAL mode) |
 | Real-time | SSE for real-time push |
@@ -100,8 +100,6 @@ cd galo-routine
 cp .env.example .env
 # Edit .env and set FAMILY_ID and DB_PATH
 
-# Also set VITE_FAMILY_ID in the frontend env:
-echo "VITE_FAMILY_ID=your-family-id" >> frontend/.env
 
 # 3. Backend
 cd backend
@@ -120,7 +118,6 @@ npm run dev         # http://localhost:5174
 |---|---|---|
 | `FAMILY_ID` | Yes | Unique identifier for your family |
 | `DB_PATH` | Yes | Path to the SQLite database file |
-| `VITE_FAMILY_ID` | Yes | Family ID for the frontend (set in `frontend/.env`) |
 
 ### Development
 
@@ -202,7 +199,6 @@ A Telegram alert fires if the next home match is within 7 days.
 |---|---|
 | `scripts/galo-matches.mjs` | Daily cron — ESPN + News → backend; Telegram alert if home match ≤ 7 days |
 | `scripts/import-tasks-admin.mjs` | One-shot admin import of the full task list |
-| `scripts/migrate-from-firebase.mjs` | One-shot migration from Firebase Firestore to SQLite |
 
 ---
 

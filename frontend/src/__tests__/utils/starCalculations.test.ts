@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateStarBudget, determinePeriodOutcome, getStarProgress } from '../../lib/utils/starCalculations';
 import type { Task, Period } from '../../lib/types';
-import { Timestamp } from 'firebase/firestore';
 
 function makeTask(overrides: Partial<Task> = {}): Task {
   return {
@@ -18,8 +17,8 @@ function makeTask(overrides: Partial<Task> = {}): Task {
 function makePeriod(overrides: Partial<Period> = {}): Period {
   return {
     id: 'period-1',
-    startDate: Timestamp.fromDate(new Date('2026-01-06')),
-    endDate: Timestamp.fromDate(new Date('2026-01-12')),
+    startDate: '2026-01-06T00:00:00.000Z',
+    endDate: '2026-01-12T00:00:00.000Z',
     status: 'active',
     starBudget: 100,
     starsEarned: 50,

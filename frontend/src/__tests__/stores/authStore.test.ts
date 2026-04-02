@@ -1,15 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../../lib/firebase/auth');
+vi.mock('../../lib/api/client');
 
 import { useAuthStore } from '../../lib/stores/authStore';
-import {
-  signOut as firebaseSignOut,
-  verifyChildPin,
-} from '../../lib/firebase/auth';
+import { apiFetch } from '../../lib/api/client';
 
-const mockedSignOut = vi.mocked(firebaseSignOut);
-const mockedVerifyPin = vi.mocked(verifyChildPin);
+const mockedApiFetch = vi.mocked(apiFetch);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -38,9 +34,13 @@ describe('authStore', () => {
         role: 'child',
         isAuthenticated: true,
       });
+      // Mock apiFetch for logout and prevent redirect
+      mockedApiFetch.mockResolvedValue(undefined as any);
+      const originalHref = Object.getOwnPropertyDescriptor(window, 'location');
+      Object.defineProperty(window, 'location', { value: { href: '' }, writable: true });
       await useAuthStore.getState().logout();
-      expect(window.localStorage.getItem('star_routine_role')).toBeNull();
-      expect(useAuthStore.getState().role).toBe('parent');
+      expect(mockedApiFetch).toHaveBeenCalledWith('/auth/logout', { method: 'POST' });
+      if (originalHref) Object.defineProperty(window, 'location', originalHref);
     });
   });
 
@@ -66,16 +66,25 @@ describe('authStore', () => {
   });
 
   describe('checkChildPin', () => {
-    it('verifies pin via verifyChildPin with hardcoded family id', async () => {
-      mockedVerifyPin.mockResolvedValue(true);
+    it('verifies pin via apiFetch', async () => {
+      mockedApiFetch.mockResolvedValue({ valid: true });
       const result = await useAuthStore.getState().checkChildPin('1234');
       expect(result).toBe(true);
-      expect(mockedVerifyPin).toHaveBeenCalled();
+      expect(mockedApiFetch).toHaveBeenCalledWith('/auth/verify-pin', {
+        method: 'POST',
+        body: JSON.stringify({ pin: '1234' }),
+      });
     });
 
     it('returns false for wrong pin', async () => {
-      mockedVerifyPin.mockResolvedValue(false);
+      mockedApiFetch.mockResolvedValue({ valid: false });
       const result = await useAuthStore.getState().checkChildPin('0000');
+      expect(result).toBe(false);
+    });
+
+    it('returns false on network error', async () => {
+      mockedApiFetch.mockRejectedValue(new Error('Network error'));
+      const result = await useAuthStore.getState().checkChildPin('1234');
       expect(result).toBe(false);
     });
   });

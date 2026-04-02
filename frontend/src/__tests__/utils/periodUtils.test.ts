@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculatePeriodDates, formatPeriodRange, isPeriodCurrent, hasPeriodEnded, getRemainingDays } from '../../lib/utils/periodUtils';
 import type { FamilySettings, Period } from '../../lib/types';
-import { Timestamp } from 'firebase/firestore';
 
 const baseSettings: FamilySettings = {
   rewardThresholdPercent: 80,
@@ -39,8 +38,8 @@ const baseSettings: FamilySettings = {
 function makePeriod(start: Date, end: Date, status: 'active' | 'completed' = 'active'): Period {
   return {
     id: 'p1',
-    startDate: Timestamp.fromDate(start),
-    endDate: Timestamp.fromDate(end),
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
     status,
     starBudget: 100,
     starsEarned: 0,
